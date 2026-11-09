@@ -1,20 +1,37 @@
-# Spec: <Feature Name>
+# Spec: {Feature Name}
 
 - **Date**: YYYY-MM-DD
-- **Scope Tier**: Micro/Small | Medium/Large
+- **Scope Tier**: Small | Large ({one-line reason})
 
 ## Problem Statement
 
-## Ubiquitous Language
+{The problem, from the user's perspective.}
 
-Terms used from `docs/CONTEXT.md`:
+## Solution
 
-## Interface Contracts
+{The solution, from the user's perspective.}
 
-## Data Flow
+## Goals / Non-goals / Anti-goals
 
-## Edge Cases
+## Approaches Considered
 
-## Verification Criteria
+{2–3 approaches, what each trades off, which was picked and why.}
 
-- [ ] 
+## User Stories
+
+1. As a {actor}, I want {feature}, so that {benefit}
+
+## Implementation Decisions
+
+{Modules built/modified and their interfaces, architectural decisions, schema changes, API contracts. No file paths or code snippets.}
+
+## Testing Decisions
+
+- **What makes a good test**: external behaviour only, through the interface
+- **Confirmed seams**:
+- **Modules tested**:
+- **Prior art**:
+
+## Out of Scope
+
+## Further Notes

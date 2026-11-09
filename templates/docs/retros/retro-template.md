@@ -1,14 +1,12 @@
-# Retro: <Feature Name>
+# Retro: {Session / Feature}
 
 - **Date**: YYYY-MM-DD
-- **Spec / Plan**: 
+- **Session**: {which session was reviewed}
 
-## What Went Well
+Environment improvements, most severe first:
 
-## What Was Hard
+1. **{Category: Navigation | Automated checks | Coding standards | Steering files | Tool economy | No-ops | Information access}**: {what went wrong} → {proposed change}
 
-## Lessons Learned
+## Applied
 
-## Architectural Debt
-
-## CONTEXT.md / ADR Updates
+- {which candidates the user chose, and where they landed}

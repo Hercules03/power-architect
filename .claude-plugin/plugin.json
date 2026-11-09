@@ -1,0 +1,8 @@
+{
+  "name": "power-architect",
+  "version": "2.0.0",
+  "description": "Integrates Matt Pocock's skills and Superpowers into one pipeline: grill, design-interface, to-spec, plan, build, debug, review, verify, finish, retro.",
+  "author": { "name": "Hercules03" },
+  "repository": "https://github.com/Hercules03/power-architect",
+  "license": "MIT"
+}

@@ -1,0 +1,11 @@
+{
+  "name": "power-architect",
+  "owner": { "name": "Hercules03" },
+  "plugins": [
+    {
+      "name": "power-architect",
+      "source": "./",
+      "description": "Integrates Matt Pocock's skills and Superpowers into one pipeline: grill, design-interface, to-spec, plan, build, debug, review, verify, finish, retro."
+    }
+  ]
+}
