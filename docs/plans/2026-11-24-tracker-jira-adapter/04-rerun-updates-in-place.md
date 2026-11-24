@@ -8,10 +8,10 @@
 
 **Blocked by:** 03
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Scenario: re-running unchanged creates no new items and no duplicate comments
-- [ ] Scenario: a Done Story's text changed in the spec, so it gets a comment and is held, and is not rewritten
-- [ ] Scenario: a To Do Story moved to a different Epic is re-parented
-- [ ] Scenario: a removed user story gets a "removed from spec" comment, is held, and is not deleted
-- [ ] Scenario: renumbered user stories map to their existing keys
+- [x] Scenario: re-running unchanged creates no new items and no duplicate comments
+- [x] Scenario: a Done Story's text changed in the spec, so it gets a comment and is held, and is not rewritten
+- [x] Scenario: a To Do Story moved to a different Epic is re-parented
+- [x] Scenario: a removed user story gets a "removed from spec" comment, is held, and is not deleted
+- [x] Scenario: renumbered user stories map to their existing keys
