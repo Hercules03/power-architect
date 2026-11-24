@@ -9,11 +9,11 @@
 
 **Blocked by:** 04
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Scenario: a Large plan creates Sub-tasks under the right Stories, with "blocks" links matching the blocking edges
-- [ ] Scenario: a slice spanning two Stories is flagged and gets "relates to" links
-- [ ] Scenario: a Small plan's Sub-tasks carry exact steps and file paths
-- [ ] Scenario: the Plan section appears on the Spec Page, and `pull(spec, outline)` returns it
-- [ ] Scenario: unreachable, so plan stops
-- [ ] Local-mode regression and the locality grep check pass
+- [x] Scenario: a Large plan creates Sub-tasks under the right Stories, with "blocks" links matching the blocking edges
+- [x] Scenario: a slice spanning two Stories is flagged and gets "relates to" links
+- [x] Scenario: a Small plan's Sub-tasks carry exact steps and file paths
+- [x] Scenario: the Plan section appears on the Spec Page, and `pull(spec, outline)` returns it
+- [x] Scenario: unreachable, so plan stops
+- [x] Local-mode regression and the locality grep check pass

@@ -36,8 +36,24 @@ Each row is one dry run, graded against the scenario's **Then**. A run counts on
 | 2026-11-24 | 47-rerun-small-user-owned-epic-untouched | 04 | ✅ 7/7 | graded from fresh dry-run traces; ticket 04 needed 4 fix rounds (see ledger) |
 | 2026-11-24 | 48-rerun-local-mode-unchanged | 04 | ✅ 7/7 (round 1; unaffected by later rounds) | graded from fresh dry-run traces; ticket 04 needed 4 fix rounds (see ledger) |
 | 2026-11-24 | 49-rerun-no-ledger-confirms-spec-page | 04 | ✅ 7/7 | graded from fresh dry-run traces; ticket 04 needed 4 fix rounds (see ledger) |
+| 2026-11-24 | 50-plan-large-publishes-subtasks | 05 | ✅ 14/14 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 51-plan-slice-spans-stories-flagged | 05 | ✅ 8/8 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 52-plan-small-subtasks-carry-steps | 05 | ✅ 12/12 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 53-plan-section-pulled-on-second-run | 05 | ✅ 7/7 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 54-plan-unreachable-stops | 05 | ✅ 7/7 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 54b-plan-no-spec-page-stops | 05 | ✅ 6/6 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 54c-plan-partial-failure-resumes | 05 | ✅ 9/9 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 54d-plan-unclear-link-direction-asks-before-writes | 05 | ✅ 8/8 (Run A and Run B) | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 55-plan-nothing-before-approval | 05 | ✅ 5/5 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 56-plan-rerun-unchanged-no-writes | 05 | ✅ 10/10 (ambiguous link schema; no direction question on an unchanged re-run) | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 57-plan-rerun-started-subtask-held | 05 | ✅ 10/10 (three sessions; the same change reworded adds no second comment) | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 58-to-spec-rerun-keeps-plan-section | 05 | ✅ 8/8 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 59-plan-local-mode-unchanged | 05 | ✅ 8/8 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 59b-plan-small-local-mode-unchanged | 05 | ✅ 7/7 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-24 | 30 / 40 / 46 (regression) | 05 | ✅ 14/14, 8/8, 9/9 after ticket 05 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
 
 Locality check (`jira\|rovo\|mcp__\|atlassian\|confluence\|ADF` outside `tracker-jira.md`): ✅ no matches (2026-11-24, ticket 01).
 Locality check re-run at ticket 02 (head b3f6ccf): ✅ no matches.
 Locality check re-run at ticket 03 (head 8df444b): ✅ no matches.
 Locality check re-run at ticket 04 (head bacb2a7): ✅ no matches.
+Locality check re-run at ticket 05 (head 9ca0ef3): ✅ no matches.
