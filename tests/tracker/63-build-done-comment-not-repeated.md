@@ -40,7 +40,7 @@
   | listJiraIssueComments | PA-60 | one comment, c-7, whose body is the line `Done`, then a fenced code block holding the two lines `a1b2c3d feat: count failed logins` and `tests: npx vitest run tests/auth/attempts.test.ts → 2 passed` |
   | listJiraIssueComments | any other | none |
   | addOrEditJiraIssueComment | any | {id: "c-<n>"} |
-  | git log --oneline a1b2c3d^..a1b2c3d | (shell) | `a1b2c3d feat: count failed logins` |
+  | git log for the ledger line's range a1b2c3d..a1b2c3d (both included) | (shell) | `a1b2c3d feat: count failed logins` |
 
 - Ledger / local files:
   - Today is 2026-11-25. `.power-architect/2026-11-24-login-lockout/progress.md` exists: first line `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`, the `## Work Refs` table, and `Task PA-60: complete (commits a1b2c3d..a1b2c3d, review clean, tests: npx vitest run tests/auth/attempts.test.ts → 2 passed)`. The previous session crashed after adding comment c-7 and before moving PA-60 to Done.

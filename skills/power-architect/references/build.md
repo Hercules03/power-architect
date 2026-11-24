@@ -17,7 +17,7 @@ A step with a `Local:` line below it reads two ways. With a Tracker configured, 
   - **Read the spec and plan once:** `pull(<Spec Page Work Ref>, outline)`. Its shared context is the spec, and its Plan section is the plan header (Global Constraints, Review Focus). A Large-tier Plan section is a ticket overview with no Review Focus. Write the outline to `<workspace>/spec.md` and give that path to every reviewer in place of a spec or plan path. Each Sub-task's description is its task (Small) or its ticket (Large), and its Story's Acceptance Criteria come with it.
   - **Route by its Scope Tier:** Small runs S1 or S2. Large runs L1 for one Sub-task and L2 for more.
 - **Resume.** An item whose ledger already has a `Task <Work Ref>: complete` line is never rebuilt. `pull` returned it, so the Tracker has not recorded it done: call `record(<Work Ref>, done, <evidence>)` once, with the evidence from that line, before any other work.
-- **Evidence** for `record(done)`: the commits as `git log --oneline` shows the line's range (or the PR URL), then the test command and its result.
+- **Evidence** for `record(done)`: every commit from `a` to `b` of the line's `commits a..b`, both included (`git log --oneline a^..b`), or the PR URL; then the test command and its result.
 - **If `record` stops**, stop the build there. Tell the user which items' starts and completions are not recorded in the Tracker. The ledger lines stand, and re-running `/power-architect:build` records them.
 
 `Local:` No work list to pull. The argument (none, a ticket number, or `all`) and the plan or tickets choose the work, and the ledger is `.power-architect/<plan-slug>/progress.md`, as below.

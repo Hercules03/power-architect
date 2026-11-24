@@ -38,7 +38,7 @@
   | transitionJiraIssue | any | {ok: true}; the issue's status becomes the transition's `to`. Live input schema: `cloudId`, `issueIdOrKey`, `transitionId`, `transitionName`, `fields`, `sprintId`, `assignToBacklog`, `boardId` |
   | listJiraIssueComments | any | the comments this dry run has added to that issue (none at the start) |
   | addOrEditJiraIssueComment | any | {id: "c-<n>"} |
-  | git log --oneline a1b2c3d^..a1b2c3d | (shell) | `a1b2c3d feat: count failed logins` |
+  | git log for the ledger line's range a1b2c3d..a1b2c3d (both included) | (shell) | `a1b2c3d feat: count failed logins` |
 
   Items (each Sub-task's parent is PA-50; each description ends with `Spec Page: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`):
 
