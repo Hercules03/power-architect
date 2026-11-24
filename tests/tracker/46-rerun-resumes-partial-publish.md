@@ -72,7 +72,7 @@ The user runs `/power-architect:to-spec` and replies in order:
 - No MCP call of any kind is made before the user's "approved"
 - `publish` finds the earlier publish from the ledger: there is no `searchConfluence` call and no `createConfluenceContent` call
 - Reads: a connection check, `getConfluenceContent` on page 5001, and `getJiraIssue` on PA-40 … PA-43
-- The change summary, shown before any write, lists stories 3 and 4 to create under PA-41, PA-41 as updated with a redrafted slice (its membership changed), and nothing else updated, re-parented, held or removed
+- The change summary, shown before any write, lists stories 3 and 4 to create under PA-41, and nothing else updated, re-parented, held or removed. If a slice-only `editJiraIssue` on PA-41 occurs, the summary lists PA-41 as updated with a redrafted slice (its membership changed); if the redrafted slice equals the text read, there is no write and PA-41 is not listed. Either outcome is correct, but the summary and the writes must agree, and there is never more than one slice-only edit on PA-41
 - The writes in order: at most one `editJiraIssue` on PA-41 that changes only its slice line(s) → `createJiraIssue` (Story, parent PA-41, "Remove a member") → PA-50 → `createJiraIssue` (Story, parent PA-41, "Leave an organization") → PA-51 → one `updateConfluenceContent` on page 5001, the last call
 - No Epic is created, and no Story is created for stories 1 or 2; no `editJiraIssue` on PA-40, PA-42 or PA-43, and no `addOrEditJiraIssueComment`
 - The `updateConfluenceContent` body is the Spec Page body followed by a key table of 7 rows: spec, E1 PA-40, E2 PA-41, 1 PA-42, 2 PA-43, 3 PA-50, 4 PA-51

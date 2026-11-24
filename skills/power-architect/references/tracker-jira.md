@@ -134,7 +134,7 @@ Read first, then get one go-ahead, then write. Make no write before the go-ahead
    1. Same text, after normalising (see step 4): an Epic's name against the summary; a Story's user-story sentence(s) against the first paragraph of the description.
    2. Then the same outline id, among the items still unpaired. A row whose outline id is `—` never pairs by id.
    3. An outline item still unpaired is **new**. A recorded item still unpaired is **removed from spec**, except as the next item says.
-   4. **Ask, never guess.** If an outline item and a recorded item of the same kind both remain unpaired, do not create or mark removed yet: a started item keeps its old text, so after its sentence or name changed and the outline was renumbered it pairs by neither. Open the change summary with every candidate pair, one line each: `new: <sentence or name> / recorded: <Work Ref> <its sentence or name as read>`. Ask the user, for each remaining new item, "same as <Work Ref>" or "new", and wait. Make no write before the answer. "Same as" pairs the two, and **Decide** (step 4) handles them (a started Story whose sentence changed is **held** with a comment, never rewritten). An item answered "new" is created. A recorded item that no answer claims is removed from spec. The answer is final for this run.
+   4. **Ask, never guess.** If an outline item and a recorded item of the same kind both remain unpaired, do not create or mark removed yet: a started item keeps its old text, so after its sentence or name changed and the outline was renumbered it pairs by neither. Open the change summary with every candidate pair, one line each: `new: <sentence or name> / recorded: <Work Ref> <its sentence or name as read>`. Ask the user, for each remaining new item, "same as <Work Ref>" or "new", and wait. Make no write before the answer. "Same as" pairs the two, and **Decide** (step 4) handles them (a started Story whose sentence changed is **held** with a comment, never rewritten). An item answered "new" is created. A recorded item that no answer claims is removed from spec. The answer is final for this run. A recorded row already marked removed from spec (outline id `—`, already commented) is not a candidate for pairing and is never offered again: it stays removed unless the user names it explicitly.
 
    If a recorded item could pair with more than one outline item, or an outline item with more than one recorded item, list those pairs and ask the user which is right. Wait for the answer.
 4. **Decide** each paired item.
@@ -146,6 +146,8 @@ Read first, then get one go-ahead, then write. Make no write before the go-ahead
      - **User asks:** at the go-ahead (step 6) the user names an item to redraft.
 
      Show each redraft in the change summary.
+
+     A redraft whose text equals the text read from the Tracker (after the same normalising) is not an update: it makes no write and is not listed as updated in the change summary.
 
    An item is **not started** when its status is in `status-todo`, and **started** otherwise (In Progress, Done, or a status in no bucket). A started item is never redrafted or rewritten.
 
