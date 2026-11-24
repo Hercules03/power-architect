@@ -116,4 +116,5 @@ The user runs `/power-architect:plan` and replies in order:
 - PA-30 (Done) and PA-31 (In Progress) get no comment
 - The agent tells the user nothing changed and the Tracker is already up to date; `held` is empty
 - The ledger still has its first line and the same 17 rows. Nothing is written under `docs/plans/`
+- No question is asked to the user about link direction, and no write happens, because no `blocks` link is created on this unchanged re-run
 - No Sprint or board call, no transition, no `executeDestructive` call
