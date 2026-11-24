@@ -185,7 +185,7 @@ A failed call is handled as in "A call fails after step 1" above.
 
 Implements `publish` for plan's outline: the Plan section and the Sub-tasks. The outline always names the Spec Page's Work Ref and the ledger's rows. Plan publish never creates the Spec Page, never writes an Epic or Story, and never changes the page's shared context. A Sub-task's Work Ref is its issue key. Never pass a Sprint, backlog, priority, story-point or estimate field. Never call a transition, and never delete.
 
-Read first, then (on a re-run) get one go-ahead, then write. Make no write before the go-ahead.
+Read first, then (on a re-run) get one go-ahead, then write. Make no write before the go-ahead. **Every question to the user happens before the first write**: the link direction (step 2), the candidate pairs (step 3) and the go-ahead (step 6). Once the first write is made, ask nothing more.
 
 1. **Reach Jira** and **format**, as steps 1 and 2 above. If Jira can't be reached, stop and write nothing: tell the user the plan was not published.
 2. **Recorded items**, as Re-run step 1: `getConfluenceContent` on the Spec Page, its key table, plus the ledger's rows the table lacks. A Story the outline names as a parent is the recorded Story row with that outline id; its key is the parent.
@@ -195,30 +195,35 @@ Read first, then (on a re-run) get one go-ahead, then write. Make no write befor
    - Its **relates set**: the recorded Stories joined to it by a `link-relates` link.
    - Links to items not recorded for this spec are ignored, never compared or removed.
 
+   **Link direction.** If the outline carries any `blocks` or `relates` edge, confirm the link direction now, as [Links](#links) steps 1–3 say, before any write. If it can't be determined and the user does not answer, stop and write nothing: tell the user the plan was not published.
+
    **No Sub-task recorded** means a first plan publish: every outline Sub-task is new. Skip steps 3–6 and go to step 7.
 3. **Pair** each outline Sub-task with a recorded Sub-task exactly as Re-run step 3 pairs Stories: first the same title (normalised) against the summary, then the same outline id among Sub-task rows, then **ask, never guess** for every remaining candidate pair ("same as <Work Ref>" or "new"). A Sub-task only ever pairs with a Sub-task. A row already marked removed from plan (outline id `—`) is never offered again.
 4. **Decide** each paired Sub-task, as Re-run step 4 decides Stories, with the approved plan in place of the approved spec.
-   - **Only user-approved plan content is compared:**
+   - **Only user-approved plan content is compared.** Both tiers compare its title, parent Story, blocked-by set and relates-to set:
      - its title against the summary
      - its Story against the parent
-     - its blocked-by set and relates set against the sets read
-     - in the Small tier, its step list (the plan's `- [ ]` step lines) against the description's `- [ ]` lines
+     - its blocked-by set and relates-to set against the sets read
+
+     The Small tier also compares its approved step list (the plan's `- [ ]` step lines) against the description's `- [ ]` lines. The Large tier compares nothing more: its description is drafted text, kept verbatim.
 
      Normalise as Re-run step 4. A ticked `[x]` box equals `[ ]`.
-   - **Drafted text is kept verbatim as read.** A Large-tier description is drafted by the agent: it is redrafted only on a not-started Sub-task whose title, Story or blocked-by set changed, or that the user names at the go-ahead. Its `Blocked by:` line then names the new blockers. A Small-tier description is the approved task itself: when the title or step list changed, the new description is the task as approved now. A redraft or new description equal to the text read (after normalising) is no update.
+   - **Drafted text is kept verbatim as read.** A Large-tier description is drafted by the agent: it is redrafted only on a not-started Sub-task whose title, Story or blocked-by set changed, or that the user names at the go-ahead. Its `Blocked by:` line then names the new blockers. So a not-started Sub-task that gains a blocker is an **update** (the redrafted `Blocked by:` line) as well as a **link**, and the change summary lists both. A Small-tier description is the approved task itself: when the title or step list changed, the new description is the task as approved now. A redraft or new description equal to the text read (after normalising) is no update.
 
    | The plan… | Not started | Started |
    |---|---|---|
    | did not change it | nothing | nothing |
    | changed its title (Small tier: or its steps) | **update**: summary and description | **held**: comment the change |
    | moved it to another Story | **re-parent** | **held**: comment the move |
-   | added a blocker or relates-to Story | **link**: add the link | **held**: comment the change; no link |
+   | added a blocker or relates-to Story | **link**: add the link (a blocker, Large tier: also **update**, the `Blocked by:` line) | **held**: comment the change; no link |
    | dropped a blocker or relates-to Story | **held**: the link stays; comment it | **held**: comment the change |
 
    A recorded Sub-task no longer in the plan is **held** whatever its status, with a "removed from plan" comment. It is never deleted, closed or transitioned, and its key table row stays.
 5. **Comments are written once**, as Re-run step 5: one per item, holding only approved plan text, de-duplicated against `listJiraIssueComments` by the first line and the code block's lines. First lines:
    - held (changed, moved, or a link it could not add or remove): `Plan change not applied (item started)`, or `Plan change not applied (links are never deleted)` when the item is not started and only a dropped link is kept. Then one fenced code block holding only what changed: `- <old title>` and `+ <new title>`; Small tier, `- <step>` for each step removed and `+ <step>` for each step added; `Story: <old key> → <new key>`; `Blocked by: <old keys> → <new keys>`; `Relates to: <old keys> → <new keys>`. Then `Spec Page: <page URL>`.
    - removed: `Removed from plan`. Then `This item is no longer in the plan. It was not deleted or closed. Spec Page: <page URL>`
+
+   **A held change is not re-commented.** A re-plan starts from the plan as read from Jira (the Plan section, and each Sub-task's summary, description and links) and carries only the changes the user asked for in this session, so a held item's change is never in what step 2 read. For a started Sub-task, compare the change the outline carries with the code-block lines of each existing `Plan change not applied (item started)` comment, normalised. If one holds the same change (the same title, steps, Story or links added or removed, even when this session words a step differently), add no comment and make no write: the item stays `held`. If the user asked for a different change, add one new comment holding only that change. If the outline carries no change for it (the user did not ask again this session), write and comment nothing for it.
 6. **Change summary**, as Re-run step 6, listing also each link to add and whether the Plan section changes. If there is nothing to write, say the Tracker is already up to date, make no write, and go to step 9. Otherwise wait for the go-ahead; on a decline, write nothing and list the declined items.
 7. **Write**, one call at a time:
    1. Sub-tasks in outline order (blockers first):
@@ -226,7 +231,7 @@ Read first, then (on a re-run) get one go-ahead, then write. Make no write befor
       - update or re-parent: `editJiraIssue` as Re-run step 7.
       - held: `addOrEditJiraIssueComment` with the step 5 text and no `commentId`, unless step 5 found it already there.
    2. Removed Sub-tasks: their comment.
-   3. [Links](#links), after every Sub-task exists: each missing `blocks` edge, in outline order of the blocked Sub-task, then each missing `relates` edge.
+   3. [Links](#links), after every Sub-task exists, in the direction confirmed at step 2: each missing `blocks` edge, in outline order of the blocked Sub-task, then each missing `relates` edge.
    4. The Spec Page (step 8), last.
 
    **Description**, Markdown:
@@ -247,11 +252,11 @@ Read first, then (on a re-run) get one go-ahead, then write. Make no write befor
 
 ### Links
 
-The link types are `link-blocks` and `link-relates` from the `## Tracker` section. A "blocks" link puts the blocker on the side the type's **outward** text describes ("blocks") and the blocked Sub-task on the side its **inward** text describes ("is blocked by"). Direction is easy to get backwards, and this adapter can't delete a wrong link, so confirm it before the first link:
+The link types are `link-blocks` and `link-relates` from the `## Tracker` section. A "blocks" link puts the blocker on the side the type's **outward** text describes ("blocks") and the blocked Sub-task on the side its **inward** text describes ("is blocked by"). Direction is easy to get backwards, and this adapter can't delete a wrong link, so confirm it in the read phase ([Plan publish](#plan-publish) step 2), before any write:
 
 1. Call `listJiraIssueLinkTypes` and read the inward and outward text of `link-blocks`.
 2. Read `createJiraIssueLink`'s live input schema for which issue parameter the outward text describes. Pass the blocker there and the blocked Sub-task in the other.
-3. If the schema does not say, create no link: ask the user which parameter takes the issue that "blocks", and wait.
+3. If the listing and the schema do not settle it, ask the user which parameter takes the issue that "blocks", and wait, before any write. If they do not answer, write nothing.
 
 A `relates` link joins a flagged Sub-task to each other Story it spans; either side will do. Never pass a `comment` with a link.
 
@@ -264,7 +269,7 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
 `scope` is a spec: its Spec Page's Work Ref (the page URL). Reads only; never write.
 
 1. **Reach Jira.** Call `atlassianUserInfo`. If it fails, stop: tell the user Jira can't be reached, so nothing was read, and that `/mcp` reconnects the Rovo MCP server.
-2. **Spec Page.** `getConfluenceContent` on the page, with a Markdown body. If there is no such page, stop and report the unknown Work Ref. The body holds the shared context, then the `## Plan` section if plan ran, then the `## Work Refs` key table.
+2. **Spec Page.** `getConfluenceContent` on the page, with a Markdown body. If there is no such page, stop and report the unknown Work Ref (not an unreachable Tracker): tell the user to check the Work Ref and the ledger's first line. The body holds the shared context, then the `## Plan` section if plan ran, then the `## Work Refs` key table.
 3. **Recorded items.** The key table's rows, plus the rows of the ledger whose first line names this Spec Page (`.power-architect/<spec-slug>/progress.md`) that the table lacks, as publish's Re-run step 1.
 4. **Read** each recorded Epic, Story and Sub-task with `getJiraIssue` (`view: full`, Markdown): summary, description, status, parent and issue links.
 5. **Return** the Work Outline:

@@ -1,4 +1,10 @@
-# 57: A started Sub-task whose approved steps changed is left untouched, gets one comment holding only the change across two sessions, and is listed as held
+<!--
+Why this can fail against the text before this fix: plan's Re-plan drafted afresh each session, so session 2
+words step 6 differently from session 1 (both wordings are fixed below). The held change never reaches Jira, so
+session 2 re-adds it in new words; the de-duplication (first line + normalised code-block lines) then misses
+session 1's comment and a second comment is added. Session 2's "no second comment" line fails.
+-->
+# 57: A started Sub-task whose approved steps changed is left untouched, gets one comment holding only the change across sessions, and is listed as held
 
 **Phase:** /power-architect:plan
 
@@ -66,7 +72,8 @@
     - Task 1 "Failed-login counter". Files: Create `src/auth/attempts.ts`; Test `tests/auth/attempts.test.ts`. Interfaces: Produces `recordFailure(accountId: string): Promise<number>` and `isLocked(accountId: string): Promise<boolean>`. Steps: (1) write the failing test `counts failures per account` in `tests/auth/attempts.test.ts`: five failures lock the account, another account stays unlocked; (2) run `npx vitest run tests/auth/attempts.test.ts`, expected FAIL with "recordFailure is not a function"; (3) implement `recordFailure` and `isLocked` in `src/auth/attempts.ts` with a Redis key per account and a 10-minute expiry; (4) run `npx vitest run tests/auth/attempts.test.ts`, expected PASS; (5) commit with `git add src/auth/attempts.ts tests/auth/attempts.test.ts && git commit -m "feat: count failed logins"`.
     - Task 2 "Login handler enforces the lockout". Files: Modify `src/auth/login.ts:40-62`; Test `tests/auth/login.test.ts`. Interfaces: Consumes `recordFailure` and `isLocked` from Task 1. Steps: (1) write the failing test `returns 423 after five failures` in `tests/auth/login.test.ts`; (2) run `npx vitest run tests/auth/login.test.ts`, expected FAIL with "expected 423, got 401"; (3) in `src/auth/login.ts`, call `isLocked` before the password check and `recordFailure` on each failure; (4) run `npx vitest run tests/auth/login.test.ts`, expected PASS; (5) commit with `git add src/auth/login.ts tests/auth/login.test.ts && git commit -m "feat: lock out repeated failed logins"`.
 
-  - Each session is new. If the agent drafted the plan afresh, it would word every step differently (same meaning, other words).
+  - Each session is new. If the agent drafted the plan afresh, it would word every step differently (same meaning, other words). In particular, the requested step 6 on Task 2 is worded in session 1 as `` - [ ] **Step 6: Run the whole suite**   Run: `npx vitest run`  Expected: PASS ``; a session 2 that drafted afresh would word it as `` - [ ] **Step 6: Run every test to confirm nothing else broke**   Run: `npx vitest run`  Expected: all tests PASS ``.
+  - At the start of session 2, `listJiraIssueComments` on PA-61 returns exactly one comment: session 1's, first line `Plan change not applied (item started)`, whose code block holds the single line `` + - [ ] **Step 6: Run the whole suite**   Run: `npx vitest run`  Expected: PASS ``, then `Spec Page: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`.
   - Conversation so far: Task 1 is built (Done) and Task 2 is being built (In Progress). The user re-runs plan to add one step to Task 2.
 
 ## When
@@ -75,7 +82,12 @@ The user runs `/power-architect:plan` and replies in order:
 2. if the plan is shown again for review: "approved, subagent-driven";
 3. if shown a change summary and asked to go ahead: "go ahead".
 
-Then, in a new session, the user runs `/power-architect:plan` a second time with the same request, and gives the same replies 1–3.
+Then, in a new session (session 2), the user runs `/power-architect:plan` a second time with the same request, and gives the same replies 1–3.
+
+Variant (session 3, a new session after session 2): the user runs `/power-architect:plan` and replies in order:
+1. when asked to review the plan and pick an execution method: "Add a final step 6 to Task 2: run `npx tsc --noEmit`, expected no errors. Otherwise approved, subagent-driven.";
+2. if the plan is shown again for review: "approved, subagent-driven";
+3. if shown a change summary and asked to go ahead: "go ahead".
 
 ## Then
 - Each run calls `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, outline)` before drafting, and the plan shown for review takes the Plan section and each task's title, files and steps from the Tracker as read, plus the requested step 6 on Task 2
@@ -84,6 +96,8 @@ Then, in a new session, the user runs `/power-architect:plan` a second time with
 - First run, the only write: one `addOrEditJiraIssueComment` on PA-61 with no comment id. Its first line is `Plan change not applied (item started)`, and its fenced code block holds only the added step as a `+` line (the `npx vitest run` step). It holds no other step text and no unchanged step
 - PA-61 and PA-60 are never edited: no `editJiraIssue`, no transition. No `createJiraIssue`, no `createJiraIssueLink`, and no `updateConfluenceContent` (the Plan section and the titles did not change)
 - `publish` returns `held` with PA-61 and its reason, and the agent tells the user PA-61 was held and why
-- Second run: only reads; no write call of any kind. In particular no second comment on PA-61 (it has exactly one comment across both sessions). PA-61 is still reported as held
-- The ledger lists the same 4 rows after both runs. Nothing is written under `docs/plans/`
+- Second run: only reads; no write call of any kind. In particular no second comment on PA-61 (it has exactly one comment across both sessions), even though a fresh draft would word step 6 as in the Given's session 2 wording. PA-61 is still reported as held
+- Second run: the plan shown for review takes Task 2's steps 1–5 from PA-61's description as read, not from a fresh draft; no `addOrEditJiraIssueComment` and no `editJiraIssue` on any item
+- Variant (session 3): the only write is exactly one more `addOrEditJiraIssueComment` on PA-61 with no comment id (PA-61 then has exactly two comments). Its first line is `Plan change not applied (item started)`, and its code block holds only the added `npx tsc --noEmit` step as a `+` line: no `npx vitest run` step and no unchanged step. No other write of any kind
+- The ledger lists the same 4 rows after every run. Nothing is written under `docs/plans/`
 - No Sprint or board call, no `executeDestructive` call
