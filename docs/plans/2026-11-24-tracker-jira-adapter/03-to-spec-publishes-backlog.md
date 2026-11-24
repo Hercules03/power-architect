@@ -9,11 +9,11 @@ A Small-tier spec creates one Story (under a named or new Epic) and has no group
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Scenario: a Large spec with 8 stories gives a grouping table at the gate, and after approval the expected Spec Page, Epics and Stories are created with keys recorded
-- [ ] Scenario: a Small spec creates one Story, with no grouping table
-- [ ] Scenario: nothing is published before the gate is approved
-- [ ] Scenario: Rovo unreachable, so to-spec stops and reports it, and nothing is half-written
-- [ ] Local-mode regression: same behaviour as today, and the Jira adapter is never read
-- [ ] The locality grep check passes
+- [x] Scenario: a Large spec with 8 stories gives a grouping table at the gate, and after approval the expected Spec Page, Epics and Stories are created with keys recorded
+- [x] Scenario: a Small spec creates one Story, with no grouping table
+- [x] Scenario: nothing is published before the gate is approved
+- [x] Scenario: Rovo unreachable, so to-spec stops and reports it, and nothing is half-written
+- [x] Local-mode regression: same behaviour as today, and the Jira adapter is never read
+- [x] The locality grep check passes
