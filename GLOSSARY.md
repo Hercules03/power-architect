@@ -40,7 +40,7 @@ A cluster of a spec's user stories, grouped by functional area, user persona, or
 _Avoid_: feature, initiative
 
 **Story**:
-One numbered user story from a spec, held as a Backlog item under exactly one Epic.
+One numbered user story from a spec, held as a Backlog item under exactly one Epic. A Small-tier spec is filed as a single Story.
 _Avoid_: ticket, requirement
 
 **Sub-task**:

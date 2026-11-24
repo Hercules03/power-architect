@@ -57,4 +57,4 @@ Built in step 7 from the approved draft. `Local:` not built.
 
 ## Handoff
 
-Recommend `/power-architect:plan`.
+Recommend `/power-architect:plan`. If nothing was published (the Tracker was unreachable), recommend re-running `/power-architect:to-spec` once the Tracker is reachable instead.

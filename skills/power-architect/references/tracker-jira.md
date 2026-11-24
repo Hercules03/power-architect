@@ -83,7 +83,7 @@ Implements [`publish(outline)`](tracker.md#publishoutline) for to-spec's outline
 
 **Work Refs.** An Epic's or Story's Work Ref is its issue key (for example `PA-12`). The Spec Page's Work Ref is the page's URL.
 
-Make these calls in this order, one at a time. Pass `cloudId` on each. Never pass a Sprint, backlog, priority, story-point or estimate field; leave those blank.
+Make these calls in this order, one at a time. Pass `cloudId` on each Jira and Confluence call. Never pass a Sprint, backlog, priority, story-point or estimate field; leave those blank.
 
 1. **Reach Jira.** Call `atlassianUserInfo`. If it fails, stop and write nothing. Tell the user Jira can't be reached, so nothing was published, and that `/mcp` reconnects the Rovo MCP server. Return an empty map.
 2. **Format.** If `discover` finds `getContentFormatGuide`, read it once and follow it for tables and task lists.
@@ -113,4 +113,4 @@ Make these calls in this order, one at a time. Pass `cloudId` on each. Never pas
    One row per item created from this spec: the Spec Page, then the Epics, then the Stories, in outline order. Sub-task rows are appended below them later. This table is how a re-run finds each item.
 7. **Return** the outline id → Work Ref map (the table's rows) and an empty `held` list. Tell the user the Spec Page URL and the Epics and Stories created, with their keys.
 
-**A call fails after step 1.** Stop at once. Make no further call: no retry and no key table. Tell the user the spec is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not. Return the created items as the map, so the phase records them.
+**A call fails after step 1.** Stop at once. Make no further call: no retry and no key table. If the Spec Page create itself failed, nothing was created: tell the user nothing was published. Otherwise tell the user the spec is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not. Return the created items as the map, so the phase records them.

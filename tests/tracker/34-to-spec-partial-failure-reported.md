@@ -54,7 +54,7 @@ The user runs `/power-architect:to-spec` and replies in order:
 4. at the spec gate: "approved".
 
 ## Then
-- The MCP calls, in order: connection check → `createConfluenceContent` (page 4001) → three Epic creates (PA-10, PA-11, PA-12) → Story creates for user stories 1, 2, 3 under PA-10 (PA-13, PA-14, PA-15) → the Story create for user story 4 under PA-11, which returns UNREACHABLE
+- The MCP calls, in order: connection check → `createConfluenceContent` (page 4001) → three Epic creates (PA-10, PA-11, PA-12) → Story creates for user stories 1, 2, 3 under PA-10 (PA-13, PA-14, PA-15) → the Story create for user story 4 under PA-11, which returns UNREACHABLE. (A `discover` or `getContentFormatGuide` read may appear after the connection check)
 - No MCP call follows the failed one: no retry, no further Story create, and no `updateConfluenceContent` (no key table)
 - The agent tells the user the spec is only partly published, and lists exactly what was created (the Spec Page, PA-10, PA-11, PA-12, PA-13, PA-14, PA-15, each with its outline id) and what was not (user stories 4–8 and the key table)
 - The ledger `.power-architect/2026-11-24-onboarding/progress.md` is written. Its first line is `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001`, and it lists the 7 created items with their Work Refs, and nothing for user stories 4–8
