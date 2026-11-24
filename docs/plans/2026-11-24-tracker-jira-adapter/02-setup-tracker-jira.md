@@ -11,11 +11,11 @@ The command is listed in the skill's command table and the README. The Jira Trac
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The setup command exists and is listed in the command table and the README
-- [ ] Scenario: Rovo not connected, so setup stops with connection instructions and writes nothing
-- [ ] Scenario: a team-managed project's issue-type names are found and recorded
-- [ ] Scenario: a custom workflow gets a proposed status mapping that the user confirms before it is written
-- [ ] The written `## Tracker` section is complete enough to pass the contract's selection check
-- [ ] The locality grep check passes
+- [x] The setup command exists and is listed in the command table and the README
+- [x] Scenario: Rovo not connected, so setup stops with connection instructions and writes nothing
+- [x] Scenario: a team-managed project's issue-type names are found and recorded
+- [x] Scenario: a custom workflow gets a proposed status mapping that the user confirms before it is written
+- [x] The written `## Tracker` section is complete enough to pass the contract's selection check
+- [x] The locality grep check passes
