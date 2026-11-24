@@ -53,7 +53,8 @@ state of the world: the repo instructions file, Tracker, ledger and files are
 exactly as described. Make no real tool calls, file edits or MCP calls. For every
 MCP tool you would call, use the stubbed Rovo table's response.
 
-Stop at the first point where the phase would wait for the user, or end.
+If the scenario's **When** gives the user's replies, use them in order and carry
+on. Stop at the first question the When does not answer, or when the phase ends.
 Report the trace as an ordered list:
 - each skill file you opened, in order
 - each Tracker operation (publish / pull / record) with its arguments and result

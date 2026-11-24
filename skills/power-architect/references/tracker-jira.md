@@ -49,8 +49,10 @@ Install writes these lines, one per line, in this order. Values are as Jira retu
 Run by `/power-architect:setup-tracker jira`. Write nothing until step 8. If any call in steps 2–7 fails for a reason other than the fallbacks below, stop and say which step failed.
 
 1. **Connection.** Call `atlassianUserInfo`, then `getAccessibleAtlassianResources`. If either fails or is missing, stop and write nothing. Tell the user the Rovo MCP server is not connected or not signed in: add the server `https://mcp.atlassian.com/v2/mcp` to their client and sign in. In Claude Code, run `/mcp` to connect or re-authenticate. Then run this command again.
+In steps 2 and 3, the user picks from lists you fetch. Never ask the user for an id or key you can list. If a list has exactly one entry, use it and say so.
+
 2. **Site.** From the site list, ask the user to pick one. Record its URL and cloudId.
-3. **Project, board and Confluence space.** List each (`listJiraProjects`, `listJiraBoards` for the project, `listConfluenceSpaces`) and ask the user to pick. Never ask the user for an id or key you can list. If a list has exactly one entry, use it and say so.
+3. **Project, board and Confluence space.** List each (`listJiraProjects`, `listJiraBoards` for the project, `listConfluenceSpaces`) and ask the user to pick.
 4. **Issue types.** Call `listJiraProjectIssueTypesMetadata` for the project. Use the names exactly as returned:
    - Epic: the type at hierarchy level 1.
    - Sub-task: the sub-task type (level -1). Its name varies by project (for example `Sub-task` or `Subtask`), so never assume it.
