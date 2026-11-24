@@ -18,6 +18,15 @@ SKILL.md sends you here when the repo's AGENTS.md or CLAUDE.md has a `## Tracker
 
 One repo has exactly one Tracker. There are no partial or mixed modes.
 
+## Setup
+
+`/power-architect:setup-tracker <name>` puts a repo into that Tracker's mode.
+
+1. Look for `tracker-<name>.md` beside this file. If none exists, stop: tell the user there is no adapter named `<name>`, and list the adapters that do exist (the `tracker-*.md` files). Write nothing.
+2. Otherwise open it and run its **Install** section exactly. Install checks the connection and writes the repo's `## Tracker` section.
+
+Setup does not apply the Selection rules above. A missing, incomplete or different `## Tracker` section is exactly what Install replaces.
+
 ## Work Ref
 
 An opaque name for one work item: a key in an external tracker, or a file and anchor in Local Files mode. Phases store it, pass it on and show it to the user, and never parse or build one. Only the adapter knows its shape.

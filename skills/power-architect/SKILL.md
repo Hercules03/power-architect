@@ -1,6 +1,6 @@
 ---
 name: power-architect
-description: Integrated architecture + TDD workflow that runs Matt Pocock's skills (grilling, domain modeling, deep-module design, specs, tracer-bullet tickets, two-axis review, retros) and Jesse Vincent's Superpowers (implementation plans, subagent-driven TDD execution, systematic debugging, verification, branch finishing) as one pipeline. Use when the user asks to design, architect, spec, plan, implement, debug, review, or finish software work, or invokes /power-architect:grill, :design-interface, :to-spec, :plan, :build, :debug, :review, :verify, :finish, or :retro.
+description: Integrated architecture + TDD workflow that runs Matt Pocock's skills (grilling, domain modeling, deep-module design, specs, tracer-bullet tickets, two-axis review, retros) and Jesse Vincent's Superpowers (implementation plans, subagent-driven TDD execution, systematic debugging, verification, branch finishing) as one pipeline. Use when the user asks to design, architect, spec, plan, implement, debug, review, or finish software work, or invokes /power-architect:grill, :design-interface, :to-spec, :plan, :build, :debug, :review, :verify, :finish, :retro, or :setup-tracker.
 ---
 
 # Power Architect
@@ -31,6 +31,7 @@ What Power Architect adds is only the glue: which phase comes next, which method
 | `/power-architect:verify` | Verify | Superpowers `verification-before-completion` | [references/verify.md](references/verify.md) |
 | `/power-architect:finish` | Finish | Superpowers `finishing-a-development-branch` | [references/finish.md](references/finish.md) |
 | `/power-architect:retro` | Improve | Matt `retro` | [references/retro.md](references/retro.md) |
+| `/power-architect:setup-tracker` | Setup | Tracker Adapter Install | [references/tracker.md](references/tracker.md#setup) |
 
 Shared references: [references/testing.md](references/testing.md) (good tests, mocking, TDD rules) and [references/glossary-and-adr.md](references/glossary-and-adr.md) (file formats).
 

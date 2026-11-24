@@ -66,6 +66,7 @@ cp -r templates/docs ./docs
 | `/power-architect:verify` | Superpowers `verification-before-completion` | evidence for every claim |
 | `/power-architect:finish` | Superpowers `finishing-a-development-branch` | merge, PR, or keep |
 | `/power-architect:retro` | Matt `retro` | environment improvements, most severe first |
+| `/power-architect:setup-tracker` | Tracker Adapter Install | `## Tracker` section in AGENTS.md or CLAUDE.md |
 
 ## Where the two methods disagree
 
