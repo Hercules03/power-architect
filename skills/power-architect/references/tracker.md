@@ -48,15 +48,16 @@ A spec is always referred to by its Spec Page's Work Ref.
 
 Called by to-spec (the Spec Page, Epics and Stories) and by plan (Sub-tasks and the Plan section).
 
-- **Returns:** a map from outline id to Work Ref, and a `held` list of items it did not rewrite, each with the reason. On a re-run, the map holds every item recorded for the spec, including removed ones.
+- **Returns:** a map from outline id to Work Ref, a `held` list of items it did not rewrite, each with the reason, and a `declined` list of items it would have written on a re-run but did not, because the user declined the go-ahead. On a re-run, the map holds every item recorded for the spec, including removed ones.
 - **Order:** only after the phase's approval gate. Parents are written before children: Spec Page, then Epic, then Story, then Sub-task.
 - **Re-run.** When the spec was published before, the outline names its Spec Page's Work Ref and the Work Refs the phase recorded for it. Without them, `publish` asks the Tracker for this spec's existing Spec Page, and the user confirms a match before anything is written. On a re-run, `publish` shows the user a change summary (created, updated, re-parented, held, removed) and waits for their go-ahead before its first write. If nothing changed, it writes nothing.
 - **Invariants:**
-  - **Updates in place.** Items are matched by the Work Refs recorded for this spec, so running it again creates no duplicates. Each outline item pairs with a recorded item by its text first (a Story's user-story sentence, an Epic's name), then by outline id, so renumbering is harmless. A publish that stopped partway is finished, never duplicated.
+  - **Updates in place.** Items are matched by the Work Refs recorded for this spec, so running it again creates no duplicates. Each outline item pairs with a recorded item by its text first (a Story's title or its user-story sentence, an Epic's name, after normalising as below), then by outline id, so renumbering is harmless. If a pairing is ambiguous, the user picks. A publish that stopped partway is finished, never duplicated.
+  - **Starts from what the Tracker holds.** On a re-run, each item's text starts from what was read from the Tracker and changes only where the approved spec changed that item's content. An item is never re-drafted. Whether the spec changed an item is decided on the spec content itself, never on freshly drafted prose. Text is compared after normalising case, whitespace, list markers, Markdown escapes and link wrapping; text equal after normalising is unchanged and is not written.
   - **Never rewrites an item that is In Progress or Done** (any status outside the To Do bucket). That item gets a comment describing the change and goes into `held`.
   - A To Do Story moved to another Epic is re-parented.
   - An item no longer in the outline is never deleted. It gets a "removed from spec" comment and goes into `held`.
-  - A comment is never repeated: an unchanged re-run adds none.
+  - A comment is never repeated: an unchanged re-run adds none. A comment starts with a fixed first line, and is a repeat when that line and its normalised changed lines match an existing comment (a "removed from spec" comment: the first line alone).
   - Recorded items of kinds the outline does not carry (Sub-tasks, when to-spec publishes) are left alone. So is an item the outline names by an existing Work Ref that was not created from this spec.
 - **Errors:**
   - Tracker unreachable: **stop**. Tell the user nothing was published, or exactly what was, and return the Work Refs of what was so the phase can record them.
