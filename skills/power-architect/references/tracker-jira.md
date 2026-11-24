@@ -9,7 +9,7 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 - **Parameters.** Sources disagree on parameter names. Before each call, read the tool's live input schema and follow it. Parameter names in this file are hints only.
 - **cloudId.** Pass it on every call except the two below that list sites or the user. Take it from the `cloud-id:` line of the `## Tracker` section, or from the site list during Install.
 - **Text.** Write descriptions, comments and page bodies as Markdown (`contentFormat: markdown`). Never build ADF; it is not needed.
-- **No Sprint control.** Never call `manageJiraSprint` or `createJiraBoard`, and never pass a sprint or backlog assignment (such as `assignToSprint`, `sprintId`, `assignToBacklog`) to a create or transition call. Reading boards and Sprints is fine. Never set story points or estimates.
+- **No Sprint control.** Never call `manageJiraSprint` or `createJiraBoard`, and never pass a sprint, board or backlog assignment (such as `assignToSprint`, `sprintId`, `boardId`, `assignToBacklog`) to a create or transition call. Reading boards and Sprints is fine. Never set story points or estimates.
 
 | Tool | Used for | Older name | Reached by |
 |---|---|---|---|
@@ -22,8 +22,10 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 | `listJiraIssueLinkTypes` | link type names, with their inward and outward text | | `discover` |
 | `getJiraWorkflows` | workflow statuses (admin-disabled by default) | | `discover` |
 | `listJiraStatuses` | status list | | `discover` |
-| `searchJiraIssuesUsingJql` | find one existing issue (hint: `jql`, `maxResults`) | | primary |
-| `listJiraIssueTransitions` | an issue's transitions | `getTransitionsForJiraIssue` | `discover` |
+| `searchJiraIssuesUsingJql` | find existing issues (hint: `jql`, `maxResults`) | | primary |
+| `getJiraBoardSprintData` | read the board's active Sprint and its issues (hints: `boardId`, `includeIssues`; the active Sprint is the default; parameters unverified). Read-only | | `discover` |
+| `listJiraIssueTransitions` | an issue's transitions, each with its target status | `getTransitionsForJiraIssue` | `discover` |
+| `transitionJiraIssue` | move an issue (hints: `issueIdOrKey`, `transitionId`; parameters unverified). Pass nothing else: no `fields`, `sprintId`, `boardId` or `assignToBacklog` | | primary |
 | `getContentFormatGuide` | how page bodies are formatted (unverified name) | | `discover` |
 | `createConfluenceContent` | create the Spec Page (hints: `contentType`, `title`, `parent` {`spaceId`}, `body` {`format`, `value`}) | `createConfluencePage` | primary |
 | `updateConfluenceContent` | replace the Spec Page body (hints: `contentId`, `body`) | `updateConfluencePage` | primary |
@@ -276,3 +278,36 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
    - the Scope Tier, from the page's Scope Tier section
    - the Spec Page: its Work Ref, title, shared context and Plan section
    - each item with its outline id, kind, Work Ref, summary, description, status and parent. A Story's Acceptance Criteria are the `- [ ]` lines under its `## Acceptance Criteria`. A Sub-task also has its blocked-by and relates sets, as [Plan publish](#plan-publish) step 2 defines them. An item with outline id `—` comes back marked removed.
+
+### `subtask`
+
+`scope` is `sprint`, or a Work Ref: a Sub-task's or a Story's key. Reads only; never write.
+
+1. **Reach Jira**, as for `outline`. If it fails, stop: tell the user Jira can't be reached, so nothing was read and nothing should be built, and that `/mcp` reconnects the Rovo MCP server.
+2. **Candidates.**
+   - `sprint`: `getJiraBoardSprintData` with `boardId` the `board` value, with its issues. It reads the active Sprint by default: never pass a `sprintId` or `sprintName`. If `discover` does not find the tool, use `searchJiraIssuesUsingJql` with `project = <project> AND sprint in openSprints() AND issuetype = "<type-subtask>"` (that this JQL works through Rovo is unverified). If there is no active Sprint, stop: tell the user there is no active Sprint to build, and that the Product Owner starts one in Jira. Keep the issues of type `type-subtask`.
+   - A Work Ref: `getJiraIssue` on it. If there is no such issue, stop and report the unknown Work Ref (not an unreachable Tracker): tell the user to check the Work Ref and the ledger's first line. A `type-subtask` issue is the only candidate. For a `type-story` issue, the candidates are its Sub-tasks: `searchJiraIssuesUsingJql` with `parent = <key>`. For any other type, stop and tell the user build takes a Sub-task or a Story.
+3. **Drop** each candidate whose status is in `status-done`.
+4. **Read** each remaining candidate with `getJiraIssue` (`view: full`, Markdown): summary, description, status, parent and issue links. Its **blockers** are the issues joined to it by a `link-blocks` link in which it is the blocked side, as [Plan publish](#plan-publish) step 2 defines it. Read each blocker that is not a candidate with `getJiraIssue`, for its status.
+5. **Spec.** A candidate's spec is the page its description's `Spec Page: <URL>` line names; that URL is the Spec Page's Work Ref. Read each distinct Spec Page once with `getConfluenceContent` (Markdown): its Scope Tier section gives the tier, and its key table gives each Sub-task's outline id. A candidate with no `Spec Page:` line, or listed neither in its page's key table nor in that spec's ledger `## Work Refs` rows, is not built: put it in `blocked` as "not from a published spec".
+6. **Order** the candidates blockers first. Break ties by key table order, then by spec in the order their items were first read. Then walk the list. A candidate is **ready** when each blocker's status is in `status-done`, or the blocker is a ready candidate earlier in the list. Otherwise move it to `blocked`: "blocked by <key> outside scope" when that blocker is not a candidate, or "blocked by <key>" when it is a candidate that is not ready.
+7. **Return** the ready list, in order, each with its Work Ref (key), title (summary), description, status, Story (parent key), Spec Page Work Ref, Scope Tier, and blockers with their status; and the `blocked` list.
+
+## record
+
+Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence) for `started` and `done`. One call at a time, passing `cloudId` on each. Never set a resolution, assignee, estimate, or any Sprint, board or backlog field. Never touch a Sprint.
+
+1. **Read** the item with `getJiraIssue`: its status.
+2. **`started`.** If the status is in `status-in-progress` or `status-done`, do nothing (no transition, no comment) and return `ok`. Otherwise [move](#moving-an-item) it to the first status of `status-in-progress`.
+3. **`done`**, in this order. A Done item is never pulled again, so a crash between the two steps must leave the comment written and the move still to do:
+   1. **Comment.** The evidence comment is the first line `Done`, then one fenced code block holding one line per commit, `<short SHA> <subject>` (or one line `PR: <URL>`), then `tests: <command> → <result>`. Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Done` and a code block naming the same commits (or PR) and the same test command and result, compared as normalised text (publish [Re-run](#re-run) step 4). Then add none. Otherwise `addOrEditJiraIssueComment` with it, Markdown, and no `commentId`.
+   2. **Move** it to the first status of `status-done`, unless its status is already in `status-done`.
+4. **Return** `ok`.
+
+### Moving an item
+
+`listJiraIssueTransitions` on the item. Pick the transition whose target status is the wanted status. If none leads there, pick one that leads to another status of the same bucket. Call `transitionJiraIssue` with only the item and that transition's id. If no transition leads into the bucket, stop: tell the user which item could not be moved to which status, and recommend checking the status mapping with `/power-architect:setup-tracker jira`.
+
+### Jira unreachable during `record`
+
+Stop the phase at that point, and write nothing else. Tell the user Jira can't be reached, and exactly which items' `started` or `done` the Tracker has not recorded. A completion line already in the ledger stays, so the next build run records that `done` without rebuilding.

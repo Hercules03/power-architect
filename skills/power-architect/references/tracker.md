@@ -75,12 +75,15 @@ Called by plan, build, review and verify.
   - `scope`: `sprint` (the active Sprint), a spec, or a Work Ref.
   - `level`: one of three:
     - `story`: the unfinished Stories in scope, in outline order, each with its body and Acceptance Criteria.
-    - `subtask`: the unfinished Sub-tasks in scope, plus any Bugs in scope, in `blocks` order with blockers first. Each comes with its body and acceptance criteria.
+    - `subtask`: the unfinished Sub-tasks in scope, plus any Bugs in scope, in `blocks` order with blockers first. Each comes with its body and acceptance criteria. With `sprint`, the scope is the Sub-tasks in the active Sprint; with a Story's Work Ref, that Story's Sub-tasks; with a Sub-task's Work Ref, that Sub-task.
+      - Each item carries its Work Ref, title, description, status, Story, the Spec Page Work Ref of its spec, that spec's Scope Tier, and its blockers with their status. Ties in `blocks` order follow the spec's outline order.
+      - An item is **ready** when each of its blockers is finished or comes earlier in the returned list. An item with an unfinished blocker outside scope, or blocked by an item that is not ready, is not returned for building: it comes back in a separate `blocked` list, naming that blocker ("blocked by <Work Ref> outside scope").
     - `outline`: the whole Work Outline of the spec, finished items included: the Spec Page (its shared context and its Plan section), then every Epic, Story and Sub-task with its outline id, kind, status, parent, and `blocks` and `relates` edges. This is how a phase reads the spec and plan in Tracker mode.
 - **Order:** replays any queued `record` events first (see `record`), then reads.
 - **Errors:**
   - Tracker unreachable: **stop**. Never build or verify from a guess.
   - Unknown Work Ref: **stop** and report it.
+  - `sprint` with no active Sprint: **stop** and tell the user. The Product Owner starts Sprints; the agent never does.
 
 ### `record(ref?, event, evidence)`
 
@@ -96,7 +99,7 @@ Called by build, debug, review, verify and finish.
 
 - **Returns:** `ok`, or `queued`.
 - **Invariants:**
-  - Safe to repeat: replaying an event already applied changes nothing.
+  - Safe to repeat: replaying an event already applied changes nothing. `started` on an item already In Progress or Done changes nothing; `done` never adds a second evidence comment.
   - An item's events apply in the order they were recorded.
 - **Order:**
   - For `done`, write the phase's own completion record (such as the ledger line) **before** calling `record`.
