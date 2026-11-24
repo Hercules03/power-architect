@@ -29,14 +29,16 @@ A step with a `Local:` line below it reads two ways. With a Tracker configured, 
 7. **Publish.** Build the [Work Outline](#work-outline) from the approved draft and call `publish(outline)` (see the [Tracker contract](tracker.md#publishoutline)). Then write the ledger `.power-architect/<spec-slug>/progress.md`: first line `# Ledger — spec: <the Spec Page's Work Ref>`, then a `## Work Refs` table `outline id | kind | Work Ref | title`, one row per item `publish` returned.
    - If `publish` stops partway, write the ledger the same way with the items it did create, and tell the user the spec is only partly published.
    - If it published nothing, write no ledger, and tell the user the draft is still at `.power-architect/<spec-slug>/spec-draft.md`.
+   - **Re-run.** This spec was published before when its ledger names a Spec Page (a ledger for the same slug from an earlier date counts: reuse its `<spec-slug>`), or when the user gave the Spec Page's Work Ref. Then put that Work Ref and the ledger's `## Work Refs` rows in the outline, so `publish` updates in place. Otherwise `publish` asks the Tracker for this spec's Spec Page, and the user confirms a match before anything is written. On a re-run `publish` shows the user a change summary (created, updated, re-parented, held, removed) and waits for their go-ahead before it writes. Afterwards tell the user each `held` item with its reason, and replace the ledger's first line and `## Work Refs` table, leaving the rest of the ledger unchanged.
 
-   `Local:` Nothing to publish; the spec file from step 4 is the record.
+   `Local:` Nothing to publish; the spec file from step 4 is the record. A re-run rewrites that file as today.
 
 ## Work Outline
 
 Built in step 7 from the approved draft. `Local:` not built.
 
 - **Scope Tier**: Small or Large.
+- **Earlier publish** (re-run only): the Spec Page's Work Ref and the ledger's `## Work Refs` rows.
 - **Spec Page** (outline id `spec`): the spec's title and its shared context: Problem Statement, Solution, Goals / Non-goals / Anti-goals, Approaches considered, the Implementation and Testing Decisions that span Epics (including the cross-Epic test seams), Out of Scope, Scope Tier and Further Notes.
 - **Epics** (outline ids `E1`, `E2`, … in the approved order): the name; this Epic's own slice of the goals and Implementation Decisions; links to the ADRs relevant to it. Small tier: the one Epic the user named, as its Work Ref if it already exists (it is used as is), or as a new name.
 - **Stories** (outline id: the user story's number in the spec): a short title, the user-story sentence, its parent Epic's outline id, and **Acceptance Criteria**: a checklist of testable checks drawn from the story and the Testing Decisions, each one provable by `/power-architect:verify` with a command or an observable result. Small tier: one Story (outline id `1`) that carries every user-story sentence of the spec and all their Acceptance Criteria.

@@ -28,6 +28,12 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 | `createConfluenceContent` | create the Spec Page (hints: `contentType`, `title`, `parent` {`spaceId`}, `body` {`format`, `value`}) | `createConfluencePage` | primary |
 | `updateConfluenceContent` | replace the Spec Page body (hints: `contentId`, `body`) | `updateConfluencePage` | primary |
 | `createJiraIssue` | create an Epic or Story (hints: `projectKey`, issue type, `summary`, `description`, `parent`) | | primary |
+| `searchConfluence` | find an earlier Spec Page by title (hint: a CQL query; parameters unverified) | | primary |
+| `getConfluenceContent` | read the Spec Page body and key table (hint: page id or URL, Markdown body; parameters unverified) | `getConfluencePage` | primary |
+| `getJiraIssue` | read an item's summary, description, status and parent (hints: `issueIdOrKey`, `view: full` or those `fields`, `responseContentFormat: markdown`) | | primary |
+| `listJiraIssueComments` | an item's comments (hint: `issueIdOrKey`) | | primary |
+| `editJiraIssue` | rewrite an item's summary, description or parent (hints: `issueIdOrKey`, `fields`, `contentFormat`) | | primary |
+| `addOrEditJiraIssueComment` | add a comment (hints: `issueIdOrKey`, `commentBody`; never pass `commentId`, which edits an existing comment) | `addCommentToJiraIssue` | primary |
 
 ## The `## Tracker` section
 
@@ -79,7 +85,9 @@ In steps 2 and 3, the user picks from lists you fetch. Never ask the user for an
 
 ## publish
 
-Implements [`publish(outline)`](tracker.md#publishoutline) for to-spec's outline: the Spec Page, Epics and Stories. Every item in the outline is created new, except an item that already carries a Work Ref (such as an existing Epic the user named). That item is used as is: never created, edited or added to the key table.
+Implements [`publish(outline)`](tracker.md#publishoutline) for to-spec's outline: the Spec Page, Epics and Stories. A first publish creates every item. A re-run updates the recorded items in place (see [Re-run](#re-run)).
+
+**Recorded items.** The items recorded for a spec are the rows of the key table on its Spec Page (step 7). An item the outline gives as an existing Work Ref that is not recorded (such as an existing Epic the user named for a Small-tier spec) is used as is, on every run: never created, edited, re-parented, commented on, marked removed, or added to the key table.
 
 **Work Refs.** An Epic's or Story's Work Ref is its issue key (for example `PA-12`). The Spec Page's Work Ref is the page's URL.
 
@@ -87,18 +95,19 @@ Make these calls in this order, one at a time. Pass `cloudId` on each Jira and C
 
 1. **Reach Jira.** Call `atlassianUserInfo`. If it fails, stop and write nothing. Tell the user Jira can't be reached, so nothing was published, and that `/mcp` reconnects the Rovo MCP server. Return an empty map.
 2. **Format.** If `discover` finds `getContentFormatGuide`, read it once and follow it for tables and task lists.
-3. **Spec Page.** `createConfluenceContent`: `contentType` `page`, `title` the spec's title, `parent` {`spaceId`: `confluence-space-id`}, `body` {`format`: `markdown`, `value`: the Spec Page body}. No key table yet.
-4. **Epics.** For each new Epic, in outline order, `createJiraIssue`: project `project`, issue type `type-epic`, `summary` its name, `contentFormat` `markdown`, `description`:
+3. **Earlier publish.** If the outline names the Spec Page's Work Ref, this is a re-run: go to [Re-run](#re-run). Otherwise `searchConfluence` for a page with the spec's title in the space `confluence-space` (for example CQL `space = "<confluence-space>" AND type = page AND title = "<spec title>"`). If it finds one, show the user its title and URL, ask whether it is this spec's Spec Page, and write nothing until they answer. Yes: go to Re-run with that page. No, or no page found: carry on with step 4.
+4. **Spec Page.** `createConfluenceContent`: `contentType` `page`, `title` the spec's title, `parent` {`spaceId`: `confluence-space-id`}, `body` {`format`: `markdown`, `value`: the Spec Page body}. No key table yet.
+5. **Epics.** For each new Epic, in outline order, `createJiraIssue`: project `project`, issue type `type-epic`, `summary` its name, `contentFormat` `markdown`, `description`:
    - its slice of the goals and decisions
    - `Spec Page: <page URL>`
-   - `ADRs:` one line per ADR link: title, path, and URL if the outline gives one
-5. **Stories.** After every Epic, for each Story in outline order, `createJiraIssue`: project `project`, issue type `type-story`, `parent` its Epic's key, `summary` its title, `contentFormat` `markdown`, `description`:
+   - `ADRs:` one line per ADR link: title, path, and URL if the outline gives one (no `ADRs:` line when it has none)
+6. **Stories.** After every Epic, for each new Story in outline order, `createJiraIssue`: project `project`, issue type `type-story`, `parent` its Epic's key, `summary` its title, `contentFormat` `markdown`, `description`:
    - the user-story sentence
    - `## Acceptance Criteria`, then one `- [ ]` line per check
    - `Spec Page: <page URL>`
 
    If Jira rejects the Epic as a Story's parent, stop: tell the user this project does not let a Story sit under an Epic, then report as for a failed call.
-6. **Key table.** `updateConfluenceContent` on the page: the same body, followed by:
+7. **Key table.** `updateConfluenceContent` on the page: the same body, followed by:
 
    ```md
    ## Work Refs
@@ -111,6 +120,46 @@ Make these calls in this order, one at a time. Pass `cloudId` on each Jira and C
    ```
 
    One row per item created from this spec: the Spec Page, then the Epics, then the Stories, in outline order. Sub-task rows are appended below them later. This table is how a re-run finds each item.
-7. **Return** the outline id → Work Ref map (the table's rows) and an empty `held` list. Tell the user the Spec Page URL and the Epics and Stories created, with their keys.
+8. **Return** the outline id → Work Ref map (the table's rows) and an empty `held` list. Tell the user the Spec Page URL and the Epics and Stories created, with their keys.
 
-**A call fails after step 1.** Stop at once. Make no further call: no retry and no key table. If the Spec Page create itself failed, nothing was created: tell the user nothing was published. Otherwise tell the user the spec is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not. Return the created items as the map, so the phase records them.
+**A call fails after step 1.** Stop at once. Make no further call: no retry and no key table. If the Spec Page create itself failed, nothing was created: tell the user nothing was published. Otherwise tell the user the spec is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not. Return the created items as the map, so the phase records them. On a re-run, the map also holds every recorded item.
+
+### Re-run
+
+Read first, then get one go-ahead, then write. Make no write before the go-ahead. These rules apply to every outline item, whatever its kind.
+
+1. **Recorded items.** `getConfluenceContent` on the Spec Page, with a Markdown body. Its `## Work Refs` table lists the recorded items. Add each row of the outline's recorded Work Refs (from the ledger) whose Work Ref is not in that table: a publish that stopped partway created it. Where both list a Work Ref, the page's row wins. If the page has no key table, the ledger's rows are the recorded items.
+2. **Read** each recorded item of a kind this outline carries with `getJiraIssue`: its summary, description (Markdown), status and parent. Rows of other kinds (Sub-task rows, when to-spec publishes) are kept unchanged and are not read, paired or marked removed.
+3. **Pair** each outline item with a recorded item of the same kind, so renumbering is harmless. The Spec Page pairs with the `spec` row.
+   1. Same text, after trimming, collapsing whitespace and ignoring case: an Epic's name against the summary; a Story's user-story sentence(s) against the first paragraph of the description.
+   2. Then the same outline id, among the items still unpaired. A row whose outline id is `—` never pairs by id.
+   3. An outline item still unpaired is **new**. A recorded item still unpaired is **removed from spec**.
+
+   If a recorded item could pair with more than one outline item, or an outline item with more than one recorded item, list those pairs and ask the user which is right. Wait for the answer.
+4. **Decide** each paired item. Build the summary and description it would get on a first publish (steps 5 and 6), and compare them with what step 2 read, ignoring whitespace. An item is **not started** when its status is in `status-todo`, and **started** otherwise (In Progress, Done, or a status in no bucket).
+
+   | The spec… | Not started | Started |
+   |---|---|---|
+   | did not change it | nothing | nothing |
+   | changed its summary or description | **update**: rewrite them | **held**: comment what changed |
+   | moved the Story to another Epic | **re-parent** | **held**: comment the move |
+
+   A removed item is **held** whatever its status, with a "removed from spec" comment. It is never deleted, closed or transitioned, and its key table row stays.
+5. **Comments are written once.** Use this text, one comment per item (a started item both changed and moved gets one comment with both parts):
+   - changed: `Spec change not applied, because this item has started.` Then each changed field: `Summary: <old> → <new>`, and the description lines removed (`- <line>`) and added (`+ <line>`). Then `Spec Page: <page URL>`.
+   - moved: `Spec change not applied, because this item has started: the spec moves this Story to Epic <key> (<name>).`
+   - removed: `Removed from spec: this item is no longer in the spec. It was not deleted or closed. Spec Page: <page URL>`
+
+   Read the item's comments with `listJiraIssueComments`. If one already has this text, add no new one. The item is still held.
+6. **Change summary.** Show the user a table of what would be created, updated, re-parented, held (with the reason) and removed from spec. If there is nothing to write (no create, update, re-parent or new comment, and the page body and key table read in step 1 already match step 8), say the Tracker is already up to date, make no write, and go to step 9. Otherwise ask the user to go ahead, and wait. If they decline, write nothing and go to step 9.
+7. **Write**, one call at a time, parents first: Epics in outline order, then Stories in outline order, then removed items.
+   - new: create it as steps 5 and 6 do. A Story's parent is its Epic's key, new or recorded.
+   - update: `editJiraIssue` with `fields` `summary` and `description`, and `contentFormat` `markdown`.
+   - re-parent: `editJiraIssue` with `fields` `parent` set to the new Epic's key (in the same call as an update, when both apply).
+   - held: `addOrEditJiraIssueComment` with the step 5 text, Markdown, and no `commentId`, unless step 5 skipped it.
+
+   Never call a transition, and never delete.
+8. **Spec Page.** If the body or the key table differs from what step 1 read, `updateConfluenceContent` as the last call: the Spec Page body followed by the key table. Rows: the Spec Page; the Epics, then the Stories, in outline order, each with its new outline id, its title and its Work Ref (recorded or new); then each removed item, with outline id `—` and its old title; then the kept rows of other kinds, unchanged. Every recorded row stays, and no Work Ref changes.
+9. **Return** the map (every key table row) and `held` (each held item with its reason). Tell the user what was created, updated and re-parented, and each held item with its reason.
+
+A failed call is handled as in "A call fails after step 1" above.

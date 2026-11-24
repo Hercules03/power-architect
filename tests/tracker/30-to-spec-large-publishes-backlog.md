@@ -31,6 +31,7 @@
   | getAccessibleAtlassianResources | any | [{id: "11111111-2222-3333-4444-555555555555", url: "https://acme.atlassian.net", name: "acme"}] |
   | discover | any | the tools in this table whose names match the query |
   | getContentFormatGuide | any | "Markdown is accepted. Tables and task lists (`- [ ]`) are supported." |
+  | searchConfluence | any | [] |
   | createConfluenceContent | any | {id: "4001", url: "https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001"} |
   | createJiraIssue | any | {key: "PA-<n>"} |
   | updateConfluenceContent | any | {id: "4001", version: 2} |
@@ -59,7 +60,7 @@ The user runs `/power-architect:to-spec` and replies in order:
 - At the spec gate the agent shows a table with the columns Epic, user stories and why they belong together, with three rows: Identity & SSO (1, 2, 3), Organization Setup (4, 5), Subscription & Billing (6, 7, 8). Every user story appears in exactly one row
 - No MCP call of any kind is made before the user's "approved"
 - After approval, `publish(outline)` is called once, with Scope Tier Large, a Spec Page, three Epics and eight Stories, each Story carrying its user-story sentence and a checklist of Acceptance Criteria
-- The MCP calls, in order: a connection check (`atlassianUserInfo`) → `createConfluenceContent` (space id `98765`, Markdown body, no key table) → three `createJiraIssue` calls with issue type `Epic` (PA-10 Identity & SSO, PA-11 Organization Setup, PA-12 Subscription & Billing) → eight `createJiraIssue` calls with issue type `Story`, user stories 1–8 in order (PA-13 … PA-20), parents PA-10, PA-10, PA-10, PA-11, PA-11, PA-12, PA-12, PA-12 → one `updateConfluenceContent` on page `4001`. (A `discover` or `getContentFormatGuide` read may appear after the connection check)
+- The MCP calls, in order: a connection check (`atlassianUserInfo`) → `createConfluenceContent` (space id `98765`, Markdown body, no key table) → three `createJiraIssue` calls with issue type `Epic` (PA-10 Identity & SSO, PA-11 Organization Setup, PA-12 Subscription & Billing) → eight `createJiraIssue` calls with issue type `Story`, user stories 1–8 in order (PA-13 … PA-20), parents PA-10, PA-10, PA-10, PA-11, PA-11, PA-12, PA-12, PA-12 → one `updateConfluenceContent` on page `4001`. (A `discover` or `getContentFormatGuide` read, and a `searchConfluence` read that finds no page, may appear after the connection check)
 - Every Jira and Confluence call passes cloudId `11111111-2222-3333-4444-555555555555`, and every work-item create uses project `PA`
 - Each Epic's description holds its own slice of the spec and a link to the Spec Page (`https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001`). The Identity & SSO Epic links ADR-0003 by title, path `docs/adr/0003-saml-for-enterprise-sso.md` and URL `https://github.com/acme/onboard/blob/main/docs/adr/0003-saml-for-enterprise-sso.md`. The Subscription & Billing Epic links ADR-0004 the same way
 - Each Story's description holds its user-story sentence, its Acceptance Criteria as a `- [ ]` checklist, and the Spec Page link

@@ -31,6 +31,7 @@
   | getAccessibleAtlassianResources | any | [{id: "11111111-2222-3333-4444-555555555555", url: "https://acme.atlassian.net", name: "acme"}] |
   | discover | any | the tools in this table whose names match the query |
   | getContentFormatGuide | any | "Markdown is accepted. Tables and task lists (`- [ ]`) are supported." |
+  | searchConfluence | any | [] |
   | createConfluenceContent | any | {id: "4001", url: "https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001"} |
   | createJiraIssue | any | {key: "PA-<n>"} |
   | updateConfluenceContent | any | {id: "4001", version: 2} |

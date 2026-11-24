@@ -31,6 +31,7 @@
   | getAccessibleAtlassianResources | any | [{id: "11111111-2222-3333-4444-555555555555", url: "https://acme.atlassian.net", name: "acme"}] |
   | discover | any | the tools in this table whose names match the query |
   | getContentFormatGuide | any | "Markdown is accepted. Tables and task lists (`- [ ]`) are supported." |
+  | searchConfluence | any | [] |
   | createConfluenceContent | any | {id: "4100", url: "https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4100"} |
   | createJiraIssue | any | {key: "PA-<n>"} |
   | updateConfluenceContent | any | {id: "4100", version: 2} |
@@ -54,7 +55,7 @@ The user runs `/power-architect:to-spec` and replies in order:
 - The agent asks once which Epic the Story goes under (an existing Epic or a new one with a name)
 - No MCP call of any kind is made before the user's "approved"
 - `publish(outline)` is called once with Scope Tier Small, a Spec Page, the existing Epic `PA-7` and exactly one Story that carries both user-story sentences and Acceptance Criteria for both
-- The MCP calls, in order: a connection check → `createConfluenceContent` → exactly one `createJiraIssue` (issue type `Story`, parent `PA-7`, key PA-30) → `updateConfluenceContent` on page `4100`. (A `discover` or `getContentFormatGuide` read may appear after the connection check)
+- The MCP calls, in order: a connection check → `createConfluenceContent` → exactly one `createJiraIssue` (issue type `Story`, parent `PA-7`, key PA-30) → `updateConfluenceContent` on page `4100`. (A `discover` or `getContentFormatGuide` read, and a `searchConfluence` read that finds no page, may appear after the connection check)
 - No `createJiraIssue` with issue type `Epic`, and no edit call on `PA-7`
 - The key table written to the Spec Page has a row for the Spec Page and a row for the Story (PA-30), and no row for `PA-7`
 - The ledger `.power-architect/2026-11-24-invoice-csv/progress.md` starts with `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4100`
