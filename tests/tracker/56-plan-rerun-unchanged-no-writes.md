@@ -1,5 +1,7 @@
 # 56: Re-running plan on an unchanged, already published plan makes no writes, even with started Sub-tasks and fresh wording
 
+The link-create tool's schema is deliberately ambiguous about link direction (as in scenario 54d), so an agent that still asks about direction on this unchanged re-run, where no link is created, fails the last Then line.
+
 **Phase:** /power-architect:plan
 
 ## Given
@@ -36,7 +38,7 @@
   | listJiraIssueComments | any | the comments this dry run has added to that issue (none at the start) |
   | listJiraIssueLinkTypes | any | [{name: "Blocks", outward: "blocks", inward: "is blocked by"}, {name: "Relates", outward: "relates to", inward: "relates to"}] |
   | createJiraIssue | any | {key: "PA-<n>"} (n starts at 30) |
-  | createJiraIssueLink | any | {ok: true}. Its live input schema: `type` (the link type's name); `outwardIssue` (the issue the type's outward text describes: `<outwardIssue> blocks <inwardIssue>`); `inwardIssue` (the issue the inward text describes: `<inwardIssue> is blocked by <outwardIssue>`) |
+  | createJiraIssueLink | any | {ok: true}. Its live input schema: `type` (the link type's name); `issue1` (an issue key); `issue2` (an issue key). Nothing in the schema says which of `issue1` and `issue2` takes the side the type's outward text ("blocks") describes |
   | editJiraIssue | any | {ok: true} |
   | addOrEditJiraIssueComment | any | {id: "c-<n>"} |
   | updateConfluenceContent | any | {id: "4001", version: 3} |
