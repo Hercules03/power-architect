@@ -24,6 +24,10 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 | `listJiraStatuses` | status list | | `discover` |
 | `searchJiraIssuesUsingJql` | find one existing issue (hint: `jql`, `maxResults`) | | primary |
 | `listJiraIssueTransitions` | an issue's transitions | `getTransitionsForJiraIssue` | `discover` |
+| `getContentFormatGuide` | how page bodies are formatted (unverified name) | | `discover` |
+| `createConfluenceContent` | create the Spec Page (hints: `contentType`, `title`, `parent` {`spaceId`}, `body` {`format`, `value`}) | `createConfluencePage` | primary |
+| `updateConfluenceContent` | replace the Spec Page body (hints: `contentId`, `body`) | `updateConfluencePage` | primary |
+| `createJiraIssue` | create an Epic or Story (hints: `projectKey`, issue type, `summary`, `description`, `parent`) | | primary |
 
 ## The `## Tracker` section
 
@@ -72,3 +76,41 @@ In steps 2 and 3, the user picks from lists you fetch. Never ask the user for an
    - Leave every other line of the file unchanged.
 
    Tell the user which file was written and that the repo is now in Jira Mode.
+
+## publish
+
+Implements [`publish(outline)`](tracker.md#publishoutline) for to-spec's outline: the Spec Page, Epics and Stories. Every item in the outline is created new, except an item that already carries a Work Ref (such as an existing Epic the user named). That item is used as is: never created, edited or added to the key table.
+
+**Work Refs.** An Epic's or Story's Work Ref is its issue key (for example `PA-12`). The Spec Page's Work Ref is the page's URL.
+
+Make these calls in this order, one at a time. Pass `cloudId` on each. Never pass a Sprint, backlog, priority, story-point or estimate field; leave those blank.
+
+1. **Reach Jira.** Call `atlassianUserInfo`. If it fails, stop and write nothing. Tell the user Jira can't be reached, so nothing was published, and that `/mcp` reconnects the Rovo MCP server. Return an empty map.
+2. **Format.** If `discover` finds `getContentFormatGuide`, read it once and follow it for tables and task lists.
+3. **Spec Page.** `createConfluenceContent`: `contentType` `page`, `title` the spec's title, `parent` {`spaceId`: `confluence-space-id`}, `body` {`format`: `markdown`, `value`: the Spec Page body}. No key table yet.
+4. **Epics.** For each new Epic, in outline order, `createJiraIssue`: project `project`, issue type `type-epic`, `summary` its name, `contentFormat` `markdown`, `description`:
+   - its slice of the goals and decisions
+   - `Spec Page: <page URL>`
+   - `ADRs:` one line per ADR link: title, path, and URL if the outline gives one
+5. **Stories.** After every Epic, for each Story in outline order, `createJiraIssue`: issue type `type-story`, `parent` its Epic's key, `summary` its title, `contentFormat` `markdown`, `description`:
+   - the user-story sentence
+   - `## Acceptance Criteria`, then one `- [ ]` line per check
+   - `Spec Page: <page URL>`
+
+   If Jira rejects the Epic as a Story's parent, stop: tell the user this project does not let a Story sit under an Epic, then report as for a failed call.
+6. **Key table.** `updateConfluenceContent` on the page: the same body, followed by:
+
+   ```md
+   ## Work Refs
+
+   | outline id | kind | Work Ref | title |
+   |---|---|---|---|
+   | spec | Spec Page | <page URL> | <spec title> |
+   | E1 | Epic | <key> | <name> |
+   | 1 | Story | <key> | <title> |
+   ```
+
+   One row per item created from this spec: the Spec Page, then the Epics, then the Stories, in outline order. Sub-task rows are appended below them later. This table is how a re-run finds each item.
+7. **Return** the outline id → Work Ref map (the table's rows) and an empty `held` list. Tell the user the Spec Page URL and the Epics and Stories created, with their keys.
+
+**A call fails after step 1.** Stop at once. Make no further call: no retry and no key table. Tell the user the spec is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not. Return the created items as the map, so the phase records them.

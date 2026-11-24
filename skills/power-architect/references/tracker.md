@@ -56,7 +56,7 @@ Called by to-spec (the Spec Page, Epics and Stories) and by plan (Sub-tasks and 
   - A To Do Story moved to another Epic is re-parented.
   - An item no longer in the outline is never deleted. It gets a "removed from spec" comment and goes into `held`.
 - **Errors:**
-  - Tracker unreachable: **stop**. Tell the user nothing was published, or exactly what was.
+  - Tracker unreachable: **stop**. Tell the user nothing was published, or exactly what was, and return the Work Refs of what was so the phase can record them.
 
 ### `pull(scope, level)`
 
