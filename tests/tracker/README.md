@@ -55,6 +55,8 @@ MCP tool you would call, use the stubbed Rovo table's response.
 
 If the scenario's **When** gives the user's replies, use them in order and carry
 on. Stop at the first question the When does not answer, or when the phase ends.
+If the When asks for the phase to be run again, carry on and run it again; stub
+state left by the earlier run carries over.
 Report the trace as an ordered list:
 - each skill file you opened, in order
 - each Tracker operation (publish / pull / record) with its arguments and result
