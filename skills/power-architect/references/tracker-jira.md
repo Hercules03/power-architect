@@ -102,7 +102,7 @@ Make these calls in this order, one at a time. Pass `cloudId` on each Jira and C
    - `Spec Page: <page URL>`
    - `ADRs:` one line per ADR link: title, path, and URL if the outline gives one (no `ADRs:` line when it has none)
 6. **Stories.** After every Epic, for each new Story in outline order, `createJiraIssue`: project `project`, issue type `type-story`, `parent` its Epic's key, `summary` its title, `contentFormat` `markdown`, `description`:
-   - the user-story sentence
+   - the user-story sentence, alone as the first paragraph: nothing else in that paragraph, because a re-run pairs and compares on it
    - `## Acceptance Criteria`, then one `- [ ]` line per check
    - `Spec Page: <page URL>`
 
@@ -133,7 +133,8 @@ Read first, then get one go-ahead, then write. Make no write before the go-ahead
 3. **Pair** each outline item with a recorded item of the same kind, so renumbering is harmless. The Spec Page pairs with the `spec` row.
    1. Same text, after normalising (see step 4): an Epic's name against the summary; a Story's user-story sentence(s) against the first paragraph of the description.
    2. Then the same outline id, among the items still unpaired. A row whose outline id is `—` never pairs by id.
-   3. An outline item still unpaired is **new**. A recorded item still unpaired is **removed from spec**.
+   3. An outline item still unpaired is **new**. A recorded item still unpaired is **removed from spec**, except as the next item says.
+   4. **Ask, never guess.** If an outline item and a recorded item of the same kind both remain unpaired, do not create or mark removed yet: a started item keeps its old text, so after its sentence or name changed and the outline was renumbered it pairs by neither. Open the change summary with every candidate pair, one line each: `new: <sentence or name> / recorded: <Work Ref> <its sentence or name as read>`. Ask the user, for each remaining new item, "same as <Work Ref>" or "new", and wait. Make no write before the answer. "Same as" pairs the two, and **Decide** (step 4) handles them (a started Story whose sentence changed is **held** with a comment, never rewritten). An item answered "new" is created. A recorded item that no answer claims is removed from spec. The answer is final for this run.
 
    If a recorded item could pair with more than one outline item, or an outline item with more than one recorded item, list those pairs and ask the user which is right. Wait for the answer.
 4. **Decide** each paired item.
@@ -162,7 +163,7 @@ Read first, then get one go-ahead, then write. Make no write before the go-ahead
    - removed: first line `Removed from spec`. Then `This item is no longer in the spec. It was not deleted or closed. Spec Page: <page URL>`
 
    Read the item's comments with `listJiraIssueComments`. A held comment is already there when one has the same first line and the same lines in its code block: compare each `-`/`+` line's marker as is and the sentence after it as normalised text (step 4; the marker is never stripped as a list marker), and each `Name:` or `Epic:` line normalised. A removed comment is already there when one has the first line `Removed from spec`, whatever follows. Then add no new one. The item is still held.
-6. **Change summary.** Show the user a table of what would be created, updated, re-parented, held (with the reason) and removed from spec. If there is nothing to write (no create, update, re-parent or new comment, and the page body and key table read in step 1 already match step 8), say the Tracker is already up to date, make no write, and go to step 9. Otherwise ask the user to go ahead, and wait. If they name an item to redraft (step 4), redraft it, show the summary again and wait. If they decline, write nothing (no comment either) and go to step 9: every item the summary would have written is **declined**, not held.
+6. **Change summary.** Show the user a table of what would be created, updated, re-parented, held (with the reason) and removed from spec, after each step 3 candidate pair with the user's answer. If there is nothing to write (no create, update, re-parent or new comment, and the page body and key table read in step 1 already match step 8), say the Tracker is already up to date, make no write, and go to step 9. Otherwise ask the user to go ahead, and wait. If they name an item to redraft (step 4), redraft it, show the summary again and wait. If they decline, write nothing (no comment either) and go to step 9: every item the summary would have written is **declined**, not held.
 7. **Write**, one call at a time, parents first: Epics in outline order, then Stories in outline order, then removed items.
    - new: create it as steps 5 and 6 do. A Story's parent is its Epic's key, new or recorded.
    - update: `editJiraIssue` with `fields` `summary` and `description`, and `contentFormat` `markdown`.
