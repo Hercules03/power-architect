@@ -14,9 +14,10 @@ What Power Architect adds is only the glue: which phase comes next, which method
 
 ## How to run a phase
 
-1. Read the phase's reference file (table below) and follow it exactly. Don't paraphrase it from memory.
-2. **If the upstream skill is installed** (it appears in your available skills, e.g. `mattpocock-skills:grilling` or `superpowers:writing-plans`), invoke it for that phase instead, then apply the Power Architect conventions below on top. The reference files are the bundled fallback so that nothing else needs to be installed.
-3. End every response with the Next-Step Footer.
+1. **Check the Tracker first.** For to-spec, plan, build, debug, review, verify and finish, look in the repo's AGENTS.md, then CLAUDE.md, for a `## Tracker` section. If there is none, use local files and don't open the Tracker contract. If there is one, follow [references/tracker.md](references/tracker.md) before any other step of the phase, including workspace setup.
+2. Read the phase's reference file (table below) and follow it exactly. Don't paraphrase it from memory.
+3. **If the upstream skill is installed** (it appears in your available skills, e.g. `mattpocock-skills:grilling` or `superpowers:writing-plans`), invoke it for that phase instead, then apply the Power Architect conventions below on top. The reference files are the bundled fallback so that nothing else needs to be installed.
+4. End every response with the Next-Step Footer.
 
 | Command | Phase | Method | Reference |
 |---|---|---|---|
@@ -75,7 +76,7 @@ Create files and directories lazily, only when there is something to write. Proj
 | Execution ledger (git-ignored scratch) | `.power-architect/<plan-slug>/progress.md` |
 | Retros (optional record) | `docs/retros/YYYY-MM-DD-slug.md` |
 
-If the user has an issue tracker configured (for example via Matt's `/setup-matt-pocock-skills`), publish specs and tickets there as the upstream skills do, and skip the local files.
+**Tracker.** When the repo configures a Tracker (see "How to run a phase"), the Tracker holds the specs, plans and progress in place of the files above. Knowledge Docs (the glossary, ADRs, DESIGN.md and AGENTS.md) and the ledger stay local.
 
 ## Rules that apply in every phase
 

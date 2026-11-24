@@ -16,6 +16,10 @@ _Avoid_: plugin, connector
 An opaque name for one work item, such as a Jira key or a local file anchor. Phases pass it along and never interpret it.
 _Avoid_: ticket ID, key
 
+**Work Outline**:
+The tree of one spec's work: its Spec Page, Epics, Stories and Sub-tasks, plus its Scope Tier. It is what the pipeline publishes to the Tracker, and how it reads the spec back.
+_Avoid_: backlog dump, ticket tree
+
 **Jira Mode**:
 The repo state in which the configured Tracker is Jira.
 _Avoid_: Jira sync, Jira integration

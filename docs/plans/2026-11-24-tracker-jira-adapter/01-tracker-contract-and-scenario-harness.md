@@ -4,11 +4,11 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] The Tracker contract states selection, Work Ref, all three operations with inputs, outputs, invariants and error modes, and the adapter rules (no Sprint changes, no estimates, the whole contract implemented)
-- [ ] The skill's top-level rules link to the contract, and the old issue-tracker sentence is gone
-- [ ] The scenario format and the stubbed Rovo table format are documented, with dry-run instructions for a subagent
-- [ ] Scenario: an unknown adapter name stops the phase and recommends `/power-architect:setup-tracker`, as shown by a dry run
-- [ ] Scenario: no `## Tracker` section leaves the phase reading nothing new, as shown by a dry run
-- [ ] The locality grep check is documented and passes
+- [x] The Tracker contract states selection, Work Ref, all three operations with inputs, outputs, invariants and error modes, and the adapter rules (no Sprint changes, no estimates, the whole contract implemented)
+- [x] The skill's top-level rules link to the contract, and the old issue-tracker sentence is gone
+- [x] The scenario format and the stubbed Rovo table format are documented, with dry-run instructions for a subagent
+- [x] Scenario: an unknown adapter name stops the phase and recommends `/power-architect:setup-tracker`, as shown by a dry run
+- [x] Scenario: no `## Tracker` section leaves the phase reading nothing new, as shown by a dry run
+- [x] The locality grep check is documented and passes
