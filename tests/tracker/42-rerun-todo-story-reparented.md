@@ -87,9 +87,9 @@ The user runs `/power-architect:to-spec` and replies in order:
 
 ## Then
 - No MCP call of any kind is made before the user's "approved"
-- The change summary, shown before any write, lists PA-43 as re-parented from PA-40 to PA-41, and nothing created, updated, held or removed
-- The only write call is one `editJiraIssue` on PA-43 that sets its parent to PA-41; its summary and description are not changed
-- No `addOrEditJiraIssueComment`, no `createJiraIssue`, and no edit of any other item
+- The change summary, shown before any write, lists PA-43 as re-parented from PA-40 to PA-41, PA-40 and PA-41 as updated with a redrafted slice (their membership changed), and nothing created, held or removed
+- The writes in order: at most one `editJiraIssue` on each of PA-40 and PA-41 that changes only its slice line(s) (summary, `Spec Page:` line and any other line kept as read) → one `editJiraIssue` on PA-43 that sets its parent to PA-41; PA-43's summary and description are not changed
+- No `addOrEditJiraIssueComment`, no `createJiraIssue`, and no edit of PA-42, PA-44 or PA-45
 - No `updateConfluenceContent` (the key table's rows are unchanged)
 - `publish` returns an empty `held` list, and the ledger keeps the same 7 Work Refs (story 2 is still PA-43)
 - No `createConfluenceContent` call, no Sprint or board call, no transition, and no `executeDestructive` call

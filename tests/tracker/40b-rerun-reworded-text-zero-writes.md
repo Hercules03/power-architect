@@ -31,7 +31,7 @@
   | discover | any | the tools in this table whose names match the query |
   | getContentFormatGuide | any | "Markdown is accepted. Tables and task lists (`- [ ]`) are supported." |
   | getConfluenceContent | page 5001 | {id: "5001", title: "Team invites", url: "https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001", body (Markdown): the Page body below, followed by the key table below} |
-  | getJiraIssue | PA-40 … PA-43 | that item's row of the Items table below, with `description` the matching Descriptions block below |
+  | getJiraIssue | PA-40 … PA-44 | that item's row of the Items table below, with `description` the matching Descriptions block below |
   | listJiraIssueComments | any | none |
   | editJiraIssue | any | {ok: true} |
   | addOrEditJiraIssueComment | any | {id: "c-1"} |

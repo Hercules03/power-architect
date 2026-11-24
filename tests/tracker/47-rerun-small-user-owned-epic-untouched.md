@@ -69,6 +69,6 @@ The user runs `/power-architect:to-spec` and replies in order:
 - The change summary, shown before any write, lists PA-30 as updated and nothing created, re-parented, held or removed. It does not list PA-7
 - The only write call is one `editJiraIssue` on PA-30 whose Markdown description carries all three user-story sentences and all three criteria; it does not change PA-30's parent
 - No write call names PA-7: no `editJiraIssue`, `addOrEditJiraIssueComment` or other write on PA-7, and PA-7 is never reported as "removed from spec" or held
-- No `createJiraIssue` (no new Epic or Story) and no `updateConfluenceContent` (the key table is unchanged and still has no row for PA-7)
+- No `createJiraIssue` (no new Epic or Story). No `updateConfluenceContent`, unless PA-30's redrafted title differs from "Invoice CSV export"; then one, the last call, whose only change is PA-30's title cell in the key table, which still has no row for PA-7
 - `publish` returns an empty `held` list; the ledger keeps the same 2 Work Refs
 - No `createConfluenceContent` call, no Sprint or board call, no transition, and no `executeDestructive` call

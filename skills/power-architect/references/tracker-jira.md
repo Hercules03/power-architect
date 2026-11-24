@@ -131,31 +131,38 @@ Read first, then get one go-ahead, then write. Make no write before the go-ahead
 1. **Recorded items.** `getConfluenceContent` on the Spec Page, with a Markdown body. Its `## Work Refs` table lists the recorded items. Add each row of the outline's recorded Work Refs (from the ledger) whose Work Ref is not in that table: a publish that stopped partway created it. Where both list a Work Ref, the page's row wins. If the page has no key table, the ledger's rows are the recorded items.
 2. **Read** each recorded item of a kind this outline carries with `getJiraIssue`: its summary, description (Markdown), status and parent. Rows of other kinds (Sub-task rows, when to-spec publishes) are kept unchanged and are not read, paired or marked removed.
 3. **Pair** each outline item with a recorded item of the same kind, so renumbering is harmless. The Spec Page pairs with the `spec` row.
-   1. Same text, after normalising (see step 4): an Epic's name against the summary; a Story pairs when **either** its title matches the summary **or** its user-story sentence(s) match the first paragraph of the description.
+   1. Same text, after normalising (see step 4): an Epic's name against the summary; a Story's user-story sentence(s) against the first paragraph of the description.
    2. Then the same outline id, among the items still unpaired. A row whose outline id is `—` never pairs by id.
    3. An outline item still unpaired is **new**. A recorded item still unpaired is **removed from spec**.
 
    If a recorded item could pair with more than one outline item, or an outline item with more than one recorded item, list those pairs and ask the user which is right. Wait for the answer.
-4. **Decide** each paired item. Never re-draft an item: its text starts from what step 2 read.
-   - **Did the spec change it?** Compare the approved spec's content for the item (an Epic's name, slice and ADR links; a Story's title, user-story sentence, each Acceptance Criteria check and its Epic) with the same content in what step 2 read, piece by piece. Never compare freshly drafted prose with the read text: a difference that comes only from drafting again is no change.
-   - **Normalise before comparing any text:** ignore case and whitespace, list markers (`-`, `*`, `+`, `1.`, and a `[ ]` or `[x]` box), Markdown escapes (`\-` is `-`), and link wrapping (a bare URL, `<url>` and `[text](url)` are equal). Equal after normalising means unchanged: no write.
-   - **New text** for a changed item is the read summary and description with only the pieces the spec changed replaced, added or removed. Every other line stays exactly as read.
+4. **Decide** each paired item.
+   - **Only user-approved spec content is compared:** a Story's user-story sentence(s) against the first paragraph of its description; a Story's Epic against its parent; an Epic's name against its summary, and its member Stories against the approved grouping. Text the agent drafts (Story titles, Acceptance Criteria, Epic slices, ADR lines) is never compared: the earlier session's drafts are not kept, so the Tracker text is their only record.
+   - **Normalise** sentences and names before comparing: ignore case and whitespace, list markers (`-`, `*`, `+`, `1.`, and a `[ ]` or `[x]` box), Markdown escapes (`\-` is `-`), and link wrapping (a bare URL, `<url>` and `[text](url)` are equal). Equal after normalising means unchanged: no write.
+   - **Drafted text is kept verbatim as read.** Each paired item's summary and description start exactly as step 2 read them, and are never rewritten because the agent would word them differently now. Drafted text is redrafted only in these cases, and only on a not-started item:
+     - **Sentence changed:** redraft the Story's title and Acceptance Criteria from the new sentence and the spec's Testing Decisions. New text: summary the new title; description the new sentence, the redrafted `## Acceptance Criteria`, and every other line as read.
+     - **Membership changed:** this run creates a Story under an Epic, or re-parents a Story into or out of it. Redraft that Epic's slice; every other line stays as read. A held or removed Story does not change membership.
+     - **User asks:** at the go-ahead (step 6) the user names an item to redraft.
 
-   An item is **not started** when its status is in `status-todo`, and **started** otherwise (In Progress, Done, or a status in no bucket).
+     Show each redraft in the change summary.
+
+   An item is **not started** when its status is in `status-todo`, and **started** otherwise (In Progress, Done, or a status in no bucket). A started item is never redrafted or rewritten.
 
    | The spec… | Not started | Started |
    |---|---|---|
    | did not change it | nothing | nothing |
-   | changed its summary or description | **update**: rewrite them | **held**: comment what changed |
+   | changed a Story's sentence | **update**: new sentence, redrafted title and criteria | **held**: comment the sentence change |
+   | changed an Epic's name | **update**: the summary | **held**: comment the name change |
+   | changed an Epic's membership | **update**: redrafted slice | nothing |
    | moved the Story to another Epic | **re-parent** | **held**: comment the move |
 
    A removed item is **held** whatever its status, with a "removed from spec" comment. It is never deleted, closed or transitioned, and its key table row stays.
-5. **Comments are written once.** One comment per item. Each starts with a fixed first line:
-   - held (changed, moved, or both): first line `Spec change not applied (item started)`. Then one fenced code block (so Jira keeps the `+`/`-` markers and does not turn URLs into links) holding the changed lines only: `Summary: <old> → <new>`, each description line removed (`- <line>`) and added (`+ <line>`), and for a move `Epic: <old key> → <new key> (<name>)`. Then `Spec Page: <page URL>`.
+5. **Comments are written once.** One comment per item. A comment holds only approved spec text, never Acceptance Criteria or other drafted text. Each starts with a fixed first line:
+   - held (changed, moved, or both): first line `Spec change not applied (item started)`. Then one fenced code block (so Jira keeps the `+`/`-` markers and does not turn URLs into links) holding only what changed: for a sentence, `- <old sentence>` and `+ <new sentence>`; for an Epic's name, `Name: <old> → <new>`; for a move, `Epic: <old key> → <new key> (<name>)`. After a sentence change, one plain line may follow: `Acceptance Criteria on this item were not updated; review them against the new sentence.` Then `Spec Page: <page URL>`.
    - removed: first line `Removed from spec`. Then `This item is no longer in the spec. It was not deleted or closed. Spec Page: <page URL>`
 
-   Read the item's comments with `listJiraIssueComments`. A held comment is already there when one has the same first line and the same changed lines after normalising (step 4). A removed comment is already there when one has the first line `Removed from spec`. Then add no new one. The item is still held.
-6. **Change summary.** Show the user a table of what would be created, updated, re-parented, held (with the reason) and removed from spec. If there is nothing to write (no create, update, re-parent or new comment, and the page body and key table read in step 1 already match step 8), say the Tracker is already up to date, make no write, and go to step 9. Otherwise ask the user to go ahead, and wait. If they decline, write nothing (no comment either) and go to step 9: every item the summary would have written is **declined**, not held.
+   Read the item's comments with `listJiraIssueComments`. A held comment is already there when one has the same first line and the same lines in its code block: compare each `-`/`+` line's marker as is and the sentence after it as normalised text (step 4; the marker is never stripped as a list marker), and each `Name:` or `Epic:` line normalised. A removed comment is already there when one has the first line `Removed from spec`, whatever follows. Then add no new one. The item is still held.
+6. **Change summary.** Show the user a table of what would be created, updated, re-parented, held (with the reason) and removed from spec. If there is nothing to write (no create, update, re-parent or new comment, and the page body and key table read in step 1 already match step 8), say the Tracker is already up to date, make no write, and go to step 9. Otherwise ask the user to go ahead, and wait. If they name an item to redraft (step 4), redraft it, show the summary again and wait. If they decline, write nothing (no comment either) and go to step 9: every item the summary would have written is **declined**, not held.
 7. **Write**, one call at a time, parents first: Epics in outline order, then Stories in outline order, then removed items.
    - new: create it as steps 5 and 6 do. A Story's parent is its Epic's key, new or recorded.
    - update: `editJiraIssue` with `fields` `summary` and `description`, and `contentFormat` `markdown`.
@@ -163,7 +170,7 @@ Read first, then get one go-ahead, then write. Make no write before the go-ahead
    - held: `addOrEditJiraIssueComment` with the step 5 text, Markdown, and no `commentId`, unless step 5 skipped it.
 
    Never call a transition, and never delete.
-8. **Spec Page.** Start the body from what step 1 read, and change only the parts the approved spec changed, deciding and comparing as step 4 does. If the body or the key table differs from what step 1 read after normalising, `updateConfluenceContent` as the last call: the Spec Page body followed by the key table. Rows: the Spec Page; the Epics, then the Stories, in outline order, each with its new outline id, its title and its Work Ref (recorded or new); then each removed item, with outline id `—` and its old title; then the kept rows of other kinds, unchanged. Every recorded row stays, and no Work Ref changes.
+8. **Spec Page.** Start the body from what step 1 read. Change a shared-context section only when the user changed that shared context in this session; then it becomes that section as the user approved it in this session's draft. Otherwise keep the body exactly as read. Key table rows: the Spec Page; the Epics, then the Stories, in outline order, each with its new outline id, its Work Ref (recorded or new) and its title (the title as read, or the new or redrafted title); then each removed item, with outline id `—` and its title as read; then the kept rows of other kinds, unchanged. Every recorded row stays, and no Work Ref changes. If the body or the key table differs from what step 1 read after normalising, `updateConfluenceContent` as the last call: the Spec Page body followed by the key table.
 9. **Return** the map (every key table row), `held` (each item left untouched by the started-item or removed rule, with its reason, whose comment was written or was already there) and `declined` (each item the user declined in step 6; empty otherwise). Tell the user what was created, updated and re-parented, and each held item with its reason. If they declined, tell them nothing was written and list the declined items.
 
 A failed call is handled as in "A call fails after step 1" above.

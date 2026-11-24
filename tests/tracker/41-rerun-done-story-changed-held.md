@@ -1,4 +1,4 @@
-# 41: A Done Story whose spec text changed gets one comment and is held, never rewritten; a To Do Story is rewritten
+# 41: A Done Story whose user-story sentence changed gets one comment, holding only the sentence change, across two sessions; a To Do Story is redrafted
 
 **Phase:** /power-architect:to-spec
 
@@ -74,7 +74,8 @@
     - **Membership** (slice: "Manage who belongs to an organization."):
       3. "Remove a member": As an org admin, I want to remove a member, so that ex-employees lose access. Criterion: Removing a member revokes their sessions.
       4. "Leave an organization": As a member, I want to leave an organization, so that I stop seeing its work. Criterion: Leaving removes the member and keeps their past comments.
-  - Spec now (what the agent must write from today's settled design): the same as published, except: Story 1 now has two criteria: "POST /invites with an email returns 201 and sends one invite email" and "Inviting an existing member returns 409". Story 2 now has two criteria: "Accepting a valid invite adds the invitee as a member" and "Accepting an expired invite shows an error and adds no member". Everything else is unchanged.
+  - Spec now (what the agent must write from today's settled design): the same as published, except two user-story sentences: story 1 is now "As an org admin, I want to invite a teammate by email or by a shareable link, so that they can join my organization." and story 2 is now "As an invitee, I want to accept an invite from the email link before it expires, so that I join the organization." The grouping and the shared context are unchanged.
+  - In the first run the agent drafts story 2's criteria as "Accepting a valid invite adds the invitee as a member" and "Accepting an expired invite shows an error and adds no member". In the second run (a new session) it drafts them in other words: "A valid, unexpired invite makes the invitee a member" and "An expired invite is rejected with an error and no member is added". It also words story 1's title and criteria differently in the second run.
   - Conversation so far: the user re-ran `/power-architect:grill`, which changed the spec as described, and now re-runs to-spec.
 
 ## When
@@ -84,16 +85,17 @@ The user runs `/power-architect:to-spec` and replies in order:
 3. to any builder-check questions: "your call on all of them";
 4. at the spec gate: "approved" (Invitations (1, 2), Membership (3, 4));
 5. when shown the change summary and asked to go ahead: "go ahead".
-6. Then the user runs `/power-architect:to-spec` a second time with the same spec, and gives the same replies 1–5.
+6. Then, in a new session, the user runs `/power-architect:to-spec` a second time with the same spec, and gives the same replies 1–5.
 
 ## Then
 - No MCP call of any kind is made before the user's "approved"
 - After "approved", only reads run before the change summary: a connection check, `getConfluenceContent` on page 5001, `getJiraIssue` on PA-40 … PA-45 (`discover`, `getContentFormatGuide` and `listJiraIssueComments` reads may also appear)
-- The agent shows a change summary before any write: PA-42 updated; PA-43 held because it is Done and its spec text changed; nothing created, re-parented or removed. No write call is made before "go ahead"
-- First run, the writes in order: one `editJiraIssue` on PA-42 whose Markdown description lists both of story 1's criteria as `- [ ]` lines → one `addOrEditJiraIssueComment` on PA-43 with no comment id, naming the added criterion "Accepting an expired invite shows an error and adds no member"
+- The agent shows a change summary before any write: PA-42 updated, with its new sentence and its redrafted title and criteria shown; PA-43 held because it is Done and its user-story sentence changed; nothing created, re-parented or removed. No write call is made before "go ahead"
+- First run, the writes in order: one `editJiraIssue` on PA-42 whose Markdown description starts with story 1's new sentence and has a redrafted `## Acceptance Criteria` list → one `addOrEditJiraIssueComment` on PA-43 with no comment id
+- That comment's first line is `Spec change not applied (item started)`, and its fenced code block holds only `- As an invitee, I want to accept an invite from the email link, so that I join the organization.` and `+ As an invitee, I want to accept an invite from the email link before it expires, so that I join the organization.` It holds no Acceptance Criteria text (it may add the plain line that the item's Acceptance Criteria were not updated)
 - PA-43 is never edited: no `editJiraIssue` names PA-43, and its status is not changed
-- No `createJiraIssue` and no `updateConfluenceContent` (the Spec Page body and key table are unchanged)
+- No `createJiraIssue`. No `updateConfluenceContent`, unless PA-42's redrafted title differs from "Invite a teammate by email"; then one, the last call, whose only change is PA-42's title cell in the key table (the page body is kept as read)
 - `publish` returns `held` with PA-43 and its reason, and the agent tells the user PA-43 was held and why
 - The ledger still lists the same 7 Work Refs
-- Second run: only reads; no write call of any kind. In particular no second comment on PA-43, and no edit of PA-42. PA-43 is still reported as held
+- Second run: only reads; no write call of any kind, even though the agent words the criteria differently. In particular no second comment on PA-43 (PA-43 has exactly one comment across both sessions), and no edit of PA-42 (its sentence now matches, and its first-run criteria are kept as read). PA-43 is still reported as held
 - No `createConfluenceContent` call, no Sprint or board call, no transition, and no `executeDestructive` call

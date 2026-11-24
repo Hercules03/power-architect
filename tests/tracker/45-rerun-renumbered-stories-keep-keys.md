@@ -87,9 +87,9 @@ The user runs `/power-architect:to-spec` and replies in order:
 
 ## Then
 - No MCP call of any kind is made before the user's "approved"
-- The change summary, shown before any write, lists one Story to create (story 1, "Request an invite") and nothing updated, re-parented, held or removed
-- The writes in order: one `createJiraIssue` (issue type `Story`, parent PA-40, "Request an invite") returning PA-50 → one `updateConfluenceContent` on page 5001
-- No `editJiraIssue` and no `addOrEditJiraIssueComment`: nothing is marked "removed from spec"
+- The change summary, shown before any write, lists one Story to create (story 1, "Request an invite"), PA-40 as updated with a redrafted slice (its membership changed), and nothing else updated, re-parented, held or removed
+- The writes in order: at most one `editJiraIssue` on PA-40 that changes only its slice line(s) → one `createJiraIssue` (issue type `Story`, parent PA-40, "Request an invite") returning PA-50 → one `updateConfluenceContent` on page 5001
+- No `editJiraIssue` on PA-41 or on any Story, and no `addOrEditJiraIssueComment`: nothing is marked "removed from spec"
 - The key table written has 8 rows: spec, E1 PA-40, E2 PA-41, 1 PA-50, 2 PA-42, 3 PA-43, 4 PA-44, 5 PA-45
 - The ledger lists the same 8 Work Refs; `held` is empty
 - No `createConfluenceContent` call, no Sprint or board call, no transition, and no `executeDestructive` call
