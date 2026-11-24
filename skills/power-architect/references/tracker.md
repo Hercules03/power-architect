@@ -35,10 +35,10 @@ An opaque name for one work item: a key in an external tracker, or a file and an
 
 What `publish` writes and `pull(…, outline)` returns. It carries the spec's **Scope Tier** (Small or Large) at its root. Below that it is a tree, and each item carries an **outline id**, which is stable within one spec:
 
-- **Spec Page**: the spec's shared context (problem, solution, global decisions, cross-Epic test seams). After `/plan`, it also has a **Plan** section: Goal, Architecture, Global Constraints, Review Focus.
+- **Spec Page**: the spec's shared context (problem, solution, global decisions, cross-Epic test seams). After `/plan`, it also has a **Plan** section holding the plan-level content: in the Small tier the Goal, Architecture, Tech Stack, Global Constraints and Review Focus; in the Large tier an overview of the ticket graph (each ticket's title and what blocks it). The Plan section is not shared context.
 - **Epic**: a cluster of the spec's user stories, grouped by functional area, user persona or system boundary, with its own slice of goals and decisions, and links to the relevant ADRs. A Small-tier spec has one Epic: one the user names, or a new one.
 - **Story**: one user story. It carries the user-story sentence and its Acceptance Criteria, and sits under exactly one Epic.
-- **Sub-task**: one unit of a plan (a Small-tier plan task, or a Large-tier tracer-bullet ticket), under exactly one Story. It carries `blocks` edges (and `relates` edges for a flagged slice that spans Stories). In the Small tier, it also carries the exact steps and file paths.
+- **Sub-task**: one unit of a plan (a Small-tier plan task, or a Large-tier tracer-bullet ticket), under exactly one Story. It carries a title, a description, `blocks` edges (and `relates` edges to Stories, for a flagged slice that spans Stories). In the Small tier, it also carries the exact steps and file paths. Its outline id is the ticket or task number, as text (`01`, or `1`). Outline ids are unique within a kind, so a Sub-task `1` and a Story `1` are different items.
 
 A spec is always referred to by its Spec Page's Work Ref.
 
@@ -51,6 +51,7 @@ Called by to-spec (the Spec Page, Epics and Stories) and by plan (Sub-tasks and 
 - **Returns:** a map from outline id to Work Ref, a `held` list of items it did not rewrite, each with the reason, and a `declined` list of items it would have written on a re-run but did not, because the user declined the go-ahead. On a re-run, the map holds every item recorded for the spec, including removed ones.
 - **Order:** only after the phase's approval gate. Parents are written before children: Spec Page, then Epic, then Story, then Sub-task.
 - **Re-run.** When the spec was published before, the outline names its Spec Page's Work Ref and the Work Refs the phase recorded for it. Without them, `publish` asks the Tracker for this spec's existing Spec Page, and the user confirms a match before anything is written. On a re-run, `publish` shows the user a change summary (created, updated, re-parented, held, removed) and waits for their go-ahead before its first write. If nothing changed, it writes nothing.
+- **Plan's outline.** plan always names the Spec Page's Work Ref and the recorded Work Refs: it publishes only after to-spec, and never creates a Spec Page. Its first publish (no Sub-task recorded for the spec yet) creates the Sub-tasks and the Plan section without a change summary. Once any Sub-task is recorded, a plan run is a re-run.
 - **Invariants:**
   - **Updates in place.** Items are matched by the Work Refs recorded for this spec, so running it again creates no duplicates. Each outline item pairs with a recorded item by its text first (a Story's user-story sentence, an Epic's name, after normalising as below), then by outline id, so renumbering is harmless. If a pairing is ambiguous, the user picks. If an outline item and a recorded item of the same kind both remain unpaired, `publish` never guesses: before any write, its change summary lists each candidate pair and asks the user, for each remaining outline item, "same as <Work Ref>" or "new". The answer is final for this run. A started item the user names as the same is held with a comment, never rewritten; a recorded item no answer claims is removed from spec. A publish that stopped partway is finished, never duplicated.
   - **Compares only user-approved spec content.** On a re-run, `publish` compares only each Story's user-story sentence, each Story's Epic, each Epic's name and its member Stories, and the Spec Page's shared context, and the shared context only when the user changed it in this session (otherwise the page body is kept exactly as read). Sentences and names are compared after normalising case, whitespace, list markers, Markdown escapes and link wrapping; equal after normalising is unchanged and is not written.
@@ -60,7 +61,9 @@ Called by to-spec (the Spec Page, Epics and Stories) and by plan (Sub-tasks and 
   - An item no longer in the outline is never deleted. It gets a "removed from spec" comment and goes into `held`.
   - A comment holds only approved spec text: the old and new user-story sentence, an Epic's old and new name, or the Epic move. Never Acceptance Criteria or other drafted text.
   - A comment is never repeated: an unchanged re-run adds none. A comment starts with a fixed first line, and is a repeat when that line and its changed sentences or Epic lines, compared as normalised text, match an existing comment (a "removed from spec" comment: the first line alone).
-  - Recorded items of kinds the outline does not carry (Sub-tasks, when to-spec publishes) are left alone. So is an item the outline names by an existing Work Ref that was not created from this spec.
+  - Recorded items of kinds the outline does not carry (Sub-tasks, when to-spec publishes; Epics and Stories, when plan publishes) are left alone. So is an item the outline names by an existing Work Ref that was not created from this spec.
+  - **The Spec Page has two owners.** A to-spec run keeps the Plan section exactly as read. A plan run keeps the shared context exactly as read, and replaces the Plan section only when the approved plan-level content changed.
+  - **Sub-tasks follow the same rules, with the plan in place of the spec.** The approved content compared is each Sub-task's title, Story and `blocks` edges (Large tier), or its title and step list (Small tier). A Large-tier description is drafted text, kept as read. A started Sub-task whose approved content changed gets one comment and goes into `held`; one no longer in the plan gets one "removed from plan" comment. Edges are only ever added: an edge the plan dropped is never deleted, and gets a comment instead.
 - **Errors:**
   - Tracker unreachable: **stop**. Tell the user nothing was published, or exactly what was, and return the Work Refs of what was so the phase can record them.
 
@@ -73,7 +76,7 @@ Called by plan, build, review and verify.
   - `level`: one of three:
     - `story`: the unfinished Stories in scope, in outline order, each with its body and Acceptance Criteria.
     - `subtask`: the unfinished Sub-tasks in scope, plus any Bugs in scope, in `blocks` order with blockers first. Each comes with its body and acceptance criteria.
-    - `outline`: the whole Work Outline of the spec, finished items included. This is how a phase reads the spec and plan in Tracker mode.
+    - `outline`: the whole Work Outline of the spec, finished items included: the Spec Page (its shared context and its Plan section), then every Epic, Story and Sub-task with its outline id, kind, status, parent, and `blocks` and `relates` edges. This is how a phase reads the spec and plan in Tracker mode.
 - **Order:** replays any queued `record` events first (see `record`), then reads.
 - **Errors:**
   - Tracker unreachable: **stop**. Never build or verify from a guess.

@@ -19,7 +19,7 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 | `listJiraBoards` | boards | | `discover` |
 | `listConfluenceSpaces` | Confluence spaces (key and id) | `getConfluenceSpaces` | `discover` |
 | `listJiraProjectIssueTypesMetadata` | a project's issue types (hint: `projectIdOrKey`) | `getJiraProjectIssueTypesMetadata` | `discover` |
-| `listJiraIssueLinkTypes` | link type names | | `discover` |
+| `listJiraIssueLinkTypes` | link type names, with their inward and outward text | | `discover` |
 | `getJiraWorkflows` | workflow statuses (admin-disabled by default) | | `discover` |
 | `listJiraStatuses` | status list | | `discover` |
 | `searchJiraIssuesUsingJql` | find one existing issue (hint: `jql`, `maxResults`) | | primary |
@@ -27,10 +27,11 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 | `getContentFormatGuide` | how page bodies are formatted (unverified name) | | `discover` |
 | `createConfluenceContent` | create the Spec Page (hints: `contentType`, `title`, `parent` {`spaceId`}, `body` {`format`, `value`}) | `createConfluencePage` | primary |
 | `updateConfluenceContent` | replace the Spec Page body (hints: `contentId`, `body`) | `updateConfluencePage` | primary |
-| `createJiraIssue` | create an Epic or Story (hints: `projectKey`, issue type, `summary`, `description`, `parent`) | | primary |
+| `createJiraIssue` | create an Epic, Story or Sub-task (hints: `projectKey`, issue type, `summary`, `description`, `parent`) | | primary |
+| `createJiraIssueLink` | add a "blocks" or "relates to" link (hints: link type name as `linkType` or `type`, `inwardIssue`, `outwardIssue`; parameters and their direction unverified, see [Links](#links)) | `createIssueLink` | `discover` |
 | `searchConfluence` | find an earlier Spec Page by title (hint: a CQL query; parameters unverified) | | primary |
 | `getConfluenceContent` | read the Spec Page body and key table (hint: page id or URL, Markdown body; parameters unverified) | `getConfluencePage` | primary |
-| `getJiraIssue` | read an item's summary, description, status and parent (hints: `issueIdOrKey`, `view: full` or those `fields`, `responseContentFormat: markdown`) | | primary |
+| `getJiraIssue` | read an item's summary, description, status, parent and issue links (hints: `issueIdOrKey`, `view: full` or those `fields`, `responseContentFormat: markdown`; that `view: full` returns the links is unverified, so ask for the links field if it does not) | | primary |
 | `listJiraIssueComments` | an item's comments (hint: `issueIdOrKey`) | | primary |
 | `editJiraIssue` | rewrite an item's summary, description or parent (hints: `issueIdOrKey`, `fields`, `contentFormat`) | | primary |
 | `addOrEditJiraIssueComment` | add a comment (hints: `issueIdOrKey`, `commentBody`; never pass `commentId`, which edits an existing comment) | `addCommentToJiraIssue` | primary |
@@ -86,6 +87,8 @@ In steps 2 and 3, the user picks from lists you fetch. Never ask the user for an
 ## publish
 
 Implements [`publish(outline)`](tracker.md#publishoutline) for to-spec's outline: the Spec Page, Epics and Stories. A first publish creates every item. A re-run updates the recorded items in place (see [Re-run](#re-run)).
+
+**An outline that carries Sub-tasks is plan's.** Go straight to [Plan publish](#plan-publish). The numbered steps below and [Re-run](#re-run) are for to-spec's outline only; Plan publish names the parts of them it reuses.
 
 **Recorded items.** The items recorded for a spec are the rows of the key table on its Spec Page (step 7), plus the outline's recorded Work Refs (the ledger's `## Work Refs` rows) that the key table lacks, as [Re-run](#re-run) step 1 merges them. An item the outline gives as an existing Work Ref that is not recorded (such as an existing Epic the user named for a Small-tier spec) is used as is, on every run: never created, edited, re-parented, commented on, marked removed, or added to the key table.
 
@@ -173,7 +176,98 @@ Read first, then get one go-ahead, then write. Make no write before the go-ahead
    - held: `addOrEditJiraIssueComment` with the step 5 text, Markdown, and no `commentId`, unless step 5 skipped it.
 
    Never call a transition, and never delete.
-8. **Spec Page.** Start the body from what step 1 read. Change a shared-context section only when the user changed that shared context in this session; then it becomes that section as the user approved it in this session's draft. Otherwise keep the body exactly as read. Key table rows: the Spec Page; the Epics, then the Stories, in outline order, each with its new outline id, its Work Ref (recorded or new) and its title (the title as read, or the new or redrafted title); then each removed item, with outline id `—` and its title as read; then the kept rows of other kinds, unchanged. Every recorded row stays, and no Work Ref changes. If the body or the key table differs from what step 1 read after normalising, `updateConfluenceContent` as the last call: the Spec Page body followed by the key table.
+8. **Spec Page.** Start the body from what step 1 read. Change a shared-context section only when the user changed that shared context in this session; then it becomes that section as the user approved it in this session's draft. Otherwise keep the body exactly as read. A `## Plan` section is not shared context: keep it exactly as read, in its place after the shared context and before the key table. Key table rows: the Spec Page; the Epics, then the Stories, in outline order, each with its new outline id, its Work Ref (recorded or new) and its title (the title as read, or the new or redrafted title); then each removed item, with outline id `—` and its title as read; then the kept rows of other kinds, unchanged. Every recorded row stays, and no Work Ref changes. If the body or the key table differs from what step 1 read after normalising, `updateConfluenceContent` as the last call: the Spec Page body followed by the key table.
 9. **Return** the map (every key table row), `held` (each item left untouched by the started-item or removed rule, with its reason, whose comment was written or was already there) and `declined` (each item the user declined in step 6; empty otherwise). Tell the user what was created, updated and re-parented, and each held item with its reason. If they declined, tell them nothing was written and list the declined items.
 
 A failed call is handled as in "A call fails after step 1" above.
+
+### Plan publish
+
+Implements `publish` for plan's outline: the Plan section and the Sub-tasks. The outline always names the Spec Page's Work Ref and the ledger's rows. Plan publish never creates the Spec Page, never writes an Epic or Story, and never changes the page's shared context. A Sub-task's Work Ref is its issue key. Never pass a Sprint, backlog, priority, story-point or estimate field. Never call a transition, and never delete.
+
+Read first, then (on a re-run) get one go-ahead, then write. Make no write before the go-ahead.
+
+1. **Reach Jira** and **format**, as steps 1 and 2 above. If Jira can't be reached, stop and write nothing: tell the user the plan was not published.
+2. **Recorded items**, as Re-run step 1: `getConfluenceContent` on the Spec Page, its key table, plus the ledger's rows the table lacks. A Story the outline names as a parent is the recorded Story row with that outline id; its key is the parent.
+
+   Read each recorded Sub-task with `getJiraIssue` (`view: full`, Markdown): its summary, description, status, parent and issue links.
+   - Its **blocked-by set**: the recorded Sub-tasks joined to it by a `link-blocks` link in which it is the blocked side (the side the type's inward text, such as "is blocked by", describes).
+   - Its **relates set**: the recorded Stories joined to it by a `link-relates` link.
+   - Links to items not recorded for this spec are ignored, never compared or removed.
+
+   **No Sub-task recorded** means a first plan publish: every outline Sub-task is new. Skip steps 3–6 and go to step 7.
+3. **Pair** each outline Sub-task with a recorded Sub-task exactly as Re-run step 3 pairs Stories: first the same title (normalised) against the summary, then the same outline id among Sub-task rows, then **ask, never guess** for every remaining candidate pair ("same as <Work Ref>" or "new"). A Sub-task only ever pairs with a Sub-task. A row already marked removed from plan (outline id `—`) is never offered again.
+4. **Decide** each paired Sub-task, as Re-run step 4 decides Stories, with the approved plan in place of the approved spec.
+   - **Only user-approved plan content is compared:**
+     - its title against the summary
+     - its Story against the parent
+     - its blocked-by set and relates set against the sets read
+     - in the Small tier, its step list (the plan's `- [ ]` step lines) against the description's `- [ ]` lines
+
+     Normalise as Re-run step 4. A ticked `[x]` box equals `[ ]`.
+   - **Drafted text is kept verbatim as read.** A Large-tier description is drafted by the agent: it is redrafted only on a not-started Sub-task whose title, Story or blocked-by set changed, or that the user names at the go-ahead. Its `Blocked by:` line then names the new blockers. A Small-tier description is the approved task itself: when the title or step list changed, the new description is the task as approved now. A redraft or new description equal to the text read (after normalising) is no update.
+
+   | The plan… | Not started | Started |
+   |---|---|---|
+   | did not change it | nothing | nothing |
+   | changed its title (Small tier: or its steps) | **update**: summary and description | **held**: comment the change |
+   | moved it to another Story | **re-parent** | **held**: comment the move |
+   | added a blocker or relates-to Story | **link**: add the link | **held**: comment the change; no link |
+   | dropped a blocker or relates-to Story | **held**: the link stays; comment it | **held**: comment the change |
+
+   A recorded Sub-task no longer in the plan is **held** whatever its status, with a "removed from plan" comment. It is never deleted, closed or transitioned, and its key table row stays.
+5. **Comments are written once**, as Re-run step 5: one per item, holding only approved plan text, de-duplicated against `listJiraIssueComments` by the first line and the code block's lines. First lines:
+   - held (changed, moved, or a link it could not add or remove): `Plan change not applied (item started)`, or `Plan change not applied (links are never deleted)` when the item is not started and only a dropped link is kept. Then one fenced code block holding only what changed: `- <old title>` and `+ <new title>`; Small tier, `- <step>` for each step removed and `+ <step>` for each step added; `Story: <old key> → <new key>`; `Blocked by: <old keys> → <new keys>`; `Relates to: <old keys> → <new keys>`. Then `Spec Page: <page URL>`.
+   - removed: `Removed from plan`. Then `This item is no longer in the plan. It was not deleted or closed. Spec Page: <page URL>`
+6. **Change summary**, as Re-run step 6, listing also each link to add and whether the Plan section changes. If there is nothing to write, say the Tracker is already up to date, make no write, and go to step 9. Otherwise wait for the go-ahead; on a decline, write nothing and list the declined items.
+7. **Write**, one call at a time:
+   1. Sub-tasks in outline order (blockers first):
+      - new: `createJiraIssue`: project `project`, issue type `type-subtask`, `parent` its Story's key, `summary` its title, `contentFormat` `markdown`, `description` as below.
+      - update or re-parent: `editJiraIssue` as Re-run step 7.
+      - held: `addOrEditJiraIssueComment` with the step 5 text and no `commentId`, unless step 5 found it already there.
+   2. Removed Sub-tasks: their comment.
+   3. [Links](#links), after every Sub-task exists: each missing `blocks` edge, in outline order of the blocked Sub-task, then each missing `relates` edge.
+   4. The Spec Page (step 8), last.
+
+   **Description**, Markdown:
+   - Large tier: the ticket's What to build; `## Acceptance criteria` with one `- [ ]` line per criterion; `Blocked by: <the blockers' titles, comma-separated>`, or `Blocked by: None (can start immediately)`; `Spec Page: <page URL>`. No file paths.
+   - Small tier: the task's Files, Interfaces and `- [ ]` steps with their commands, exactly as in the approved plan; then `Spec Page: <page URL>`.
+8. **Spec Page.** Start from the body step 2 read, and keep its shared context exactly as read.
+   - **Plan section**: `## Plan`, after the shared context and before the key table.
+     - Small tier: `**Goal:**`, `**Architecture:**` and `**Tech Stack:**` lines, then `### Global Constraints` and `### Review Focus`, as in the approved plan header.
+     - Large tier: a table `| ticket | title | Blocked by |`, one row per ticket in outline order (`None` when nothing blocks it).
+
+     If the page already has a `## Plan` section equal to this after normalising, keep it exactly as read. Otherwise write this one in its place.
+   - **Key table**: every row read for the Spec Page, Epics and Stories, unchanged; then the Sub-tasks in outline order (`<outline id> | Sub-task | <key> | <title>`, a held Sub-task with its title as read); then each removed Sub-task with outline id `—` and its title as read. Every recorded row stays, and no Work Ref changes.
+
+   If the body or the key table differs from what step 2 read after normalising, `updateConfluenceContent` as the last call: the body (shared context, then Plan section) followed by the key table.
+9. **Return** the map (every key table row), `held` and `declined`, as Re-run step 9. Tell the user the Sub-tasks created (keys and parent Stories), updated and re-parented, the links added, each held item with its reason, and whether the Plan section was written.
+
+**A call fails.** As "A call fails after step 1": stop at once, with no retry, no further link and no Spec Page update. Tell the user the plan is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not (Sub-tasks, links, the Plan section and the key table rows). Return the created Sub-tasks and every recorded item as the map. A re-run finds the created ones through the ledger and pairs them, so nothing is created twice.
+
+### Links
+
+The link types are `link-blocks` and `link-relates` from the `## Tracker` section. A "blocks" link puts the blocker on the side the type's **outward** text describes ("blocks") and the blocked Sub-task on the side its **inward** text describes ("is blocked by"). Direction is easy to get backwards, and this adapter can't delete a wrong link, so confirm it before the first link:
+
+1. Call `listJiraIssueLinkTypes` and read the inward and outward text of `link-blocks`.
+2. Read `createJiraIssueLink`'s live input schema for which issue parameter the outward text describes. Pass the blocker there and the blocked Sub-task in the other.
+3. If the schema does not say, create no link: ask the user which parameter takes the issue that "blocks", and wait.
+
+A `relates` link joins a flagged Sub-task to each other Story it spans; either side will do. Never pass a `comment` with a link.
+
+## pull
+
+Implements [`pull(scope, level)`](tracker.md#pullscope-level).
+
+### `outline`
+
+`scope` is a spec: its Spec Page's Work Ref (the page URL). Reads only; never write.
+
+1. **Reach Jira.** Call `atlassianUserInfo`. If it fails, stop: tell the user Jira can't be reached, so nothing was read, and that `/mcp` reconnects the Rovo MCP server.
+2. **Spec Page.** `getConfluenceContent` on the page, with a Markdown body. If there is no such page, stop and report the unknown Work Ref. The body holds the shared context, then the `## Plan` section if plan ran, then the `## Work Refs` key table.
+3. **Recorded items.** The key table's rows, plus the rows of the ledger whose first line names this Spec Page (`.power-architect/<spec-slug>/progress.md`) that the table lacks, as publish's Re-run step 1.
+4. **Read** each recorded Epic, Story and Sub-task with `getJiraIssue` (`view: full`, Markdown): summary, description, status, parent and issue links.
+5. **Return** the Work Outline:
+   - the Scope Tier, from the page's Scope Tier section
+   - the Spec Page: its Work Ref, title, shared context and Plan section
+   - each item with its outline id, kind, Work Ref, summary, description, status and parent. A Story's Acceptance Criteria are the `- [ ]` lines under its `## Acceptance Criteria`. A Sub-task also has its blocked-by and relates sets, as [Plan publish](#plan-publish) step 2 defines them. An item with outline id `—` comes back marked removed.

@@ -1,0 +1,83 @@
+# 53: The Plan section written by plan is returned by the next `pull(spec, outline)`, and a second plan run with nothing changed writes nothing
+
+**Phase:** /power-architect:plan
+
+## Given
+- Repo instructions file (AGENTS.md):
+  ```md
+  ## Tracker
+  adapter: jira
+  site: https://acme.atlassian.net
+  cloud-id: 11111111-2222-3333-4444-555555555555
+  project: PA
+  board: 12
+  confluence-space: PASPEC
+  confluence-space-id: 98765
+  type-epic: Epic
+  type-story: Story
+  type-subtask: Sub-task
+  type-bug: Bug
+  status-todo: To Do
+  status-in-progress: In Progress, In Review
+  status-done: Done
+  link-blocks: Blocks
+  link-relates: Relates
+  ```
+- Tracker state: stubbed Rovo table. A tool reached through `discover` and `executeRead` / `executeWrite` matches the row with its own name. Rows are matched top to bottom. The stub keeps state within this dry run: a read returns what this dry run's own earlier writes left behind.
+
+  | Tool | Called with (match) | Returns |
+  |---|---|---|
+  | atlassianUserInfo | any | {account_id: "u-1", name: "Dana"} |
+  | discover | any | the tools in this table whose names match the query |
+  | getContentFormatGuide | any | "Markdown is accepted. Tables and task lists (`- [ ]`) are supported." |
+  | getConfluenceContent | page 6001 | {id: "6001", title: "Login lockout", url: "https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001", body (Markdown): the shared context below, then the key table below (after an update by this dry run, that update's body)} |
+  | getJiraIssue | PA-50 | {key: "PA-50", type: Story, summary: "Lock out repeated failed logins", status: To Do, parent: PA-5, description: "As a user, I want my account locked for 15 minutes after five failed logins in 10 minutes, so that my password can't be guessed.", then `## Acceptance Criteria` with `- [ ] The sixth login attempt within 10 minutes after five failures returns 423.`, then `Spec Page: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`, no links} |
+  | getJiraIssue | a key this dry run created | what this dry run created, status To Do, with the links this dry run made |
+  | listJiraIssueComments | any | the comments this dry run has added to that issue (none at the start) |
+  | listJiraIssueLinkTypes | any | [{name: "Blocks", outward: "blocks", inward: "is blocked by"}, {name: "Relates", outward: "relates to", inward: "relates to"}] |
+  | createJiraIssue | any | {key: "PA-<n>"} (n starts at 60) |
+  | createJiraIssueLink | any | {ok: true}. Its live input schema: `type` (the link type's name); `outwardIssue` (the issue the type's outward text describes: `<outwardIssue> blocks <inwardIssue>`); `inwardIssue` (the issue the inward text describes: `<inwardIssue> is blocked by <outwardIssue>`) |
+  | editJiraIssue | any | {ok: true} |
+  | addOrEditJiraIssueComment | any | {id: "c-<n>"} |
+  | updateConfluenceContent | any | {id: "6001", version: 3} |
+
+  Spec Page shared context: the sections Problem Statement, Solution, Goals / Non-goals / Anti-goals, Approaches considered, Implementation Decisions, Testing Decisions (seam: the login HTTP endpoint), Out of Scope, Scope Tier (`Small`) and Further Notes of the spec "Login lockout". There is no `## Plan` section. PA-5 is the user's existing Epic "Security"; it was not created from this spec.
+
+  Key table on page 6001:
+
+  ```md
+  ## Work Refs
+
+  | outline id | kind | Work Ref | title |
+  |---|---|---|---|
+  | spec | Spec Page | https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001 | Login lockout |
+  | 1 | Story | PA-50 | Lock out repeated failed logins |
+  ```
+- Ledger / local files:
+  - Today is 2026-11-24. `.power-architect/2026-11-24-login-lockout/progress.md` exists. Its first line is `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`, followed by a `## Work Refs` table with the same 2 rows as the key table. There is no `docs/specs/` file for this spec.
+  - The codebase is TypeScript with Express, Redis and Vitest. The plan the agent drafts (take it as given: exploring the codebase finds nothing that changes it):
+    - Goal: Lock an account for 15 minutes after five failed logins within 10 minutes.
+    - Architecture: A counter module records failed logins per account in the existing Redis store. The login handler asks it before checking the password and records each failure.
+    - Tech Stack: TypeScript, Express, Redis, Vitest.
+    - Global Constraints: five failures within 10 minutes lock the account; the lock lasts 15 minutes; a locked login returns 423.
+    - Review Focus: failures for different accounts never share a counter (test `counts failures per account`, Task 1).
+    - Task 1 "Failed-login counter". Files: Create `src/auth/attempts.ts`; Test `tests/auth/attempts.test.ts`. Interfaces: Produces `recordFailure(accountId: string): Promise<number>` and `isLocked(accountId: string): Promise<boolean>`. Steps: (1) write the failing test `counts failures per account` in `tests/auth/attempts.test.ts`: five failures lock the account, another account stays unlocked; (2) run `npx vitest run tests/auth/attempts.test.ts`, expected FAIL with "recordFailure is not a function"; (3) implement `recordFailure` and `isLocked` in `src/auth/attempts.ts` with a Redis key per account and a 10-minute expiry; (4) run `npx vitest run tests/auth/attempts.test.ts`, expected PASS; (5) commit with `git add src/auth/attempts.ts tests/auth/attempts.test.ts && git commit -m "feat: count failed logins"`.
+    - Task 2 "Login handler enforces the lockout". Files: Modify `src/auth/login.ts:40-62`; Test `tests/auth/login.test.ts`. Interfaces: Consumes `recordFailure` and `isLocked` from Task 1. Steps: (1) write the failing test `returns 423 after five failures` in `tests/auth/login.test.ts`; (2) run `npx vitest run tests/auth/login.test.ts`, expected FAIL with "expected 423, got 401"; (3) in `src/auth/login.ts`, call `isLocked` before the password check and `recordFailure` on each failure; (4) run `npx vitest run tests/auth/login.test.ts`, expected PASS; (5) commit with `git add src/auth/login.ts tests/auth/login.test.ts && git commit -m "feat: lock out repeated failed logins"`.
+
+  - In a new session, if the agent drafted the plan afresh, it would word every step differently (same meaning, other words) and give Task 1 the title "Count failed logins".
+
+## When
+The user runs `/power-architect:plan` and replies in order:
+1. when asked to review the plan and pick an execution method: "approved, subagent-driven";
+2. if shown a change summary and asked to go ahead: "go ahead".
+
+Then, in a new session, the user runs `/power-architect:plan` a second time with nothing changed, and gives the same replies 1–2.
+
+## Then
+- First run: the writes are two Sub-task creates under PA-50 (PA-60, PA-61), one `Blocks` link (`outwardIssue` PA-60, `inwardIssue` PA-61), and one `updateConfluenceContent` on page 6001 last, whose body is the shared context as read, then a `## Plan` section holding the Goal, Architecture, Tech Stack, Global Constraints and Review Focus, then the key table with the Sub-task rows `1 | Sub-task | PA-60 | …` and `2 | Sub-task | PA-61 | …`
+- Second run: the agent finds the Spec Page from the ledger and calls `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, outline)` before drafting. Its reads include `getConfluenceContent` on page 6001 and `getJiraIssue` on PA-50, PA-60 and PA-61
+- Second run: `pull` returns the Spec Page with its `## Plan` section (the Goal "Lock an account for 15 minutes after five failed logins within 10 minutes." among it), Story PA-50, and Sub-tasks PA-60 and PA-61, each with status To Do, parent PA-50, and the link PA-60 blocks PA-61
+- Second run: the plan the agent shows for review takes the Goal, Architecture, Tech Stack, Global Constraints and Review Focus from that Plan section, and each task's title, files and steps from PA-60 and PA-61 as read (Task 1 is still titled "Failed-login counter")
+- Second run: no MCP write call of any kind (no `createJiraIssue`, `createJiraIssueLink`, `editJiraIssue`, `addOrEditJiraIssueComment` or `updateConfluenceContent`). The agent tells the user the Tracker is already up to date
+- The ledger lists the same 4 rows after both runs
+- No `docs/plans/` file is written in either run; no Sprint or board call, no transition, no `executeDestructive` call
