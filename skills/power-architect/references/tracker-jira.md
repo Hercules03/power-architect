@@ -92,7 +92,7 @@ Make these calls in this order, one at a time. Pass `cloudId` on each. Never pas
    - its slice of the goals and decisions
    - `Spec Page: <page URL>`
    - `ADRs:` one line per ADR link: title, path, and URL if the outline gives one
-5. **Stories.** After every Epic, for each Story in outline order, `createJiraIssue`: issue type `type-story`, `parent` its Epic's key, `summary` its title, `contentFormat` `markdown`, `description`:
+5. **Stories.** After every Epic, for each Story in outline order, `createJiraIssue`: project `project`, issue type `type-story`, `parent` its Epic's key, `summary` its title, `contentFormat` `markdown`, `description`:
    - the user-story sentence
    - `## Acceptance Criteria`, then one `- [ ]` line per check
    - `Spec Page: <page URL>`
