@@ -65,7 +65,7 @@
   - ADRs: the spec's ADR list has one entry, `docs/adr/0001-sessions.md`, which PA-40 already links.
   - `.power-architect/2026-11-24-team-invites/progress.md` exists. Its first line is `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001`, followed by a `## Work Refs` table with the same 3 rows as the key table.
   - Spec as now: Story 1's user-story sentence changed to "As a team admin, I want to invite a teammate by email, so that they can join the team." Its criterion is unchanged in the spec. The grouping is unchanged (Story 1 under Invitations). The Epic's slice in the spec is "Invite teammates by email, and let invitees accept from the link." The shared context is unchanged.
-  - The change summary for this re-run therefore has one write: PA-50 updated (its sentence changed, so its summary and description are redrafted). Nothing else is in it: PA-40's membership did not change, so its slice is not in the summary.
+  - The change summary for this re-run therefore has one write: PA-50 updated (its sentence changed to the spec's "As a team admin, I want to invite a teammate by email, so that they can join the team.", so its summary and description are redrafted: the redrafted Story title is "Admins invite a teammate by email", which differs from the key table's "Invite a teammate by email", so the key table's title cell for PA-50 changes to it). Nothing else is in it: PA-40's membership did not change, so its slice is not in the summary.
   - Conversation so far: the user re-runs to-spec after changing the Story 1 sentence.
 
 ## When

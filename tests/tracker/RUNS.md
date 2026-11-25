@@ -138,3 +138,13 @@ Grading note: these were graded from fresh Haiku dry-run traces by Opus (rounds 
 | Rule dedupe: 24 of 34 safe copies replaced by pointers into `tracker.md` (48 one-clause restatements and 35 substantive copies kept); `tests/tracker/consistency.sh` added | 14 scenarios re-run (41b, 40c, 57, 58b, 79, 81d, 72, 74, 106, 94d, 96b, 97, 93, 81): 102/102 Then lines pass; `sh tests/tracker/consistency.sh` prints `consistency OK` |
 
 Not re-run in this round: 101, 108 and 109 (deferral scenarios last graded before the S2 token, Fix lines and ask rule).
+
+## Decided re-run changes (2026-11-25, "all as recommended")
+
+| Change | Evidence |
+|---|---|
+| Small-tier Sub-task re-run also compares Files and Interfaces | Scenario 117 passes (10/10) |
+| Re-run go-ahead gets three reply forms (`go ahead`, `go ahead, redraft <items>`, `no`) and a redraft offer even when nothing changed | Scenarios 118 (9/9), 120 (all lines, after its Given was made consistent), 40c, 41b, 49, 115, 42, 57 re-traced and pass; unclear replies are asked once more, a second unclear reply counts as no |
+| A redrafted or updated Epic refreshes its ADR links (add missing, never remove) | Scenario 119 passes (10/10) |
+| README note on the lost ledger | Added to the Tracker mode section |
+| Kept as built (no edit) | r2 resume order, u2 stories with no Sub-tasks are not verifiable |
