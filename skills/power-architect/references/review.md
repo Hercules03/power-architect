@@ -38,4 +38,7 @@ For each item: **read** it all → **restate** the requirement (or ask) → **ve
 
 **Large tier:** this is where refactoring happens. Fix the Standards findings you accept under green tests, and re-run the full suite after each one.
 
+**Record the fixed findings.** After the accepted findings are fixed, call `record(<item ref>, defect, <evidence>)` (see the [Tracker contract](tracker.md#recordref-event-evidence)) once per review pass, always with the item's ref, so it only ever comments and never files a Bug. The items are the Sub-tasks whose commits the review covers (from the ledger's `Task <Work Ref>` lines). `evidence` is one line per accepted finding that was fixed, never a finding you pushed back on. When the review covers several items, make one call per item, with only that item's findings. When no accepted finding was fixed, make no call. When no tracked item can be identified (a review of an untracked branch), make no Tracker call and tell the user the findings were not recorded.
+`Local:` No record.
+
 Then recommend `/power-architect:verify`.

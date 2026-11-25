@@ -281,21 +281,21 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
 
 ### `subtask`
 
-`scope` is `sprint`, or a Work Ref: a Sub-task's or a Story's key. Reads only; never write.
+`scope` is `sprint`, or a Work Ref: a Sub-task's, a Bug's or a Story's key. Reads only; never write.
 
 1. **Reach Jira**, as for `outline`. If it fails, stop: tell the user Jira can't be reached, so nothing was read and nothing should be built, and that `/mcp` reconnects the Rovo MCP server.
 2. **Candidates.**
-   - `sprint`: `getJiraBoardSprintData` with `boardId` the `board` value, with its issues. It reads the active Sprint by default: never pass a `sprintId` or `sprintName`. If `discover` does not find the tool, use `searchJiraIssuesUsingJql` with `project = <project> AND sprint in openSprints() AND issuetype = "<type-subtask>"` (that this JQL works through Rovo is unverified). If there is no active Sprint, stop: tell the user there is no active Sprint to build, and that the Product Owner starts one in Jira. Keep the issues of type `type-subtask`.
-   - A Work Ref: `getJiraIssue` on it. If there is no such issue, stop and report the unknown Work Ref (not an unreachable Tracker): tell the user to check the Work Ref and the ledger's first line. A `type-subtask` issue is the only candidate. For a `type-story` issue, the candidates are its Sub-tasks: `searchJiraIssuesUsingJql` with `parent = <key>`. For any other type, stop and tell the user build takes a Sub-task or a Story.
+   - `sprint`: `getJiraBoardSprintData` with `boardId` the `board` value, with its issues. It reads the active Sprint by default: never pass a `sprintId` or `sprintName`. If `discover` does not find the tool, use `searchJiraIssuesUsingJql` with `project = <project> AND sprint in openSprints() AND issuetype in ("<type-subtask>", "<type-bug>")` (that this JQL works through Rovo is unverified). If there is no active Sprint, stop: tell the user there is no active Sprint to build, and that the Product Owner starts one in Jira. Keep the issues of type `type-subtask` or `type-bug`.
+   - A Work Ref: `getJiraIssue` on it. If there is no such issue, stop and report the unknown Work Ref (not an unreachable Tracker): tell the user to check the Work Ref and the ledger's first line. A `type-subtask` or `type-bug` issue is the only candidate. For a `type-story` issue, the candidates are its Sub-tasks: `searchJiraIssuesUsingJql` with `parent = <key>`. For any other type, stop and tell the user build takes a Sub-task, a Bug or a Story.
 3. **Drop** each candidate whose status is in `status-done`.
 4. **Read** each remaining candidate with `getJiraIssue` (`view: full`, Markdown): summary, description, status, parent and issue links. Its **blockers** are the issues joined to it by a `link-blocks` link in which it is the blocked side, as [Plan publish](#plan-publish) step 2 defines it. Read each blocker that is not a candidate with `getJiraIssue`, for its status.
-5. **Spec.** A candidate's spec is the page its description's `Spec Page: <URL>` line names; that URL is the Spec Page's Work Ref. Read each distinct Spec Page once with `getConfluenceContent` (Markdown): its Scope Tier section gives the tier, and its key table gives each Sub-task's outline id. A candidate with no `Spec Page:` line, or listed neither in its page's key table nor in that spec's ledger `## Work Refs` rows, is not built: put it in `blocked` as "not from a published spec".
-6. **Order** the candidates blockers first. Break ties by key table order, then by spec in the order their items were first read. Then walk the list. A candidate is **ready** when each blocker's status is in `status-done`, or the blocker is a ready candidate earlier in the list. Otherwise move it to `blocked`: "blocked by <key> outside scope" when that blocker is not a candidate, or "blocked by <key>" when it is a candidate that is not ready.
-7. **Return** the ready list, in order, each with its Work Ref (key), title (summary), description, status, Story (parent key), Spec Page Work Ref, Scope Tier, and blockers with their status; and the `blocked` list.
+5. **Spec.** A `type-bug` candidate has no spec, Story, tier or blockers: skip this step and step 6's ordering for it. A candidate's spec is the page its description's `Spec Page: <URL>` line names; that URL is the Spec Page's Work Ref. Read each distinct Spec Page once with `getConfluenceContent` (Markdown): its Scope Tier section gives the tier, and its key table gives each Sub-task's outline id. A candidate with no `Spec Page:` line, or listed neither in its page's key table nor in that spec's ledger `## Work Refs` rows, is not built: put it in `blocked` as "not from a published spec".
+6. **Order** the Sub-tasks blockers first. Break ties by key table order, then by spec in the order their items were first read. Then walk the list. A candidate is **ready** when each blocker's status is in `status-done`, or the blocker is a ready candidate earlier in the list. Otherwise move it to `blocked`: "blocked by <key> outside scope" when that blocker is not a candidate, or "blocked by <key>" when it is a candidate that is not ready. A Bug is always ready and goes after every Sub-task, in the order the Sprint listed them.
+7. **Return** the ready list, in order (a Bug returns its key, title, description, status and no Story, Spec Page, tier or blockers), each with its Work Ref (key), title (summary), description, status, Story (parent key), Spec Page Work Ref, Scope Tier, and blockers with their status; and the `blocked` list.
 
 ## record
 
-Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence) for `started` and `done`. One call at a time, passing `cloudId` on each. Never set a resolution, assignee, estimate, or any Sprint, board or backlog field. Never touch a Sprint.
+Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence) for `started`, `done` and [`defect`](#defect). One call at a time, passing `cloudId` on each. Never set a resolution, assignee, estimate, or any Sprint, board or backlog field. Never touch a Sprint.
 
 1. **Read** the item with `getJiraIssue`: its status.
 2. **`started`.** If the status is in `status-in-progress` or `status-done`, do nothing (no transition, no comment) and return `ok`. Otherwise [move](#moving-an-item) it to the first status of `status-in-progress`.
@@ -311,6 +311,22 @@ Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence
       Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Done` and a body containing every evidence commit SHA (or the PR URL) and the `tests:` line (command and result), compared as normalised text (publish [Re-run](#re-run) step 4) wherever those lines sit, inside or outside the fence. Then add none. Otherwise `addOrEditJiraIssueComment` with it, Markdown, and no `commentId`.
    2. **Move** it to the first status of `status-done`, unless its status is already in `status-done`.
 4. **Return** `ok`.
+
+### `defect`
+
+`ref` is an item's key, or absent. `evidence` is the labelled lines the phase gives. Never set a priority, estimate, assignee, or any Sprint, board or backlog field, and never touch a Sprint.
+
+- **With a `ref`.** The comment is exactly this, with the evidence lines inside the one fenced block:
+  ````
+  Defect fixed in this item
+  ```
+  <evidence lines, one per line>
+  ```
+  ````
+  Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Defect fixed in this item` and the same evidence lines, compared as normalised text (publish [Re-run](#re-run) step 4). Then add none. Otherwise `addOrEditJiraIssueComment`, Markdown, no `commentId`. Never create a Bug.
+- **Without a `ref`.** The symptom line is the `symptom:` evidence line.
+  1. **Look for the symptom.** `searchJiraIssuesUsingJql`: `project = <project> AND issuetype = "<type-bug>" AND statusCategory != Done AND summary ~ "<symptom line>"` (that this JQL works through Rovo is unverified; otherwise read the project's open Bugs and compare summaries as normalised text). If an open Bug has that summary, add one comment to it, `Defect seen again` then a fenced block of the evidence lines, unless it already holds the same one (compared as above), and return `ok`. Create nothing.
+  2. **Otherwise create the Bug.** `createJiraIssue`: project `project`, issue type `type-bug`, `summary` the symptom line, `contentFormat` `markdown`, `description`: `Symptom: …`, `Repro: …`, `Root cause: …`, then the line `Found while working on <the working-on ref>` (or `Found while working on no tracked item` when it is `none`). No `parent`, no priority, assignee or estimate, and no Sprint, board or backlog parameter: the Bug lands in the Backlog.
 
 ### Moving an item
 
