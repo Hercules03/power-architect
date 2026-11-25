@@ -45,6 +45,7 @@
   - Today is 2026-11-25. `.power-architect/2026-11-24-login-lockout/progress.md` exists in the repo checkout: first line `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`, the `## Work Refs` table (Spec Page, Epic PA-5, the Stories and Sub-tasks of the Items list), `Task PA-60: complete (commits a1b2c3d..a1b2c3d, review clean, tests: npx vitest run tests/auth/attempts.test.ts → 2 passed)` and `Task PA-61: complete (commits b2c3d4e..b2c3d4e, review clean, tests: npx vitest run tests/auth/login.test.ts → 3 passed)`. No `## Tracker queue` section. No local spec file exists under `docs/`.
   - The agent is in the repo checkout on branch `feat/login-lockout`.
 - Execution outcomes (take as given): `npm test` → `14 passed`; `npx tsc --noEmit` exits 0; `npm run lint` → `0 problems`; the project has no build script.
+  Proving commands (all pass): for "The sixth login attempt within 10 minutes after five failures returns 423." `npx vitest run tests/auth/lockout.test.ts -t "sixth attempt"` → `1 passed`; for "A locked account unlocks after 15 minutes." `npx vitest run tests/auth/lockout.test.ts -t "unlock after 15 minutes"` → `1 passed`; for "The admin audit log lists each lockout." `npx vitest run tests/audit/lockout.test.ts` → `2 passed`; for "A password reset clears the lockout." `npx vitest run tests/auth/reset.test.ts` → `1 passed`.
 - Trace: report Tracker operations, MCP calls, shell commands and ledger writes in one chronological list.
 
 ## When

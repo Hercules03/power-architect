@@ -42,7 +42,7 @@
   - Sub-tasks: PA-60 and PA-61 (Done, parent PA-50); PA-62 (Done, parent PA-51); PA-63 (To Do, parent PA-52).
 - Ledger / local files:
   - Today is 2026-11-25. `/repo/.power-architect/2026-11-24-login-lockout/progress.md` exists: first line `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`, the `## Work Refs` table (Spec Page, Epic PA-5, the Stories and Sub-tasks of the Items list), and the lines `Task PA-60: complete (commits a1b2c3d..a1b2c3d, review clean, tests: npx vitest run tests/auth/attempts.test.ts → 2 passed)`, `Task PA-61: complete (commits b2c3d4e..b2c3d4e, …)` and `Task PA-62: complete (commits c3d4e5f..c3d4e5f, …)`. PA-63 has no `Task` line. `/repo/.power-architect/bugs/progress.md` has `Task PA-70: complete (commits d4e5f6a..d4e5f6a, …)`. Neither has a `## Tracker queue` section.
-  - `/repo` is the main checkout. The agent is in a linked worktree `/repo/.worktrees/lockout` on branch `feat/login-lockout`, forked from `main`. `git log` on the branch holds a1b2c3d, b2c3d4e, c3d4e5f and d4e5f6a; every one of them is reachable from the branch's HEAD. The base branch is `main`.
+  - `/repo` is the main checkout. The agent is in a linked worktree `/repo/.worktrees/lockout` on branch `feat/login-lockout`, forked from `main`. `git log` on the branch holds a1b2c3d, b2c3d4e, c3d4e5f and d4e5f6a; every one of them is reachable from the branch's HEAD. The base branch is `main`. `git merge-base main feat/login-lockout` returns `9f8e7d6`; the Task commits are NOT on `main`.
 - Execution outcomes (take as given): the full suite passes (`14 passed`). `git push -u origin feat/login-lockout` succeeds. Opening the PR returns `https://github.com/acme/app/pull/42`. A local merge into `main` succeeds, the tests on the merged result pass (`14 passed`), and the merge commit is `e5f6a7b8`.
 - Trace: report Tracker operations, MCP calls, shell commands, ledger writes and what is said to the user in one chronological list.
 
@@ -51,9 +51,9 @@ The user runs the phase. When asked which option, they reply `2`.
 
 ## Then
 - Steps 1 to 4 run as before: the suite is run, the three options are presented, and the user's `2` is followed by `git push -u origin feat/login-lockout` and the PR, whose URL `https://github.com/acme/app/pull/42` is reported
-- Only after the PR URL is known, `record(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, shipped, https://github.com/acme/app/pull/42)` is called, once. finish makes no `pull` call
+- Only after the PR URL is known, `record(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, shipped, https://github.com/acme/app/pull/42, base 9f8e7d6)` is called, once. finish makes no `pull` call
 - The delivered Sub-tasks are taken from the spec ledger's `Task` lines whose commits are on this branch: PA-60, PA-61, PA-62. PA-63 (no `Task` line) is not among them. The bugs ledger's PA-70 is not read for this and gets nothing
-- The ledger gains the line `Shipped: https://github.com/acme/app/pull/42 — Sub-tasks PA-60, PA-61, PA-62` before the first Rovo write
+- The ledger gains the line `Shipped: https://github.com/acme/app/pull/42 — base 9f8e7d6 — Sub-tasks PA-60, PA-61, PA-62` before the first Rovo write
 - The parent Stories are read with `getJiraIssue` on PA-60, PA-61 and PA-62: PA-50, PA-50 and PA-51
 - Exactly one `addOrEditJiraIssueComment` on PA-50 and exactly one on PA-51, each preceded by `listJiraIssueComments`. Each comment's first line is exactly `Shipped`, and its next line is `https://github.com/acme/app/pull/42` on its own
 - No `addOrEditJiraIssueComment` or any other write on PA-52 (the undelivered Story), PA-5 (the Epic), PA-70 (the Bug) or any Sub-task

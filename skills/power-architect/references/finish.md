@@ -8,6 +8,7 @@ Adapted from Superpowers `finishing-a-development-branch`. Announce: "I'm finish
    - Detached HEAD → 2 options (no merge); the workspace is externally managed.
 3. **Determine the base branch** the work forked from. If it isn't known, ask: "This branch split from <guess> — is that correct?"
    With a Tracker, capture `BASE_SHA` (`git merge-base <base> <branch>`) now, before any merge or push.
+   `BASE_SHA` is a commit SHA, never the base branch name: Task commits are checked against `<BASE_SHA>..<branch>`, since after a merge the base branch holds them all. It comes from the local base branch; if origin already holds part of this branch, a Sub-task already shipped there may get a second `Shipped` comment (accepted).
 4. **Present exactly these options** and wait. Integration is the user's decision.
 
    ```
