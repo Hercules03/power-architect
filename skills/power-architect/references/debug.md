@@ -56,5 +56,9 @@ Write the regression test **before the fix**, at a **correct seam**: one that ex
 - [ ] All `[DEBUG-…]` instrumentation is removed (grep the prefix)
 - [ ] Throwaway harnesses are deleted or clearly marked
 - [ ] The hypothesis that proved correct is stated in the commit or PR message
+- [ ] The defect is recorded: `record(ref?, defect, evidence)` (see the [Tracker contract](tracker.md#recordref-event-evidence)). Skip it when the defect is the Bug being built by [build](build.md#work-list-before-setup), because build records that Bug itself.
+  - **Found while fixing a work item currently being built** (the user's current `/power-architect:build` target, or the item being built in this session: its `record(started)` happened this session and its `done` has not; a finished item, one with a `Task … complete` line, does not count): pass that Work Ref. `evidence` is three lines: `symptom: …`, `root cause: <the proven hypothesis>`, `regression test: <its name>`.
+  - **Found outside current work:** pass no ref. `evidence` is four lines: `symptom: <one line>`, `repro: <the minimised repro from Phase 2>`, `root cause: <the proven hypothesis>`, `working on: <the current item's Work Ref, or none>`.
+  `Local:` No record. The defect lives only in the commit or PR message, as above.
 
 Then follow [verify.md](verify.md) before claiming it's fixed.

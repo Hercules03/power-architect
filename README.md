@@ -66,6 +66,35 @@ cp -r templates/docs ./docs
 | `/power-architect:verify` | Superpowers `verification-before-completion` | evidence for every claim |
 | `/power-architect:finish` | Superpowers `finishing-a-development-branch` | merge, PR, or keep |
 | `/power-architect:retro` | Matt `retro` | environment improvements, most severe first |
+| `/power-architect:setup-tracker` | Tracker Adapter Install | `## Tracker` section in AGENTS.md or CLAUDE.md |
+
+## Tracker mode (Jira)
+
+Opt-in. In Tracker mode Jira owns the work (specs, Epics, Stories, Sub-tasks, status) and the repo owns the Knowledge Docs (`GLOSSARY.md`, ADRs, DESIGN.md, AGENTS.md). Without a `## Tracker` section the pipeline runs in Local Files mode, exactly as above.
+
+**Prerequisites:** the Atlassian Rovo MCP server connected and signed in; a Jira Cloud project with a Scrum board; a Confluence space for Spec Pages.
+
+**Set up:** run `/power-architect:setup-tracker jira`. It picks the site, project, board and space, confirms the status mapping, and writes a `## Tracker` section into AGENTS.md or CLAUDE.md.
+
+**Mapping:** a spec becomes a Spec Page; clusters of user stories become Epics; user stories become Stories with Acceptance Criteria; plan tasks (Small) or tickets (Large) become Sub-tasks. You create and fill Sprints; the agent never touches them.
+
+| Command | Reads | Writes |
+| --- | --- | --- |
+| `to-spec` | the Spec Page, on a re-run | Spec Page, Epics, Stories |
+| `plan` | the spec (Spec Page, Stories) | Sub-tasks, links, the Spec Page's Plan section |
+| `build` | the active Sprint (or one Work Ref): Sub-tasks and Bugs | In Progress when work starts; Done with an evidence comment only after the review passes (the task review for S1 and L1, the spec's final review for S2 and L2, a Bug's own Bug review for Bugs) |
+| `debug` | open Bugs | a comment on the item, or a Backlog Bug |
+| `review` | the spec | comments on the current item |
+| `verify` | the spec's Stories | Story to Done with a Verified comment |
+| `finish` | none | the PR or merge link, as a comment on each delivered Story |
+
+**Offline:** when Jira is unreachable, `record` queues the event in `.power-architect/<spec-slug>/progress.md` and the next `pull` replays it. `pull` and `publish` stop instead.
+
+**Ledger root:** ledgers and queues live in the main checkout's `.power-architect/` (git-ignored), never in a linked worktree's.
+
+**A deleted ledger loses work.** The ledgers and the offline queue live in the main checkout's `.power-architect/` folder (git-ignored). If that folder is deleted, unsent updates are lost: the Tracker shows those items as unfinished, and a later `/power-architect:build` rebuilds them from the Tracker. Keep the folder, and replay queued updates (any `pull`, such as `/power-architect:build`, does it) before you clean up.
+
+**Local mode is unchanged.** Scenario tests for both modes are in [`tests/tracker/README.md`](tests/tracker/README.md).
 
 ## Where the two methods disagree
 

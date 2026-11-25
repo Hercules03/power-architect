@@ -4,19 +4,46 @@ Adapted from Matt Pocock's `to-spec`. The goals and approaches sections and the 
 
 Do **not** interview the user here. Write up what is already settled. If something important was never settled, say so and recommend going back to `/power-architect:grill`.
 
+A step with a `Local:` line below it reads two ways. With a Tracker configured, do what the step says. Without one (no `## Tracker` section), do only what its `Local:` line says.
+
 ## Process
 
 1. **Explore the repo** if you haven't already. Use the `GLOSSARY.md` vocabulary throughout, and respect ADRs in the area you're touching.
 2. **Sketch the test seams.** Prefer existing seams to new ones, and use the highest seam possible. If new seams are needed, propose them as high as you can. The fewer seams the better; the ideal number is one. **Confirm the seams with the user.** These are the pre-agreed seams `/power-architect:build` will test at.
 3. **Assign the Scope Tier** (Small or Large, defined in SKILL.md) with a one-line reason. The user can override it.
-4. **Write the spec** to `docs/specs/YYYY-MM-DD-slug.md` using the template below, or publish it to the issue tracker if one is configured.
-5. **Builder check (Large tier).** Dispatch a fresh subagent with [prompts/builder-check.md](prompts/builder-check.md). Sort what it asks into three piles:
+4. **Write the spec** as a draft to `.power-architect/<spec-slug>/spec-draft.md` under the ledger root (see the "Where" bullet in [tracker.md](tracker.md#recordref-event-evidence); git-ignored scratch; `<spec-slug>` is `YYYY-MM-DD-slug`) using the template below. Before choosing the path, look for a ledger `.power-architect/<any date>-slug/progress.md` under the ledger root for the same slug that names a Spec Page. If one exists from an earlier date, reuse its `<spec-slug>` (step 7 treats this as a re-run). Nothing reaches the Tracker before the gate in step 6.
+   `Local:` Write the spec to `docs/specs/YYYY-MM-DD-slug.md` using the template below, or publish it to the issue tracker if one is configured.
+5. **Builder check (Large tier).** Dispatch a fresh subagent with [prompts/builder-check.md](prompts/builder-check.md), pointing it at the file written in step 4. Sort what it asks into three piles:
    - **Already answered** by the conversation or the project: put the answer into the spec.
    - **Minor**: a sensible builder could settle it without changing what gets built. Settle it yourself and mark it in the spec as your call.
    - **Theirs**: only the user can answer it, and the answer changes what gets built. Ask these in one message, most important first.
 
    This produces one round of questions at most. Without a subagent tool, read the spec as that builder yourself.
 6. **Get the user's approval of the spec.** This is the hard gate before any building.
+   - **Epics.** Show the Epics beside the spec; the user approves both together.
+     - Large tier: a table `Epic | user stories (by number) | why they belong together`. Group by functional area, user persona or system boundary. Every user story sits in exactly one Epic.
+     - Small tier: no table. Ask once which Epic the one Story goes under: an existing Epic's Work Ref, or "new" with a name.
+     - If the user edits the spec or the Epics, update the draft, show both again and wait for approval.
+
+     `Local:` No Epics; the user approves the spec alone.
+7. **Publish.** Build the [Work Outline](#work-outline) from the approved draft and call `publish(outline)` (see the [Tracker contract](tracker.md#publishoutline)). Then write the ledger `.power-architect/<spec-slug>/progress.md` under the ledger root: first line `# Ledger — spec: <the Spec Page's Work Ref>`, then a `## Work Refs` table `outline id | kind | Work Ref | title`, one row per item `publish` returned.
+   - If `publish` stops partway, write the ledger the same way with the items it did create, and tell the user the spec is only partly published.
+   - If it published nothing, write no ledger, and tell the user the draft is still at `.power-architect/<spec-slug>/spec-draft.md` under the ledger root. If that is because of a duplicate title, combine this with the duplicate-title question below in one message.
+   - **Re-run.** This spec was published before when its ledger (found in step 4) names a Spec Page, or when the user gave the Spec Page's Work Ref or URL. Then put that Work Ref and the ledger's `## Work Refs` rows in the outline, so `publish` updates in place. Otherwise this is a first publish: the outline has no Spec Page Work Ref, and nothing is searched for. If `publish` reports that a page with this title already exists, it has written nothing. Ask the user once: "A page with this title already exists. If it is this spec's earlier Spec Page, give me its Work Ref or URL (this becomes a re-run); otherwise give a different title." That question offers exactly two things: the Work Ref or URL of this spec's existing Spec Page, or a different title. A Work Ref or URL makes it a re-run: put it in the outline as the Spec Page's Work Ref and go on as above. The Work Ref or URL the user gives must be a Spec Page: a page in the configured document space that has its key table (`## Work Refs`). Otherwise ask once more, with the same two options; if that answer is also not a Spec Page, stop and say nothing was written. A different title at either question goes into the outline, and the Spec Page create is tried once more with the new title. If that retry is also rejected as a duplicate title, `publish` stops, writes nothing and reports it. Afterwards tell the user each `held` item with its reason. If `declined` is not empty, tell the user nothing was written and list the declined items (they are not held). Then replace the ledger's first line and `## Work Refs` table, leaving the rest of the ledger unchanged.
+   - **Go-ahead.** On a re-run, `publish` asks its go-ahead question before its first write, with its three reply forms (see [tracker.md](tracker.md#publishoutline)); "go ahead, redraft <items>" redrafts the named items.
+
+   `Local:` Nothing to publish; the spec file from step 4 is the record. A re-run rewrites that file as today.
+
+## Work Outline
+
+Built in step 7 from the approved draft. `Local:` not built.
+
+- **Scope Tier**: Small or Large.
+- **Earlier publish** (re-run only): the Spec Page's Work Ref and the ledger's `## Work Refs` rows.
+- **Spec Page** (outline id `spec`): the spec's title and its shared context: Problem Statement, Solution, Goals / Non-goals / Anti-goals, Approaches considered, the Implementation and Testing Decisions that span Epics (including the cross-Epic test seams), Out of Scope, Scope Tier and Further Notes.
+- **Epics** (outline ids `E1`, `E2`, … in the approved order): the name; this Epic's own slice of the goals and Implementation and Testing Decisions; links to the ADRs relevant to it. Small tier: the one Epic the user named, as its Work Ref if it already exists (it is used as is), or as a new name.
+- **Stories** (outline id: the user story's number in the spec): a short title, the user-story sentence, its parent Epic's outline id, and **Acceptance Criteria**: a checklist of testable checks drawn from the story and the Testing Decisions, each one provable by `/power-architect:verify` with a command or an observable result. Small tier: one Story (outline id `1`) that carries every user-story sentence of the spec and all their Acceptance Criteria.
+- **ADR links**: each ADR's title and repo-relative path (`docs/adr/NNNN-slug.md`). If the `origin` remote has a web host, add its URL: `<origin web URL>/blob/<default branch>/<path>`, where `<default branch>` is the repo's default branch (the branch `origin/HEAD` points to; if that cannot be determined, the current branch), or the current branch when the ADR is not on the default branch. The web URL is `https://<host>/<owner>/<repo>`, with any trailing `.git` dropped (so `git@host:owner/repo.git` becomes `https://host/owner/repo`).
 
 ## Spec template
 
@@ -33,4 +60,4 @@ Do **not** interview the user here. Write up what is already settled. If somethi
 
 ## Handoff
 
-Recommend `/power-architect:plan`.
+Recommend `/power-architect:plan`. If nothing was published (the Tracker was unreachable, the Spec Page title was already taken and unresolved, or the given page was not a Spec Page), recommend re-running `/power-architect:to-spec` instead: once the Tracker is reachable, or with a different Spec Page title or the Work Ref or URL of this spec's existing Spec Page.

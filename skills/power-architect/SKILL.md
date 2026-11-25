@@ -1,6 +1,6 @@
 ---
 name: power-architect
-description: Integrated architecture + TDD workflow that runs Matt Pocock's skills (grilling, domain modeling, deep-module design, specs, tracer-bullet tickets, two-axis review, retros) and Jesse Vincent's Superpowers (implementation plans, subagent-driven TDD execution, systematic debugging, verification, branch finishing) as one pipeline. Use when the user asks to design, architect, spec, plan, implement, debug, review, or finish software work, or invokes /power-architect:grill, :design-interface, :to-spec, :plan, :build, :debug, :review, :verify, :finish, or :retro.
+description: Integrated architecture + TDD workflow that runs Matt Pocock's skills (grilling, domain modeling, deep-module design, specs, tracer-bullet tickets, two-axis review, retros) and Jesse Vincent's Superpowers (implementation plans, subagent-driven TDD execution, systematic debugging, verification, branch finishing) as one pipeline. Use when the user asks to design, architect, spec, plan, implement, debug, review, or finish software work, or invokes /power-architect:grill, :design-interface, :to-spec, :plan, :build, :debug, :review, :verify, :finish, :retro, or :setup-tracker.
 ---
 
 # Power Architect
@@ -14,9 +14,10 @@ What Power Architect adds is only the glue: which phase comes next, which method
 
 ## How to run a phase
 
-1. Read the phase's reference file (table below) and follow it exactly. Don't paraphrase it from memory.
-2. **If the upstream skill is installed** (it appears in your available skills, e.g. `mattpocock-skills:grilling` or `superpowers:writing-plans`), invoke it for that phase instead, then apply the Power Architect conventions below on top. The reference files are the bundled fallback so that nothing else needs to be installed.
-3. End every response with the Next-Step Footer.
+1. **Check the Tracker first.** For to-spec, plan, build, debug, review, verify and finish, look in the repo's AGENTS.md, then CLAUDE.md, for a `## Tracker` section. If there is none, use local files and don't open the Tracker contract. If there is one, follow [references/tracker.md](references/tracker.md) before any other step of the phase, including workspace setup.
+2. Read the phase's reference file (table below) and follow it exactly. Don't paraphrase it from memory.
+3. **If the upstream skill is installed** (it appears in your available skills, e.g. `mattpocock-skills:grilling` or `superpowers:writing-plans`), invoke it for that phase instead, then apply the Power Architect conventions below on top. The reference files are the bundled fallback so that nothing else needs to be installed.
+4. End every response with the Next-Step Footer.
 
 | Command | Phase | Method | Reference |
 |---|---|---|---|
@@ -30,6 +31,7 @@ What Power Architect adds is only the glue: which phase comes next, which method
 | `/power-architect:verify` | Verify | Superpowers `verification-before-completion` | [references/verify.md](references/verify.md) |
 | `/power-architect:finish` | Finish | Superpowers `finishing-a-development-branch` | [references/finish.md](references/finish.md) |
 | `/power-architect:retro` | Improve | Matt `retro` | [references/retro.md](references/retro.md) |
+| `/power-architect:setup-tracker` | Setup | Tracker Adapter Install | [references/tracker.md](references/tracker.md#setup) |
 
 Shared references: [references/testing.md](references/testing.md) (good tests, mocking, TDD rules) and [references/glossary-and-adr.md](references/glossary-and-adr.md) (file formats).
 
@@ -72,10 +74,12 @@ Create files and directories lazily, only when there is something to write. Proj
 | Specs | `docs/specs/YYYY-MM-DD-slug.md` |
 | Small-tier plan | `docs/plans/YYYY-MM-DD-slug.md` |
 | Large-tier tickets | `docs/plans/YYYY-MM-DD-slug/NN-ticket-slug.md` (one file per ticket) |
-| Execution ledger (git-ignored scratch) | `.power-architect/<plan-slug>/progress.md` |
+| Execution ledger (git-ignored scratch) | `.power-architect/<plan-slug>/progress.md` (in Tracker mode `.power-architect/<spec-slug>/progress.md` under the main checkout; see [tracker.md](references/tracker.md) "Where") |
 | Retros (optional record) | `docs/retros/YYYY-MM-DD-slug.md` |
 
-If the user has an issue tracker configured (for example via Matt's `/setup-matt-pocock-skills`), publish specs and tickets there as the upstream skills do, and skip the local files.
+In Local Files mode: If the user has an issue tracker configured (for example via Matt's `/setup-matt-pocock-skills`), publish specs and tickets there as the upstream skills do, and skip the local files.
+
+**Tracker.** When the repo configures a Tracker (see "How to run a phase"), the Tracker holds the specs, plans and progress in place of the files above. Knowledge Docs (the glossary, ADRs, DESIGN.md and AGENTS.md) and the ledger stay local.
 
 ## Rules that apply in every phase
 
