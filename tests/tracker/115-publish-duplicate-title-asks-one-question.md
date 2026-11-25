@@ -95,9 +95,9 @@ The user answers: "https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001".
 
 Then:
 - The run is a re-run with page 5001 as the Spec Page: `getConfluenceContent` on page 5001 and `getJiraIssue` on PA-40 … PA-42
-- The agent shows the re-run change summary (nothing changed) and waits for "go ahead"; no write call is made before "go ahead"
+- The agent says the Tracker is already up to date, writes nothing, and asks no go-ahead
 - No `createConfluenceContent` is retried, and no `createJiraIssue` or `updateConfluenceContent` is called (nothing changed)
-- After "go ahead", the ledger `.power-architect/2026-11-24-team-invites/progress.md` is written: first line `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001`, then the 4 Work Refs from the key table (the Spec Page, PA-40, PA-41, PA-42)
+- The ledger `.power-architect/2026-11-24-team-invites/progress.md` is written: first line `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001`, then the 4 Work Refs from the key table (the Spec Page, PA-40, PA-41, PA-42)
 
 ### Variant B: the user answers with a new title
 The user answers: "Team invites v2".
