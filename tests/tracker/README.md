@@ -79,3 +79,7 @@ grep -rniE 'jira|rovo|mcp__|atlassian|confluence|\bADF\b' skills/ \
 ```
 
 **Pass:** no output. Any line printed names a tracker detail outside its adapter.
+
+## Drift check
+
+`sh tests/tracker/consistency.sh` (run from the repo root; must print `consistency OK`).
