@@ -106,3 +106,25 @@ Locality check re-run at ticket 09 (head f92e040): ✅ no matches.
 - Regression sample after the fix pass: scenarios 02, 35, 48, 59, 59b, 64, 64b, 85, 85b, 85c, 99, 99b (Local mode) and 50, 52, 60, 96 (Tracker mode); the Local scenarios 02, 64 and 85c were re-run after the build.md fix and pass with the original Local ledger formats.
 - Not re-run after the fix pass: the other ~85 Tracker scenarios (their skill text was not touched by the fix pass apart from handoff wording, the evidence-string format in 96/97/96b, and brief file names).
 - Known open design question (user decision): S2, L2 and Bug builds record Done after the ledger line but before a per-item review; see the spec's "Known deviations".
+
+## Deferred Done for S2, L2 and Bug builds (user decision 2026-11-25)
+
+| Date | Scenario | Result |
+|---|---|---|
+| 2026-11-25 | 100-build-s2-done-only-after-final-review-passes | ✅ 7/7 (re-run after the S2 token change) |
+| 2026-11-25 | 101-build-l2-blocker-in-progress-still-unblocks-dependent | ✅ 7/7 (first grading only; NOT re-run after later rounds) |
+| 2026-11-25 | 102-build-final-review-important-open-no-done | ✅ 6/6 (re-run) |
+| 2026-11-25 | 103-build-resume-before-final-review-runs-review-first | ✅ 6/6 (re-run) |
+| 2026-11-25 | 104-build-resume-after-marker-fires-done-once | ✅ 5/5 (re-run) |
+| 2026-11-25 | 105-build-bug-done-only-after-bug-review-passes | ✅ 5/5 (re-run with the `Fix (bug …)` line) |
+| 2026-11-25 | 106-build-offline-deferred-done-queues-then-replays | ✅ 5/5 (first grading only; NOT re-run after later rounds) |
+| 2026-11-25 | 107-verify-subtasks-awaiting-final-review-not-verifiable-yet | ✅ 5/5 (re-run) |
+| 2026-11-25 | 108 / 109 (Local S2 / L2 unchanged, no marker, no record) | ✅ 6/6, 5/5 (first grading only; NOT re-run after later rounds) |
+| 2026-11-25 | 110-build-rerun-after-done-withheld-includes-fix-commits | ✅ 6/6 (re-run) |
+| 2026-11-25 | 111-build-l2-final-review-pull-unreachable-stops-before-review | ✅ variants (a) and (b) after wording fixes (graded by a Sonnet reviewer) |
+| 2026-11-25 | 112-build-two-specs-one-review-passes-one-fails | ✅ 5/5 (re-run) |
+| 2026-11-25 | 113-build-rerun-does-not-absorb-other-specs-commits | ✅ 6/6 (re-run after it was updated for the ask rule) |
+| 2026-11-25 | 114-build-rerun-two-withheld-specs-asks-which-commit-belongs | ✅ 7/7 |
+| 2026-11-25 | 66 / 67 / 78 / 83 / 84 (timing lines updated for deferred Done) | ✅ 7/7, 6/6, 8/8, 8/8, 6/6 |
+
+Grading note: these were graded from fresh Haiku dry-run traces by Opus (rounds 1–3) and Sonnet (final round) reviewers. Scenarios marked NOT re-run were last graded before the S2 token, the `Fix` lines and the ask rule landed; re-run them before relying on them.
