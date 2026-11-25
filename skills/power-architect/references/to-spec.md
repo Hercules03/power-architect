@@ -40,9 +40,9 @@ Built in step 7 from the approved draft. `Local:` not built.
 - **Scope Tier**: Small or Large.
 - **Earlier publish** (re-run only): the Spec Page's Work Ref and the ledger's `## Work Refs` rows.
 - **Spec Page** (outline id `spec`): the spec's title and its shared context: Problem Statement, Solution, Goals / Non-goals / Anti-goals, Approaches considered, the Implementation and Testing Decisions that span Epics (including the cross-Epic test seams), Out of Scope, Scope Tier and Further Notes.
-- **Epics** (outline ids `E1`, `E2`, … in the approved order): the name; this Epic's own slice of the goals and Implementation Decisions; links to the ADRs relevant to it. Small tier: the one Epic the user named, as its Work Ref if it already exists (it is used as is), or as a new name.
+- **Epics** (outline ids `E1`, `E2`, … in the approved order): the name; this Epic's own slice of the goals and Implementation and Testing Decisions; links to the ADRs relevant to it. Small tier: the one Epic the user named, as its Work Ref if it already exists (it is used as is), or as a new name.
 - **Stories** (outline id: the user story's number in the spec): a short title, the user-story sentence, its parent Epic's outline id, and **Acceptance Criteria**: a checklist of testable checks drawn from the story and the Testing Decisions, each one provable by `/power-architect:verify` with a command or an observable result. Small tier: one Story (outline id `1`) that carries every user-story sentence of the spec and all their Acceptance Criteria.
-- **ADR links**: each ADR's title and repo-relative path (`docs/adr/NNNN-slug.md`). If the `origin` remote has a web host, add its URL: `<origin web URL>/blob/<current branch>/<path>`. The web URL is `https://<host>/<owner>/<repo>`, with any trailing `.git` dropped (so `git@host:owner/repo.git` becomes `https://host/owner/repo`).
+- **ADR links**: each ADR's title and repo-relative path (`docs/adr/NNNN-slug.md`). If the `origin` remote has a web host, add its URL: `<origin web URL>/blob/<default branch>/<path>`, or the current branch when the ADR is not on the default branch. The web URL is `https://<host>/<owner>/<repo>`, with any trailing `.git` dropped (so `git@host:owner/repo.git` becomes `https://host/owner/repo`).
 
 ## Spec template
 

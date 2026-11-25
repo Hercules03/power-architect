@@ -4,14 +4,14 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 
 ## Calling Rovo
 
-- **Finding tools.** The server (`https://mcp.atlassian.com/v2/mcp`) always lists a few primary tools. Reach every other tool with `discover`, then run it through `executeRead` (reads) or `executeWrite` (writes). Never call `executeDestructive`. This adapter deletes nothing.
+- **Finding tools.** The server (`https://mcp.atlassian.com/v2/mcp`) always lists a few primary tools. Reach every other tool with `discover` (the `discover` tool and its reply are unverified), then run it through `executeRead` (reads) or `executeWrite` (writes). Never call `executeDestructive`. This adapter deletes nothing.
 - **Names.** Tool names can carry a client prefix (such as `mcp__atlassian__`, or `v2`), so match tools by suffix. If a tool below is missing, look for its older name.
 - **Parameters.** Sources disagree on parameter names. Before each call, read the tool's live input schema and follow it. Parameter names in this file are hints only.
 - **cloudId.** Pass it on every call except the two below that list sites or the user. Take it from the `cloud-id:` line of the `## Tracker` section, or from the site list during Install.
 - **Text.** Write descriptions, comments and page bodies as Markdown (`contentFormat: markdown`). Never build ADF; it is not needed.
 - **No Sprint control.** Never call `manageJiraSprint` or `createJiraBoard`, and never pass a sprint, board or backlog assignment (such as `assignToSprint`, `sprintId`, `boardId`, `assignToBacklog`) to a create or transition call. Reading boards and Sprints is fine. Never set story points or estimates.
 
-| Tool | Used for | Older name | Reached by |
+| Tool | Used for | Older name (unverified) | Reached by |
 |---|---|---|---|
 | `atlassianUserInfo` | connection check | | primary |
 | `getAccessibleAtlassianResources` | sites and their cloudId | | primary |
@@ -76,8 +76,8 @@ In steps 2 and 3, the user picks from lists you fetch. Never ask the user for an
 5. **Link types.** Call `listJiraIssueLinkTypes`. Pick the type whose outward text is "blocks" and the one whose text is "relates to". If either is missing, ask the user to pick.
 6. **Statuses.** Find the project's workflow statuses:
    1. Try `getJiraWorkflows`. It is often disabled by the site admin. If it fails, go on.
-   2. Otherwise call `listJiraStatuses` for the project.
-   3. If that also fails, find one issue in the project with `searchJiraIssuesUsingJql` (`project = <key>`) and read its statuses from `listJiraIssueTransitions`.
+   2. Otherwise call `listJiraStatuses` for the project, and show the list to the user as that project's statuses, for them to confirm.
+   3. If that also fails, find one issue in the project with `searchJiraIssuesUsingJql` (`project = <key>`) and read its statuses from `listJiraIssueTransitions`. If no issue exists either, ask the user for the status name of each bucket, and stop if they cannot give them.
 
    Put each status in exactly one bucket: To Do, In Progress or Done. Use the status category when the tool returns one; otherwise propose by name. In each bucket, put first the status that items should move to.
 7. **Confirm.** Show the user the full proposed section, with the status mapping as a table, and ask them to confirm or correct it. If AGENTS.md or CLAUDE.md already has a `## Tracker` section, say which file it is in and that it will be replaced. Wait. Write nothing before they confirm.
@@ -113,7 +113,7 @@ Make these calls in this order, one at a time. Pass `cloudId` on each Jira and C
    - `## Acceptance Criteria`, then one `- [ ]` line per check
    - `Spec Page: <page URL>`
 
-   If Jira rejects the Epic as a Story's parent, stop: tell the user this project does not let a Story sit under an Epic, then report as for a failed call.
+   If Jira rejects the Epic as a Story's parent, stop: tell the user Jira rejected Epic <key> as the parent of Story <title> and quote Jira's error, then report as for a failed call.
 7. **Key table.** `updateConfluenceContent` on the page: the same body, followed by:
 
    ```md
@@ -225,7 +225,7 @@ Read first, then (on a re-run) get one go-ahead, then write. Make no write befor
    | dropped a blocker or relates-to Story | **held**: the link stays; comment it | **held**: comment the change |
 
    A recorded Sub-task no longer in the plan is **held** whatever its status, with a "removed from plan" comment. It is never deleted, closed or transitioned, and its key table row stays.
-5. **Comments are written once**, as Re-run step 5 for the layout and for a Story or Epic; a Sub-task's repeat is decided by the rule below, not by comparing text. One per item, holding only approved plan text. First lines:
+5. **Comments are written once**, as Re-run step 5 for the layout and for a Story or Epic; a Sub-task's repeat is decided by the rule below, on the change's content. One per item, holding only approved plan text. First lines:
    - held (changed, moved, or a link it could not add or remove): `Plan change not applied (item started)`, or `Plan change not applied (links are never deleted)` when the item is not started and only a dropped link is kept. Then one fenced code block holding only what changed: `- <old title>` and `+ <new title>`; Small tier, `- <step>` for each step removed and `+ <step>` for each step added; `Story: <old key> → <new key>`; `Blocked by: <old keys> → <new keys>`; `Relates to: <old keys> → <new keys>`. Then `Spec Page: <page URL>`.
    - removed: `Removed from plan`. Then `This item is no longer in the plan. It was not deleted or closed. Spec Page: <page URL>`
 
