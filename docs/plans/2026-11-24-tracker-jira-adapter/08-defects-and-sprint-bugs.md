@@ -7,10 +7,10 @@
 
 **Blocked by:** 06
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Scenario: debug inside current work comments on that item, and no Bug is created
-- [ ] Scenario: debug outside current work creates a Bug in the Backlog, not in a Sprint
-- [ ] Scenario: review findings produce comments only
-- [ ] Scenario: a Bug in the Sprint is built test-first and moves In Progress, then Done, with evidence
-- [ ] Local-mode regression and the locality grep check pass
+- [x] Scenario: debug inside current work comments on that item, and no Bug is created
+- [x] Scenario: debug outside current work creates a Bug in the Backlog, not in a Sprint
+- [x] Scenario: review findings produce comments only
+- [x] Scenario: a Bug in the Sprint is built test-first and moves In Progress, then Done, with evidence
+- [x] Local-mode regression and the locality grep check pass

@@ -71,6 +71,15 @@ Each row is one dry run, graded against the scenario's **Then**. A run counts on
 | 2026-11-25 | 77-build-replay-failure-marked-others-still-replay | 07 | ✅ 6/6 (re-run; user told how to clear a [!] entry) | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
 | 2026-11-25 | 78-build-l2-blocker-done-queued-unblocks | 07 | ✅ after Then 7 reworded (it contradicted Then 4); not re-run | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
 | 2026-11-25 | 79-build-queue-pinned-to-main-checkout | 07 | ✅ 6/6 (queue written to the main checkout, replayed from there) | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 80-debug-inside-current-work-comments-no-bug | 08 | ✅ 7/7 (one weak line: the commit message is asserted, the Given gives none) | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
+| 2026-11-25 | 81 / 81b / 81c (no-ref defect → Backlog Bug; no tracked item; reworded symptom finds the existing Bug) | 08 | ✅ 7/7, 3/3, 6/6 | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
+| 2026-11-25 | 81d-debug-no-ref-defect-queued-offline-then-replayed | 08 | ✅ 5 runs (A, B, C1, C2, D) | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
+| 2026-11-25 | 81e-debug-defect-in-finished-item-files-bug | 08 | ✅ 3/3 | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
+| 2026-11-25 | 82 / 82b / 82c (review comments, never a Bug) | 08 | ✅ 6/6, 5/5, 3/3 (review reads the spec through pull(spec, outline)) | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
+| 2026-11-25 | 83-build-sprint-bug-test-first | 08 | ✅ 8/8 | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
+| 2026-11-25 | 84 / 84b (Sub-tasks then Bug; final review excludes a Bug commit) | 08 | ✅ 6/6, 3/3 (union of inclusive `a^..b` ranges) | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
+| 2026-11-25 | 85 / 85b / 85c (Local mode unchanged) | 08 | ✅ 4/4, 3/3, 4/4 | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
+| 2026-11-25 | 71 / 75 (ticket-07 scenarios, re-run on the merged result) | 08 | ✅ 8/8, 5/5 | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
 
 Locality check (`jira\|rovo\|mcp__\|atlassian\|confluence\|ADF` outside `tracker-jira.md`): ✅ no matches (2026-11-24, ticket 01).
 Locality check re-run at ticket 02 (head b3f6ccf): ✅ no matches.
@@ -79,3 +88,4 @@ Locality check re-run at ticket 04 (head bacb2a7): ✅ no matches.
 Locality check re-run at ticket 05 (head 9ca0ef3): ✅ no matches.
 Locality check re-run at ticket 06 (head 6e62a92): ✅ no matches.
 Locality check re-run at ticket 07 (head 0d124a7): ✅ no matches.
+Locality check re-run at ticket 08 (head af70687): ✅ no matches.
