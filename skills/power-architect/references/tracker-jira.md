@@ -9,7 +9,7 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 - **Parameters.** Sources disagree on parameter names. Before each call, read the tool's live input schema and follow it. Parameter names in this file are hints only.
 - **cloudId.** Pass it on every call except the two below that list sites or the user. Take it from the `cloud-id:` line of the `## Tracker` section, or from the site list during Install.
 - **Text.** Write descriptions, comments and page bodies as Markdown (`contentFormat: markdown`). Never build ADF; it is not needed.
-- **No Sprint control.** Never call `manageJiraSprint` or `createJiraBoard`, and never pass a sprint, board or backlog assignment (such as `assignToSprint`, `sprintId`, `boardId`, `assignToBacklog`) to a create or transition call. Reading boards and Sprints is fine. Never set story points or estimates.
+- **No Sprint control.** Never call `manageJiraSprint` or `createJiraBoard`, and never pass a sprint, board or backlog assignment (such as `assignToSprint`, `sprintId`, `boardId`, `assignToBacklog`) to a create or transition call. Reading boards and Sprints is fine. Never set story points, estimates, a priority, an assignee or a resolution. Never call a transition outside `record`. Never delete (see `executeDestructive`).
 
 | Tool | Used for | Older name (unverified) | Reached by |
 |---|---|---|---|
@@ -36,6 +36,8 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 | `listJiraIssueComments` | an item's comments (hint: `issueIdOrKey`) | | primary |
 | `editJiraIssue` | rewrite an item's summary, description or parent (hints: `issueIdOrKey`, `fields`, `contentFormat`) | | primary |
 | `addOrEditJiraIssueComment` | add a comment (hints: `issueIdOrKey`, `commentBody`; never pass `commentId`, which edits an existing comment) | `addCommentToJiraIssue` | primary |
+
+**Writing a comment once.** Read the item's comments with `listJiraIssueComments`. If one matches the test the operation gives, add none. Otherwise `addOrEditJiraIssueComment` with it, Markdown, and no `commentId`.
 
 ## The `## Tracker` section
 
@@ -129,7 +131,7 @@ Make these calls in this order, one at a time. Pass `cloudId` on each Jira and C
    One row per item created from this spec: the Spec Page, then the Epics, then the Stories, in outline order. Sub-task rows are appended below them later. This table is how a re-run finds each item.
 8. **Return** the outline id → Work Ref map (the table's rows) and empty `held` and `declined` lists. Tell the user the Spec Page URL and the Epics and Stories created, with their keys.
 
-**A call fails after step 1.** Stop at once. Make no further call: no retry and no key table. If the Spec Page create itself failed (other than as a duplicate title, below), nothing was created: tell the user nothing was published. Otherwise tell the user the spec is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not. Return the created items as the map, so the phase records them. On a re-run, the map also holds every recorded item.
+**A call fails after step 1.** Stop at once. Make no further call: no retry and no key table. If the Spec Page create itself failed (other than as a duplicate title, below), nothing was created: tell the user nothing was published. Otherwise tell the user the spec is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not. Return the created items as the map, so the phase records them.
 
 **Duplicate title.** The Spec Page create is rejected as a duplicate title when the Tracker refuses it because a page with that title already exists in the space `confluence-space`. Only that rejection counts. Its wording is unverified, so treat a rejection whose reason says the title is taken, or that a page with it already exists in that space, as this case. Any other create failure is handled above. A duplicate-title rejection is the first write's failure, so nothing else has been written: make no further call, return the failure with the title to the phase, and write nothing. The phase asks the user (to-spec step 7). A Work Ref or URL the user gives makes the run a re-run from that page. A new title is put in the outline, and the Spec Page create is tried once more with the new title. If that retry is also rejected as a duplicate title, publish stops, writes nothing, and reports it.
 
@@ -154,10 +156,6 @@ Read first, then get one go-ahead, then write. Make no write before the go-ahead
      - **Membership changed:** this run creates a Story under an Epic, or re-parents a Story into or out of it. Redraft that Epic's slice; every other line stays as read. A held or removed Story does not change membership.
      - **User asks:** at the go-ahead (step 6) the user names an item to redraft.
 
-     Show each redraft in the change summary.
-
-     A redraft whose text equals the text read from the Tracker (after the same normalising) is not an update: it makes no write and is not listed as updated in the change summary.
-
    An item is **not started** when its status is in `status-todo`, and **started** otherwise (In Progress, Done, or a status in no bucket). A started item is never redrafted or rewritten.
 
    | The spec… | Not started | Started |
@@ -181,7 +179,6 @@ Read first, then get one go-ahead, then write. Make no write before the go-ahead
    - re-parent: `editJiraIssue` with `fields` `parent` set to the new Epic's key (in the same call as an update, when both apply).
    - held: `addOrEditJiraIssueComment` with the step 5 text, Markdown, and no `commentId`, unless step 5 skipped it.
 
-   Never call a transition, and never delete.
 8. **Spec Page.** Start the body from what step 1 read. Change a shared-context section only when the user changed that shared context in this session; then it becomes that section as the user approved it in this session's draft. Otherwise keep the body exactly as read. A `## Plan` section is not shared context: keep it exactly as read, in its place after the shared context and before the key table. Key table rows: the Spec Page; the Epics, then the Stories, in outline order, each with its new outline id, its Work Ref (recorded or new) and its title (the title as read, or the new or redrafted title); then each removed item, with outline id `—` and its title as read; then the kept rows of other kinds, unchanged. Every recorded row stays, and no Work Ref changes. If the body or the key table differs from what step 1 read after normalising, `updateConfluenceContent` as the last call: the Spec Page body followed by the key table.
 9. **Return** the map (every key table row), `held` (each item left untouched by the started-item or removed rule, with its reason, whose comment was written or was already there) and `declined` (each item the user declined in step 6; empty otherwise). Tell the user what was created, updated and re-parented, and each held item with its reason. If they declined, tell them nothing was written and list the declined items.
 
@@ -189,7 +186,7 @@ A failed call is handled as in "A call fails after step 1" above.
 
 ### Plan publish
 
-Implements `publish` for plan's outline: the Plan section and the Sub-tasks. The outline always names the Spec Page's Work Ref and the ledger's rows. Plan publish never creates the Spec Page, never writes an Epic or Story, and never changes the page's shared context. A Sub-task's Work Ref is its issue key. Never pass a Sprint, backlog, priority, story-point or estimate field. Never call a transition, and never delete.
+Implements `publish` for plan's outline: the Plan section and the Sub-tasks. Plan publish never creates the Spec Page, never writes an Epic or Story, and never changes the page's shared context. A Sub-task's Work Ref is its issue key. Never pass a Sprint, backlog, priority, story-point or estimate field.
 
 Read first, then (on a re-run) get one go-ahead, then write. Make no write before the go-ahead. **Every question to the user happens before the first write**: the candidate pairs (step 3), the link direction (once step 4 has classified the items, or right after step 2 on a first plan publish) and the go-ahead (step 6). Once the first write is made, ask nothing more.
 
@@ -289,7 +286,7 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
 
 1. Run `outline` steps 1 to 4: reach Jira, [replay](#replay), read the Spec Page, the recorded items and each Epic, Story and Sub-task. A stop there stops this `pull`, with the same message.
 2. **Keep** each Story (a `type-story` row not marked removed) whose status is not in `status-done`, in key table order. Never return a Bug or an Epic.
-3. **Sub-tasks.** For each Story, its Sub-tasks are the recorded Sub-task rows (not marked removed from plan) whose parent is that Story. Note each one's status, and list those whose status is not in `status-done` as unfinished. A Story with no such Sub-task is flagged `no Sub-tasks planned`: it is not verifiable.
+3. **Sub-tasks.** For each Story, its Sub-tasks are the recorded Sub-task rows (not marked removed from plan) whose parent is that Story. Note each one's status, and list those whose status is not in `status-done` as unfinished. A Story with no such Sub-task is flagged `no Sub-tasks planned`.
 4. **Return** each Story with its Work Ref (key), title (summary), description, Acceptance Criteria (the `- [ ]` lines under its `## Acceptance Criteria`, text only), status, whether all its Sub-tasks are Done, and its unfinished Sub-tasks (key and status).
 
 ### `subtask`
@@ -308,7 +305,7 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
 
 ## record
 
-Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence) for `started`, `done` (a Sub-task, a Bug or a Story), [`shipped`](#shipped) and [`defect`](#defect). One call at a time, passing `cloudId` on each. Never set a resolution, assignee, estimate, or any Sprint, board or backlog field. Never touch a Sprint.
+Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence) for `started`, `done` (a Sub-task, a Bug or a Story), [`shipped`](#shipped) and [`defect`](#defect). One call at a time, passing `cloudId` on each.
 
 1. **Read** the item with `getJiraIssue`: its status and issue type. `shipped` has no single item: go to [`shipped`](#shipped).
 2. **`started`.** If the status is in `status-in-progress` or `status-done`, do nothing (no transition, no comment) and return `ok`. Otherwise [move](#moving-an-item) it to the first status of `status-in-progress`.
@@ -333,14 +330,14 @@ Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence
       ✅ <criterion text> — <command> → <result>
       ```
       ````
-      Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Verified` and, for every Acceptance Criterion of the Story (taken from the Story description as read), its criterion text (the part before ` — `), compared as normalised text (publish [Re-run](#re-run) step 4) wherever those lines sit, inside or outside the fence. The command and result are not compared: a new session picks them again. Then add none. Otherwise `addOrEditJiraIssueComment` with it, Markdown, and no `commentId`.
+      Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Verified` and, for every Acceptance Criterion of the Story (taken from the Story description as read), its criterion text (the part before ` — `), compared as normalised text (publish [Re-run](#re-run) step 4) wherever those lines sit, inside or outside the fence. The command and result are not compared. Then write it once, as [Calling Rovo](#calling-rovo) says.
    2. **Move** it to the first status of `status-done`.
 
-   Never touch its Sub-tasks, its Epic or a Sprint, and never set a resolution or an assignee.
+   Never touch its Sub-tasks or its Epic.
 
 ### `shipped`
 
-`ref` is the Spec Page's Work Ref and `evidence` is `<link> base <sha>`: the PR URL or merge commit link with the base SHA (the merge-base of the branch with the base branch, captured before the merge or push). It comments the link on each Story this branch delivered, and changes no status.
+`ref` is the Spec Page's Work Ref and `evidence` is as the [contract](tracker.md#recordref-event-evidence) says.
 1. **Delivered Sub-tasks**, from the ledger and git only (no Jira call). Take the spec's ledger (`.power-architect/<spec-slug>/progress.md` under the ledger root, whose first line names the Spec Page). Its `Task <Sub-task ref>: complete (commits a..b, …)` lines whose last commit `b` lies in the range `<sha>..<branch>`, where `<sha>` is the `base` SHA carried in `evidence`, never the base branch name (`git merge-base --is-ancestor b <branch>` and not `git merge-base --is-ancestor b <sha>`) are the delivered Sub-tasks. A commit already on the base branch does not count. Append the ledger line `Shipped: <link> — base <sha> — Sub-tasks <ref>, <ref>` (unless one with the same link is there). With no delivered Sub-task, return `ok` and write nothing.
 2. **Stories.** Read each delivered Sub-task with `getJiraIssue`: its parent is a delivered Story. Ignore a parent that is not a `type-story`. Comment nothing on a Bug, an Epic, a Sub-task or a Story with no delivered Sub-task.
 3. **Comment** each delivered Story, never repeating one. The comment is exactly the first line `Shipped`, then the link on its own line, as plain Markdown. Read the Story's comments with `listJiraIssueComments`: it is already there when one has the first line `Shipped` and the link, compared as normalised text. Then add none. Otherwise `addOrEditJiraIssueComment`, no `commentId`.
@@ -348,7 +345,7 @@ Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence
 
 ### `defect`
 
-`ref` is an item's key, or absent. `evidence` is the labelled lines the phase gives. Never set a priority, estimate, assignee, or any Sprint, board or backlog field, and never touch a Sprint.
+`ref` is an item's key, or absent. `evidence` is the labelled lines the phase gives.
 
 - **With a `ref`.** The comment is exactly this, with the evidence lines inside the one fenced block:
   ````
@@ -360,7 +357,7 @@ Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence
   Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Defect fixed in this item` and the same evidence lines, compared as normalised text (publish [Re-run](#re-run) step 4). Then add none. Otherwise `addOrEditJiraIssueComment`, Markdown, no `commentId`. Never create a Bug.
 - **Without a `ref`.** The symptom line is the `symptom:` evidence line.
   1. **Look for the same defect, before any write.** Search the open Bugs on the symptom's key terms: `searchJiraIssuesUsingJql` with `project = <project> AND issuetype = "<type-bug>" AND statusCategory != Done AND text ~ "<key terms of the symptom>"` (that this JQL works through Rovo is unverified; if the search tool or the JQL fails, read the project's open Bugs and compare them instead). Read each candidate with `getJiraIssue`. A candidate is **the same defect** when it has the same symptom AND the same proven root cause, whatever its wording. Decide this before any write. If you are unsure, ask the user before writing. If one is the same defect, add one comment to it, `Defect seen again` then a fenced block of the evidence lines, unless it already holds the same one (compared as above), and return `ok`. Create nothing.
-  2. **Otherwise create the Bug.** `createJiraIssue`: project `project`, issue type `type-bug`, `summary` the plain one-line symptom (the text of the `symptom:` line, without the `symptom:` label), `contentFormat` `markdown`, `description`: `Symptom: …`, `Repro: …`, `Root cause: …`, then the line `Found while working on <the working-on ref>` (or `Found while working on no tracked item` when it is `none`). No `parent`, no priority, assignee or estimate, and no Sprint, board or backlog parameter: the Bug lands in the Backlog.
+  2. **Otherwise create the Bug.** `createJiraIssue`: project `project`, issue type `type-bug`, `summary` the plain one-line symptom (the text of the `symptom:` line, without the `symptom:` label), `contentFormat` `markdown`, `description`: `Symptom: …`, `Repro: …`, `Root cause: …`, then the line `Found while working on <the working-on ref>` (or `Found while working on no tracked item` when it is `none`). No `parent`: the Bug lands in the Backlog.
 
 ### Moving an item
 
@@ -372,8 +369,7 @@ Queue, never stop (the [queue rules](tracker.md#recordref-event-evidence) apply)
 **A `defect` with no `ref`** has no item to queue behind and may have no spec ledger: queue it in the bugs ledger `<ledger root>/.power-architect/bugs/progress.md` (create it with first line `# Ledger — bugs` if missing) as `- [ ] q<N> | defect | - | <evidence verbatim>`, escaped as below, then return `queued`. Its [replay](#replay) repeats the open-Bug search of [`defect`](#defect) step 1 first, then comments on the same defect or creates the Bug, so it never creates a second Bug. Steps 2, 3 and 4 below apply. An entry with ref `-` never blocks and is never blocked by another entry: each no-ref defect is independent, so an unsent or `[!]` no-ref defect does not hold back a later one, and replay repeats the open-Bug search for each.
 1. **Behind an entry.** If the item has an unsent entry (`[ ]` or `[!]`) in any ledger's `## Tracker queue`, queue this event without calling Jira.
 2. **Unreachable.** If a Rovo call fails because Jira can't be reached, at any step, queue the whole event, even if an earlier step wrote something (replay does not repeat it: a status already in the target bucket is not moved again, and a `Done`, `Verified` or `Shipped` comment already there is not added again). A refusal that is not "unreachable" (such as no transition into the wanted status) is not queued: [Moving an item](#moving-an-item) stops (during replay, the entry becomes `[!]`).
-3. **Queue** it (for `shipped`, step 1 of [`shipped`](#shipped) is done first, because it needs no Jira call): append `- [ ] q<N> | <event> | <ref> | <evidence on one line>` to the ledger's `## Tracker queue` (create the section if missing), then return `queued`. Escape the evidence as the [queue rules](tracker.md#recordref-event-evidence) say (`\` as `\\`, a literal ` | ` as ` \| `, newlines as `\n`). The ledger is the main checkout's, whichever worktree the agent is in. If a ledger is lost, its unsent events are lost: the item then shows as unfinished in the Tracker and a resume rebuilds it. A queued `shipped` is lost for good (nothing rebuilds it): tell the user to post the link on the Stories by hand. So a build never deletes the main checkout's `.power-architect/`. For `done`, `<evidence>` is the commit lines and the `tests:` line (a Story's: its criterion lines), not the comment. For `shipped`, `<ref>` is the Spec Page's Work Ref and `<evidence>` is `<link> base <sha>`.
-4. The phase carries on. Say, at the end of the phase, which items' events are queued.
+3. **Queue** it (for `shipped`, step 1 of [`shipped`](#shipped) is done first, because it needs no Jira call): append `- [ ] q<N> | <event> | <ref> | <evidence on one line>` to the ledger's `## Tracker queue` (create the section if missing), then return `queued`. Escape the evidence as the [queue rules](tracker.md#recordref-event-evidence) say. If a ledger is lost, its unsent events are lost: the item then shows as unfinished in the Tracker and a resume rebuilds it. A queued `shipped` is lost for good (nothing rebuilds it): tell the user to post the link on the Stories by hand. For `done`, `<evidence>` is the commit lines and the `tests:` line (a Story's: its criterion lines), not the comment.4. The phase carries on.
 
 ### Replay
 
@@ -381,5 +377,5 @@ First step of every `pull`, after step 1 (Reach Jira) and before anything is rea
 1. Collect the `- [ ]` entries of every ledger under the main checkout's `.power-architect/` (never a linked worktree's): ledgers in directory-name order, each in `q` order.
 2. Apply each as `record` does for its event, with the stored evidence (`done` writes the Done comment from the evidence, a Story's the Verified comment; `shipped` reads its delivered Sub-tasks from the ledger's `Shipped:` line for that link and derives nothing, base included), skipping an entry whose item has an earlier `- [!]` entry (an entry with ref `-` is never skipped for this reason). Mark it `- [x]` on success.
 3. If a call fails because Jira can't be reached, stop replaying and stop the `pull` as its Reach Jira step does: read nothing; the rest stay `- [ ]`.
-4. If it fails for any other reason, mark it `- [!] … | failed: <reason>`, tell the user, and go on to the next entry. Say in that message how to clear it: after the cause is fixed, change the entry's marker to `- [ ]` to retry it, or to `- [x]` if it was applied by hand.
+4. If it fails for any other reason, mark it `- [!] … | failed: <reason>`, tell the user (with the way to clear it that the queue rules give), and go on to the next entry.
 5. Then carry on with the `pull`'s read.
