@@ -34,7 +34,7 @@
   | getJiraIssue | PA-70 | the Bug this dry run created, or the Bug of the Given |
   | listJiraIssueComments | any | the comments this dry run has added to that issue (none at the start) |
   | addOrEditJiraIssueComment | any | {id: "c-<n>"} |
-  | createJiraIssue | any | {key: "PA-<n>"} (n increments from 70) |
+  | createJiraIssue | any | {key: "PA-<n>"} (n increments from 70). Live input schema: `cloudId`, `projectKey`, `issueTypeName`, `summary`, `description`, `contentFormat`, `parent`, `assignee_account_id`, `additional_fields`, `sprintId`, `assignToBacklog`, `boardId` |
   | searchJiraIssuesUsingJql | any | the issues in this table that match the JQL, with this dry run's own creations (none at the start) |
 - Ledger / local files:
   - Today is 2026-11-25. `.power-architect/2026-11-24-login-lockout/progress.md` exists: first line `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`, the `## Work Refs` table, and `Task PA-60: complete (commits a1b2c3d..a1b2c3d, tests: npx vitest run tests/auth/attempts.test.ts → 2 passed)`. It has no `Task PA-61` line: PA-61 is being built.
@@ -47,8 +47,8 @@ The user runs `/power-architect:debug` and says: "I am building PA-61, but separ
 
 ## Then
 - First run, at clean-up: `record(defect, …)` is called with no ref (the defect is outside PA-61's work)
-- The adapter first calls `searchJiraIssuesUsingJql` for an open Bug in project PA whose summary matches the symptom line; it finds none
-- Then exactly one `createJiraIssue`: project `PA`, issue type `Bug`, `summary` a one-line symptom (the reset email says `Hello, undefined`), and a `description` holding the symptom, the minimised repro (a user named "Zoë"), the proven root cause (the template reads `user.name`, the field is `displayName`) and the line `Found while working on PA-61`
+- The adapter first calls `searchJiraIssuesUsingJql` for an open Bug in project PA on the symptom's key terms; it finds none
+- Then exactly one `createJiraIssue`: project `PA`, issue type `Bug`, `summary` the plain one-line symptom with no `symptom:` label (the reset email says `Hello, undefined`), and a `description` holding the symptom, the minimised repro (a user named "Zoë"), the proven root cause (the template reads `user.name`, the field is `displayName`) and the line `Found while working on PA-61`
 - The `createJiraIssue` call passes no `parent`, no `priority`, no `assignee`, no estimate and no Sprint, board or backlog field (no `assignToSprint`, `sprintId`, `boardId`, `assignToBacklog`)
 - No comment, transition or write of any kind on PA-61
 - Second run: the search finds the Bug created by the first run (PA-70), no second `createJiraIssue` is made (the dry run ends with exactly one), and one `addOrEditJiraIssueComment` is made on PA-70 with no `commentId`

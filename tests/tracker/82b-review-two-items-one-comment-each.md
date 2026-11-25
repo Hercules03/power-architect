@@ -29,6 +29,7 @@
   |---|---|---|
   | atlassianUserInfo | any | {account_id: "u-1", name: "Dana"} |
   | discover | any | the tools in this table whose names match the query |
+  | getConfluenceContent | page 6001 | the Spec Page "Login lockout" of scenario 60: Scope Tier Small, a `## Plan` section (Global Constraints "Five failures within 10 minutes lock the account."; Review Focus "Failures for different accounts never share a counter."), and the key table `spec`, `1 \| Story \| PA-50`, `1 \| Sub-task \| PA-60`, `2 \| Sub-task \| PA-61`. This is what `pull(spec, outline)` reads |
   | getJiraIssue | PA-60 | {key: "PA-60", type: Sub-task, summary: "Failed-login counter", status: Done, parent: PA-50} |
   | getJiraIssue | PA-61 | {key: "PA-61", type: Sub-task, summary: "Login handler enforces the lockout", status: In Progress, parent: PA-50} |
   | getJiraIssue | PA-70 | the Bug this dry run created, or the Bug of the Given |
@@ -49,4 +50,5 @@ The user runs `/power-architect:review` and the agent fixes F1, F2 and F3.
 - The agent calls `record(PA-60, defect, …)` once and `record(PA-61, defect, …)` once, each with its item's ref
 - PA-60 gets one comment (first line `Defect fixed in this item`) whose fenced block holds only F1; PA-61 gets one comment whose fenced block holds only F2 and F3
 - Exactly two `addOrEditJiraIssueComment` calls in the dry run, and no `createJiraIssue` call
+- The Spec axis is judged against the outline pulled with `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, outline)`, the spec identified from the Spec Page Work Ref in the ledger's first line; the agent does not ask the user for a spec
 - No `transitionJiraIssue` call

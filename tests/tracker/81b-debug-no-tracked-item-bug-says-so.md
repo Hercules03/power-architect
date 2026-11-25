@@ -43,5 +43,5 @@ The user runs `/power-architect:debug` and reports that the password-reset email
 
 ## Then
 - At clean-up the agent calls `record(defect, …)` with no ref
-- The adapter searches for an open Bug with that summary (none), then makes one `createJiraIssue` of type `Bug` in project PA whose `description` contains the symptom, repro, root cause and the line `Found while working on no tracked item`
+- The adapter searches the open Bugs on the symptom's key terms (none), then makes one `createJiraIssue` of type `Bug` in project PA whose `description` contains the symptom, repro, root cause and the line `Found while working on no tracked item`
 - No Sprint, board, backlog, priority, assignee or estimate field is passed; no comment or transition is made

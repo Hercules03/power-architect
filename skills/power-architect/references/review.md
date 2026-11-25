@@ -6,6 +6,8 @@ Matt Pocock's `code-review` (two axes, parallel fresh subagents) for running the
 
 1. **Pin the fixed point.** Use the commit, branch, or tag the user names. If they didn't name one, use the branch's merge-base with main and say so. Confirm it resolves (`git rev-parse`) and the diff is non-empty *before* dispatching anything. Diff: `git diff <fixed-point>...HEAD`. Commits: `git log <fixed-point>..HEAD --oneline`.
 2. **Find the spec**, in this order: issue references in commit messages → a path the user passed → the matching spec in `docs/specs/` (and its plan or tickets in `docs/plans/`) → ask the user. If there's no spec, skip the Spec axis and say so.
+   With a Tracker, read the spec instead through `pull(<Spec Page Work Ref>, outline)` (see the [Tracker contract](tracker.md#pullscope-level)): the spec is identified from the Spec Page Work Ref in the ledger's first line, for the ledger whose `Task` lines cover the reviewed commits. Give the Spec subagent that outline. If no ledger covers them (an untracked branch, or a Bug review), skip the Spec axis and say so.
+   `Local:` As above: commit messages → a path the user passed → the matching spec in `docs/specs/` → ask the user.
 3. **Find the standards sources**: every file that documents how code should be written (always include `CODING_STANDARDS.md` and `CONTRIBUTING.md` if they exist, plus `GLOSSARY.md` for naming). The **smell baseline** below always applies too. A documented repo standard overrides the baseline. Every smell is a judgement call, never a hard violation. Skip anything tooling already enforces.
 
    Smell baseline (Fowler, *Refactoring* ch. 3), each as *what it is* → *fix*:
@@ -38,7 +40,7 @@ For each item: **read** it all → **restate** the requirement (or ask) → **ve
 
 **Large tier:** this is where refactoring happens. Fix the Standards findings you accept under green tests, and re-run the full suite after each one.
 
-**Record the fixed findings.** After the accepted findings are fixed, call `record(<item ref>, defect, <evidence>)` (see the [Tracker contract](tracker.md#recordref-event-evidence)) once per review pass, always with the item's ref, so it only ever comments and never files a Bug. The items are the Sub-tasks whose commits the review covers (from the ledger's `Task <Work Ref>` lines). `evidence` is one line per accepted finding that was fixed, never a finding you pushed back on. When the review covers several items, make one call per item, with only that item's findings. When no accepted finding was fixed, make no call. When no tracked item can be identified (a review of an untracked branch), make no Tracker call and tell the user the findings were not recorded.
+**Record the fixed findings.** After the accepted findings are fixed, call `record(<item ref>, defect, <evidence>)` (see the [Tracker contract](tracker.md#recordref-event-evidence)) once per review pass, always with the item's ref, so it only ever comments and never files a Bug. The items are the Sub-tasks or Bugs whose commits the review covers (from the ledgers' `Task <Work Ref>` lines). `evidence` is one line per accepted finding that was fixed, never a finding you pushed back on. When the review covers several items, make one call per item, with only that item's findings. When no accepted finding was fixed, make no call. When no tracked item can be identified (a review of an untracked branch), make no Tracker call and tell the user the findings were not recorded.
 `Local:` No record.
 
 Then recommend `/power-architect:verify`.
