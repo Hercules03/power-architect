@@ -85,8 +85,11 @@ Before a task's first step, call `record(<Work Ref>, started)`; its brief is its
 
 ### Final review (both S1 and S2)
 
-0. If the work list held only resume items (nothing was built this run), skip the final review and say so.
-1. Write the diff of this spec's commits (the commits in its ledger's `Task` lines, not the whole-branch merge-base diff) to a file, and tell the reviewer which commits belong to the spec.
+0. If every item of this spec in the work list this run was a resume item (nothing of this spec was built this run), skip this spec's final review and say so. A spec with any new work this run gets its final review.
+   `Local:` No skip. The final review always runs.
+1. Write the whole-branch diff (`git merge-base main HEAD`..HEAD) to a file.
+   With a Tracker, write instead the diff of this spec's commits (the commits in its ledger's `Task` lines, not the whole-branch merge-base diff), and tell the reviewer which commits belong to the spec.
+   `Local:` Write the whole-branch diff (`git merge-base main HEAD`..HEAD) to a file.
 2. Dispatch **one fresh reviewer on the most capable model** with [prompts/code-reviewer.md](prompts/code-reviewer.md). Give it the plan's Review Focus verbatim, the spec path, and the ledger's `Ruling:` and deferred-minor lines. Without a subagent tool, do this review yourself as a separate pass, record `Final review: self-review` in the ledger, and tell the user it's weaker.
 
    The Review Focus is the Plan section's, verbatim, and the spec is `<workspace>/spec.md`.

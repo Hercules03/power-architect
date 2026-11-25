@@ -25,4 +25,5 @@ The user runs `/power-architect:build`. If asked which execution method to use, 
 - Task 1 is completed (brief → implementer → task review → ledger line) before Task 2's brief is written. Each task brief holds the task's full text from the plan
 - The completion lines are `Task 1: complete (commits …, review clean)` and `Task 2: complete (commits …, review clean)`: numbered by task, with no Work Ref and no `tests:` part
 - The final reviewer is given the plan's Review Focus verbatim and the spec path `docs/specs/2026-11-24-login-lockout.md`
+- The final review diff is the whole-branch merge-base diff (`git merge-base main HEAD`..HEAD), and the final review runs
 - The agent recommends `/power-architect:verify`, then `/power-architect:finish`
