@@ -272,7 +272,7 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
 
 1. **Reach Jira.** Call `atlassianUserInfo`. If it fails, stop: tell the user Jira can't be reached, so nothing was read, and that `/mcp` reconnects the Rovo MCP server. Then [Replay](#replay) the queue before reading.
 2. **Spec Page.** `getConfluenceContent` on the page, with a Markdown body. If there is no such page, stop and report the unknown Work Ref (not an unreachable Tracker): tell the user to check the Work Ref and the ledger's first line. The body holds the shared context, then the `## Plan` section if plan ran, then the `## Work Refs` key table.
-3. **Recorded items.** The key table's rows, plus the rows of the ledger whose first line names this Spec Page (`.power-architect/<spec-slug>/progress.md`) that the table lacks, as publish's Re-run step 1.
+3. **Recorded items.** The key table's rows, plus the rows of the ledger whose first line names this Spec Page (`.power-architect/<spec-slug>/progress.md` under the ledger root, see [tracker.md](tracker.md#recordref-event-evidence)) that the table lacks, as publish's Re-run step 1.
 4. **Read** each recorded Epic, Story and Sub-task with `getJiraIssue` (`view: full`, Markdown): summary, description, status, parent and issue links.
 5. **Return** the Work Outline:
    - the Scope Tier, from the page's Scope Tier section

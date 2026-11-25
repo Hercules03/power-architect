@@ -57,5 +57,5 @@ The user runs `/power-architect:build` with no argument.
 - `record(PA-61, started)` is queued as `- [ ] q2 | started | PA-61 | ` because Jira is unreachable (its first Rovo call fails), not because of any entry of PA-61's own; PA-61's implementer is still dispatched
 - After PA-61's merge its ledger line is written and `record(PA-61, done, …)` is queued as `- [ ] q3 | done | PA-61 | …`; the build completes through the final review
 - The end report lists the queued states: PA-60's done, PA-61's started and PA-61's done are queued, not recorded in Jira
-- No Rovo call is made after the first UNREACHABLE
+- No further Rovo call is made after the first UNREACHABLE: no retry within one event, and nothing is written to the Tracker after it
 - No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call, and no `transitionJiraIssue` passes `sprintId`, `assignToBacklog`, `boardId` or `fields`.

@@ -27,7 +27,7 @@
 
   | Tool | Called with (match) | Returns |
   |---|---|---|
-  | * | any, once PA-60's implementer has reported DONE (every call from then on, for the rest of run 1); in run 2 every row answers normally | UNREACHABLE |
+  | * | any, once PA-60's review has passed and its ledger line is written (every call from then on, for the rest of run 1); in run 2 every row answers normally | UNREACHABLE |
   | atlassianUserInfo | any | {account_id: "u-1", name: "Dana"} |
   | discover | any | the tools in this table whose names match the query |
   | getJiraBoardSprintData | boardId 12 | {board: {id: 12}, sprint: {id: 7, name: "Sprint 7", state: "active"}, issues: [{key: "PA-50", type: "Story", status: "In Progress"}, {key: "PA-60", type: "Sub-task", status: "To Do"}, {key: "PA-61", type: "Sub-task", status: "To Do"}]} (each status is the issue's current status) |
@@ -48,7 +48,7 @@
 - Trace: report dispatches, merges, ledger writes, Tracker operations and MCP calls in one chronological list.
 
 ## When
-The user runs `/power-architect:build PA-60` in the worktree (run 1). Jira goes down as the stub says. The user then runs `/power-architect:build` from `/repo` (run 2) with Jira reachable; the stub state left by run 1 carries over.
+The user runs `/power-architect:build PA-60` in the worktree (run 1). Jira goes down as the stub says. The user then runs `/power-architect:build PA-60` from `/repo` (run 2; PA-60 is the only Work Ref named, so PA-61 is not built, and the run ends after replay, once PA-60 reads Done) with Jira reachable; the stub state left by run 1 carries over.
 
 ## Then
 - Run 1: the ledger root is `/repo`, the parent directory of `git rev-parse --git-common-dir` resolved to an absolute path; the agent uses `/repo/.power-architect/2026-11-24-login-lockout/progress.md`
