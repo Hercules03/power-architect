@@ -3,7 +3,8 @@
 Read [testing.md](testing.md) before the first task. It governs every step below.
 
 - **Small tier**: Superpowers `subagent-driven-development` (S1) or `executing-plans` (S2), whichever the user picked at plan handoff.
-- **Large tier**: Matt Pocock's `implement` (L1, one ticket, `/power-architect:build 03`) or `implement-spec` (L2, the whole ticket graph, `/power-architect:build all`).
+- **Large tier**: Matt Pocock's `implement` (L1, one ticket) or `implement-spec` (L2, the whole ticket graph). With a Tracker, ask the Product Owner to put the Stories in a Sprint, then run `/power-architect:build` (the active Sprint) or `/power-architect:build <Work Ref>`.
+  `Local:` L1 is `/power-architect:build 03`, L2 is `/power-architect:build all`.
 
 A step with a `Local:` line below it reads two ways. With a Tracker configured, do what the step says. Without one (no `## Tracker` section), do only what its `Local:` line says.
 
@@ -11,6 +12,7 @@ A step with a `Local:` line below it reads two ways. With a Tracker configured, 
 
 **Pull the work list first**, before Setup, so nothing is set up or built on a guess. Call `pull(scope, subtask)` (see the [Tracker contract](tracker.md#pullscope-level)). `/power-architect:build <Work Ref>` gives that Work Ref as `scope`: a Sub-task, or a Story (its unfinished Sub-tasks). With no argument, or `all`, `scope` is `sprint`: the active Sprint the Product Owner filled. Build nothing outside it, and never create, start, close or edit a Sprint.
 - `pull` returns the ready items in `blocks` order, blockers first, each with its Work Ref, title, description, Story, its spec's Spec Page Work Ref and Scope Tier. Tell the user each item in its `blocked` list, with its blocker; never build one.
+- If the ready list is empty after replay and `pull`, the build stops before Setup and says so: nothing is ready to build.
 - If `pull` stops, stop the phase: set nothing up, build nothing, write nothing. If the Tracker was unreachable, tell the user nothing was built, and to re-run `/power-architect:build` once it is reachable. If the Work Ref is unknown, ask the user to check it and the ledger's first line.
 - **One spec at a time.** After Setup, group the items by Spec Page Work Ref, and finish one spec's items, through its final review, before the next spec's. For each spec:
   - **Its ledger** is `<ledger root>/.power-architect/<spec-slug>/progress.md`, the one whose first line is `# Ledger — spec: <Spec Page Work Ref>` (to-spec and plan wrote it). Without one, write it: that first line, with `<spec-slug>` today's date and the spec title's slug. The **ledger root** is the main checkout, not a linked worktree: the parent directory of `git rev-parse --git-common-dir`, resolved to an absolute path. Ledgers and their queues live in the ledger root's `.power-architect/`, so a queue written from a worktree survives it; never delete that directory during a build. Every "ledger" below means this file. A ledger line names its Sub-task by Work Ref: `Task <Work Ref>: …`.
@@ -55,10 +57,10 @@ Shared by S1 and S2:
 Per task:
 
 1. **Record BASE** (`git rev-parse HEAD`). Never use `HEAD~1` for review ranges, because it drops all but the last commit of a multi-commit task.
-2. **Write the task brief** (the task's full text from the plan) to `<workspace>/task-N-brief.md`. Dispatch a fresh implementer with [prompts/implementer.md](prompts/implementer.md). The dispatch contains: one line on where the task fits, the brief path ("read this first: these are your requirements"), interfaces from earlier tasks, your resolution of any ambiguity, and the report path `<workspace>/task-N-report.md`. Never paste prior-task history. **Never run implementers in parallel.**
+2. **Write the task brief** (the task's full text from the plan) to `<workspace>/task-<Work Ref>-brief.md`. Dispatch a fresh implementer with [prompts/implementer.md](prompts/implementer.md). The dispatch contains: one line on where the task fits, the brief path ("read this first: these are your requirements"), interfaces from earlier tasks, your resolution of any ambiguity, and the report path `<workspace>/task-<Work Ref>-report.md`. Never paste prior-task history. **Never run implementers in parallel.**
 
    The task's full text is its Sub-task's description, then its Story's Acceptance Criteria. Call `record(<Work Ref>, started)` (see the [Tracker contract](tracker.md#recordref-event-evidence)) just before the dispatch.
-   `Local:` The brief is the plan's task text. No record.
+   `Local:` The brief and report files are `<workspace>/task-N-brief.md` and `<workspace>/task-N-report.md`. The brief is the plan's task text. No record.
 3. **Handle the report.**
    - **DONE**: go to review.
    - **DONE_WITH_CONCERNS**: address correctness or scope concerns before review; just note observations.

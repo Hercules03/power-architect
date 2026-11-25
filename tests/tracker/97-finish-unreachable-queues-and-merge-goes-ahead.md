@@ -43,7 +43,7 @@ The user runs the phase. When asked which option, they reply `1`.
 
 ## Then
 - The user's `1` is followed: from the main repo root `git checkout main`, `git pull`, `git merge feat/login-lockout`, and the tests on the merged result pass
-- `record(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, shipped, e5f6a7b8, base 9f8e7d6)` is called once, after the merge tests pass and before the worktree cleanup. finish makes no `pull` call
+- `record(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, shipped, e5f6a7b8 base 9f8e7d6)` is called once, after the merge tests pass and before the worktree cleanup. finish makes no `pull` call
 - The delivered Sub-tasks come from the ledger and git alone, with no Tracker read: the ledger gains `Shipped: e5f6a7b8 — base 9f8e7d6 — Sub-tasks PA-60, PA-61, PA-62`
 - The first Rovo call of `record` returns UNREACHABLE, so no comment is added. The result is `queued`
 - `/repo/.power-architect/2026-11-24-login-lockout/progress.md` gains a `## Tracker queue` section holding exactly `- [ ] q1 | shipped | https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001 | e5f6a7b8 base 9f8e7d6`

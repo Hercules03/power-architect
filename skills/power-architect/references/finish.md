@@ -24,9 +24,9 @@ Adapted from Superpowers `finishing-a-development-branch`. Announce: "I'm finish
    For a detached HEAD: 1. Push as a new branch and create a PR · 2. Keep as-is.
 5. **Execute the choice.**
    - **Merge:** from the main repo root, `git checkout <base>`, `git pull`, `git merge <branch>`, then run the tests **on the merged result**. If they fail, stop and leave the branch and worktree in place. If they're green, clean up the worktree (step 6), then `git branch -d <branch>`.
-     With a Tracker, once the tests are green and before the cleanup, call `record(<Spec Page Work Ref>, shipped, <merge commit>, base <BASE_SHA>)`: the merge commit's link if the forge gives one, else its SHA.
+     With a Tracker, once the tests are green and before the cleanup, call `record(<Spec Page Work Ref>, shipped, <merge commit> base <BASE_SHA>)`: the evidence is the single string `<link> base <BASE_SHA>` (three arguments, no comma), the merge commit's link if the forge gives one, else its SHA.
    - **PR:** `git push -u origin <branch>`, then open the PR with the forge's tooling, following the repo's PR template, and report the URL. **Keep the worktree** for PR feedback.
-     With a Tracker, then call `record(<Spec Page Work Ref>, shipped, <PR URL>, base <BASE_SHA>)` (see the [Tracker contract](tracker.md#recordref-event-evidence)).
+     With a Tracker, then call `record(<Spec Page Work Ref>, shipped, <PR URL> base <BASE_SHA>)` (evidence: the single string `<PR URL> base <BASE_SHA>`) (see the [Tracker contract](tracker.md#recordref-event-evidence)).
    - **Keep:** report "Keeping branch <name>. Worktree preserved at <path>."
      With a Tracker, make no Tracker call, and tell the user nothing was shipped.
    - **Discard** happens only if the user explicitly asks. List the branch, commits, and worktree that will be deleted, and require them to type `discard`. Then clean up and `git branch -D`.

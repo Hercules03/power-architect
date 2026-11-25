@@ -55,6 +55,8 @@ Install writes these lines, one per line, in this order. Values are as Jira retu
 | `status-todo`, `status-in-progress`, `status-done` | every workflow status in that bucket, comma-separated. The first is the one items are moved to |
 | `link-blocks`, `link-relates` | the link-type names for "blocks" and "relates to" |
 
+The section is a `## Tracker` heading followed by one `key: value` line per key (for example `cloud-id: 1234`).
+
 **Config check** (run at selection, with no MCP call): every key above is present with a value, and `adapter` is `jira`. If not, stop, name the missing keys, and recommend `/power-architect:setup-tracker jira`.
 
 ## Install
@@ -62,6 +64,7 @@ Install writes these lines, one per line, in this order. Values are as Jira retu
 Run by `/power-architect:setup-tracker jira`. Write nothing until step 8. If any call in steps 2–7 fails for a reason other than the fallbacks below, stop and say which step failed.
 
 1. **Connection.** Call `atlassianUserInfo`, then `getAccessibleAtlassianResources`. If either fails or is missing, stop and write nothing. Tell the user the Rovo MCP server is not connected or not signed in: add the server `https://mcp.atlassian.com/v2/mcp` to their client and sign in. In Claude Code, run `/mcp` to connect or re-authenticate. Then run this command again.
+
 In steps 2 and 3, the user picks from lists you fetch. Never ask the user for an id or key you can list. If a list has exactly one entry, use it and say so.
 
 2. **Site.** From the site list, ask the user to pick one. Record its URL and cloudId.
@@ -233,7 +236,7 @@ Read first, then (on a re-run) get one go-ahead, then write. Make no write befor
       - update or re-parent: `editJiraIssue` as Re-run step 7.
       - held: `addOrEditJiraIssueComment` with the step 5 text and no `commentId`, unless step 5 found it already there.
    2. Removed Sub-tasks: their comment.
-   3. [Links](#links), after every Sub-task exists, in the direction confirmed at step 2: each missing `blocks` edge, in outline order of the blocked Sub-task, then each missing `relates` edge.
+   3. [Links](#links), after every Sub-task exists, in the direction confirmed in the read phase, before any write: each missing `blocks` edge, in outline order of the blocked Sub-task, then each missing `relates` edge.
    4. The Spec Page (step 8), last.
 
    **Description**, Markdown:
@@ -365,7 +368,7 @@ Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence
 ### Jira unreachable during `record`
 
 Queue, never stop (the [queue rules](tracker.md#recordref-event-evidence) apply).
-**A `defect` with no `ref`** has no item to queue behind and may have no spec ledger: queue it in the bugs ledger `<ledger root>/.power-architect/bugs/progress.md` (create it with first line `# Ledger — bugs` if missing) as `- [ ] q<N> | defect | - | <evidence verbatim>`, escaped as below, then return `queued`. Its [replay](#replay) repeats the open-Bug search of [`defect`](#defect) step 1 first, then comments on the same defect or creates the Bug, so it never creates a second Bug. Steps 2 and 3 below apply. An entry with ref `-` never blocks and is never blocked by another entry: each no-ref defect is independent, so an unsent or `[!]` no-ref defect does not hold back a later one, and replay repeats the open-Bug search for each.
+**A `defect` with no `ref`** has no item to queue behind and may have no spec ledger: queue it in the bugs ledger `<ledger root>/.power-architect/bugs/progress.md` (create it with first line `# Ledger — bugs` if missing) as `- [ ] q<N> | defect | - | <evidence verbatim>`, escaped as below, then return `queued`. Its [replay](#replay) repeats the open-Bug search of [`defect`](#defect) step 1 first, then comments on the same defect or creates the Bug, so it never creates a second Bug. Steps 2, 3 and 4 below apply. An entry with ref `-` never blocks and is never blocked by another entry: each no-ref defect is independent, so an unsent or `[!]` no-ref defect does not hold back a later one, and replay repeats the open-Bug search for each.
 1. **Behind an entry.** If the item has an unsent entry (`[ ]` or `[!]`) in any ledger's `## Tracker queue`, queue this event without calling Jira.
 2. **Unreachable.** If a Rovo call fails because Jira can't be reached, at any step, queue the whole event, even if an earlier step wrote something (replay does not repeat it: a status already in the target bucket is not moved again, and a `Done`, `Verified` or `Shipped` comment already there is not added again). A refusal that is not "unreachable" (such as no transition into the wanted status) is not queued: [Moving an item](#moving-an-item) stops (during replay, the entry becomes `[!]`).
 3. **Queue** it (for `shipped`, step 1 of [`shipped`](#shipped) is done first, because it needs no Jira call): append `- [ ] q<N> | <event> | <ref> | <evidence on one line>` to the ledger's `## Tracker queue` (create the section if missing), then return `queued`. Escape the evidence as the [queue rules](tracker.md#recordref-event-evidence) say (`\` as `\\`, a literal ` | ` as ` \| `, newlines as `\n`). The ledger is the main checkout's, whichever worktree the agent is in. If a ledger is lost, its unsent events are lost: the item then shows as unfinished in the Tracker and a resume rebuilds it. A queued `shipped` is lost for good (nothing rebuilds it): tell the user to post the link on the Stories by hand. So a build never deletes the main checkout's `.power-architect/`. For `done`, `<evidence>` is the commit lines and the `tests:` line (a Story's: its criterion lines), not the comment. For `shipped`, `<ref>` is the Spec Page's Work Ref and `<evidence>` is `<link> base <sha>`.

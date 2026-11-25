@@ -138,7 +138,8 @@ Ticket template (no file paths or code snippets; the prototype exception from th
 - [ ] Acceptance criterion 2
 ```
 
-The **frontier** is every ticket whose blockers are done. Recommend `/power-architect:build 01`, or `/power-architect:build all` to run the whole graph.
+The **frontier** is every ticket whose blockers are done. With a Tracker, there is no ticket `01`: ask the Product Owner to put the Stories in a Sprint, then run `/power-architect:build` (the active Sprint) or `/power-architect:build <Work Ref>`.
+`Local:` Recommend `/power-architect:build 01`, or `/power-architect:build all` to run the whole graph.
 
 ---
 

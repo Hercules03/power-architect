@@ -12,7 +12,7 @@ A step with a `Local:` line below it reads two ways. With a Tracker configured, 
 2. **Sketch the test seams.** Prefer existing seams to new ones, and use the highest seam possible. If new seams are needed, propose them as high as you can. The fewer seams the better; the ideal number is one. **Confirm the seams with the user.** These are the pre-agreed seams `/power-architect:build` will test at.
 3. **Assign the Scope Tier** (Small or Large, defined in SKILL.md) with a one-line reason. The user can override it.
 4. **Write the spec** as a draft to `.power-architect/<spec-slug>/spec-draft.md` under the ledger root (see the "Where" bullet in [tracker.md](tracker.md#recordref-event-evidence); git-ignored scratch; `<spec-slug>` is `YYYY-MM-DD-slug`) using the template below. Before choosing the path, look for a ledger `.power-architect/<any date>-slug/progress.md` under the ledger root for the same slug that names a Spec Page. If one exists from an earlier date, reuse its `<spec-slug>` (step 7 treats this as a re-run). Nothing reaches the Tracker before the gate in step 6.
-   `Local:` Write the spec to `docs/specs/YYYY-MM-DD-slug.md` using the template below.
+   `Local:` Write the spec to `docs/specs/YYYY-MM-DD-slug.md` using the template below, or publish it to the issue tracker if one is configured.
 5. **Builder check (Large tier).** Dispatch a fresh subagent with [prompts/builder-check.md](prompts/builder-check.md), pointing it at the file written in step 4. Sort what it asks into three piles:
    - **Already answered** by the conversation or the project: put the answer into the spec.
    - **Minor**: a sensible builder could settle it without changing what gets built. Settle it yourself and mark it in the spec as your call.

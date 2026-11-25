@@ -50,7 +50,7 @@
 The user runs the phase. When asked which option, they reply `2`.
 
 ## Then
-- Before the push, `git merge-base main feat/login-lockout` is run and `9f8e7d6` is kept; after the PR is opened, `record(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, shipped, https://github.com/acme/app/pull/42, base 9f8e7d6)` is called once
+- Before the push, `git merge-base main feat/login-lockout` is run and `9f8e7d6` is kept; after the PR is opened, `record(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, shipped, https://github.com/acme/app/pull/42 base 9f8e7d6)` is called once
 - The delivered Sub-tasks are only those whose commit is in `9f8e7d6..feat/login-lockout`: PA-62. PA-60 (commit already on `main`) is not delivered, though its commit is reachable from HEAD
 - The ledger gains the line `Shipped: https://github.com/acme/app/pull/42 — base 9f8e7d6 — Sub-tasks PA-62` before the first Rovo write
 - Exactly one `addOrEditJiraIssueComment`, on PA-51, preceded by `listJiraIssueComments`, whose first line is `Shipped` and next line `https://github.com/acme/app/pull/42`

@@ -20,6 +20,18 @@ _Avoid_: ticket ID, key
 The tree of one spec's work: its Spec Page, Epics, Stories and Sub-tasks, plus its Scope Tier. It is what the pipeline publishes to the Tracker, and how it reads the spec back.
 _Avoid_: backlog dump, ticket tree
 
+**Local Files mode**:
+The repo state with no Tracker configured: specs, plans and progress are Markdown files in the repo.
+
+**Ledger root**:
+The main checkout of the repo, where every spec's progress ledger and offline queue live, whichever worktree the agent works in.
+
+**Tracker queue**:
+The list of events the pipeline could not send while the Tracker was unreachable. They are sent on the next successful read.
+
+**Plan section**:
+The part of a Spec Page that holds the plan-level content of a spec's plan, kept apart from the spec's shared context.
+
 **Jira Mode**:
 The repo state in which the configured Tracker is Jira.
 _Avoid_: Jira sync, Jira integration
@@ -29,7 +41,7 @@ Documents that agents read alongside the code and that always stay in the repo, 
 _Avoid_: project docs, agent docs
 
 **Spec Page**:
-The Confluence page that holds a spec's shared context (overall problem, global decisions, cross-Epic test seams) and that every Epic from that spec links to.
+The page in the Tracker's document space that holds a spec's shared context (overall problem, global decisions, cross-Epic test seams) and that every Epic from that spec links to.
 _Avoid_: master spec, design doc
 
 **Backlog**:
@@ -52,12 +64,13 @@ The testable checks written on a Story that `/verify` proves before the Story is
 
 **Bug**:
 A defect found outside the Stories currently being built, held in the Backlog for the Product Owner to schedule. A defect inside current work is fixed in its Sub-task and is not a Bug.
-_Avoid_: defect, issue
+Its event name in the pipeline is `defect`.
+_Avoid_: issue
 
 ## Iterating
 
 **Sprint**:
-A time-boxed iteration that the Product Owner creates and fills in Jira. The build → review → verify → finish loop runs once per Sprint, and the thinking phases run once per spec.
+A time-boxed iteration that the Product Owner creates and fills in the Tracker. The build → review → verify → finish loop runs once per Sprint, and the thinking phases run once per spec.
 
 **Product Owner**:
 The user, who decides what goes into each Sprint. The agent only proposes a grouping.

@@ -74,8 +74,10 @@ Create files and directories lazily, only when there is something to write. Proj
 | Specs | `docs/specs/YYYY-MM-DD-slug.md` |
 | Small-tier plan | `docs/plans/YYYY-MM-DD-slug.md` |
 | Large-tier tickets | `docs/plans/YYYY-MM-DD-slug/NN-ticket-slug.md` (one file per ticket) |
-| Execution ledger (git-ignored scratch) | `.power-architect/<plan-slug>/progress.md` |
+| Execution ledger (git-ignored scratch) | `.power-architect/<plan-slug>/progress.md` (in Tracker mode `.power-architect/<spec-slug>/progress.md` under the main checkout; see [tracker.md](references/tracker.md) "Where") |
 | Retros (optional record) | `docs/retros/YYYY-MM-DD-slug.md` |
+
+In Local Files mode: If the user has an issue tracker configured (for example via Matt's `/setup-matt-pocock-skills`), publish specs and tickets there as the upstream skills do, and skip the local files.
 
 **Tracker.** When the repo configures a Tracker (see "How to run a phase"), the Tracker holds the specs, plans and progress in place of the files above. Knowledge Docs (the glossary, ADRs, DESIGN.md and AGENTS.md) and the ledger stay local.
 

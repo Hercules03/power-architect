@@ -51,7 +51,7 @@ The user runs the phase. When asked which option, they reply `2`.
 
 ## Then
 - Steps 1 to 4 run as before: the suite is run, the three options are presented, and the user's `2` is followed by `git push -u origin feat/login-lockout` and the PR, whose URL `https://github.com/acme/app/pull/42` is reported
-- Only after the PR URL is known, `record(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, shipped, https://github.com/acme/app/pull/42, base 9f8e7d6)` is called, once. finish makes no `pull` call
+- Only after the PR URL is known, `record(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, shipped, https://github.com/acme/app/pull/42 base 9f8e7d6)` is called, once. finish makes no `pull` call
 - The delivered Sub-tasks are taken from the spec ledger's `Task` lines whose commits are on this branch: PA-60, PA-61, PA-62. PA-63 (no `Task` line) is not among them. The bugs ledger's PA-70 is not read for this and gets nothing
 - The ledger gains the line `Shipped: https://github.com/acme/app/pull/42 — base 9f8e7d6 — Sub-tasks PA-60, PA-61, PA-62` before the first Rovo write
 - The parent Stories are read with `getJiraIssue` on PA-60, PA-61 and PA-62: PA-50, PA-50 and PA-51
