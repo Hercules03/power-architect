@@ -268,11 +268,11 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
 
 ### `outline`
 
-`scope` is a spec: its Spec Page's Work Ref (the page URL). Reads only; never write.
+`scope` is a spec: its Spec Page's Work Ref (the page URL). Reads only, apart from [Replay](#replay).
 
-1. **Reach Jira.** Call `atlassianUserInfo`. If it fails, stop: tell the user Jira can't be reached, so nothing was read, and that `/mcp` reconnects the Rovo MCP server.
+1. **Reach Jira.** Call `atlassianUserInfo`. If it fails, stop: tell the user Jira can't be reached, so nothing was read, and that `/mcp` reconnects the Rovo MCP server. Then [Replay](#replay) the queue before reading.
 2. **Spec Page.** `getConfluenceContent` on the page, with a Markdown body. If there is no such page, stop and report the unknown Work Ref (not an unreachable Tracker): tell the user to check the Work Ref and the ledger's first line. The body holds the shared context, then the `## Plan` section if plan ran, then the `## Work Refs` key table.
-3. **Recorded items.** The key table's rows, plus the rows of the ledger whose first line names this Spec Page (`.power-architect/<spec-slug>/progress.md`) that the table lacks, as publish's Re-run step 1.
+3. **Recorded items.** The key table's rows, plus the rows of the ledger whose first line names this Spec Page (`.power-architect/<spec-slug>/progress.md` under the ledger root, see [tracker.md](tracker.md#recordref-event-evidence)) that the table lacks, as publish's Re-run step 1.
 4. **Read** each recorded Epic, Story and Sub-task with `getJiraIssue` (`view: full`, Markdown): summary, description, status, parent and issue links.
 5. **Return** the Work Outline:
    - the Scope Tier, from the page's Scope Tier section
@@ -281,9 +281,9 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
 
 ### `subtask`
 
-`scope` is `sprint`, or a Work Ref: a Sub-task's, a Bug's or a Story's key. Reads only; never write.
+`scope` is `sprint`, or a Work Ref: a Sub-task's, a Bug's or a Story's key. Reads only, apart from [Replay](#replay).
 
-1. **Reach Jira**, as for `outline`. If it fails, stop: tell the user Jira can't be reached, so nothing was read and nothing should be built, and that `/mcp` reconnects the Rovo MCP server.
+1. **Reach Jira** and [replay](#replay) the queue, as for `outline`. If either stops, stop: tell the user Jira can't be reached, so nothing was read and nothing should be built, and that `/mcp` reconnects the Rovo MCP server.
 2. **Candidates.**
    - `sprint`: `getJiraBoardSprintData` with `boardId` the `board` value, with its issues. It reads the active Sprint by default: never pass a `sprintId` or `sprintName`. If `discover` does not find the tool, use `searchJiraIssuesUsingJql` with `project = <project> AND sprint in openSprints() AND issuetype in ("<type-subtask>", "<type-bug>")` (that this JQL works through Rovo is unverified). If there is no active Sprint, stop: tell the user there is no active Sprint to build, and that the Product Owner starts one in Jira. Keep the issues of type `type-subtask` or `type-bug`.
    - A Work Ref: `getJiraIssue` on it. If there is no such issue, stop and report the unknown Work Ref (not an unreachable Tracker): tell the user to check the Work Ref and the ledger's first line. A `type-subtask` or `type-bug` issue is the only candidate. For a `type-story` issue, the candidates are its Sub-tasks: `searchJiraIssuesUsingJql` with `parent = <key>`. For any other type, stop and tell the user build takes a Sub-task, a Bug or a Story.
@@ -334,4 +334,17 @@ Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence
 
 ### Jira unreachable during `record`
 
-Stop the phase at that point, and write nothing else. Tell the user Jira can't be reached, and exactly which items' `started` or `done` the Tracker has not recorded. A completion line already in the ledger stays, so the next build run records that `done` without rebuilding.
+Queue, never stop (the [queue rules](tracker.md#recordref-event-evidence) apply).
+1. **Behind an entry.** If the item has an unsent entry (`[ ]` or `[!]`) in any ledger's `## Tracker queue`, queue this event without calling Jira.
+2. **Unreachable.** If a Rovo call fails because Jira can't be reached, at any step, queue the whole event, even if an earlier step wrote something (replay does not repeat it: a status already in the target bucket is not moved again, and a `Done` comment already there is not added again). A refusal that is not "unreachable" (such as no transition into the wanted status) is not queued: [Moving an item](#moving-an-item) stops (during replay, the entry becomes `[!]`).
+3. **Queue** it: append `- [ ] q<N> | <event> | <ref> | <evidence on one line>` to the ledger's `## Tracker queue` (create the section if missing), then return `queued`. Escape the evidence as the [queue rules](tracker.md#recordref-event-evidence) say (`\` as `\\`, a literal ` | ` as ` \| `, newlines as `\n`). The ledger is the main checkout's, whichever worktree the agent is in. If a ledger is lost, its unsent events are lost: the item then shows as unfinished in the Tracker and a resume rebuilds it. So a build never deletes the main checkout's `.power-architect/`. For `done`, `<evidence>` is the commit lines and the `tests:` line, not the comment.
+4. The phase carries on. Say, at the end of the phase, which items' events are queued.
+
+### Replay
+
+First step of every `pull`, after step 1 (Reach Jira) and before anything is read.
+1. Collect the `- [ ]` entries of every ledger under the main checkout's `.power-architect/` (never a linked worktree's): ledgers in directory-name order, each in `q` order.
+2. Apply each as `record` does for its event, with the stored evidence (`done` writes the Done comment from the evidence), skipping an entry whose item has an earlier `- [!]` entry. Mark it `- [x]` on success.
+3. If a call fails because Jira can't be reached, stop replaying and stop the `pull` as its Reach Jira step does: read nothing; the rest stay `- [ ]`.
+4. If it fails for any other reason, mark it `- [!] … | failed: <reason>`, tell the user, and go on to the next entry. Say in that message how to clear it: after the cause is fixed, change the entry's marker to `- [ ]` to retry it, or to `- [x]` if it was applied by hand.
+5. Then carry on with the `pull`'s read.
