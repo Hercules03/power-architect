@@ -42,10 +42,10 @@ Shared by S1 and S2:
 
 - **Ledger.** Conversation memory doesn't survive compaction, and agents that lose their place re-do completed tasks. Keep `.power-architect/<plan-slug>/progress.md` (git-ignored). Its first line is `# Ledger — plan: <plan path>`. If a ledger already exists for this plan, tasks with a `Task <N>: complete` line are DONE; resume at the first task without one. Trust the ledger and `git log` over your own recollection.
   The ledger is the spec's ledger from the [Work list](#work-list-before-setup), with its first line kept, and each task is named by its Sub-task's Work Ref in place of `N`.
-  `Local:` As above.
+  `Local:` Keep `.power-architect/<plan-slug>/progress.md` (git-ignored) in the current checkout. Its first line is `# Ledger — plan: <plan path>`. If a ledger already exists for this plan, tasks with a `Task <N>: complete` line are DONE; resume at the first task without one.
 - **Read the plan and its spec once.** The spec is the binding authority, and the plan is its argument. Create one todo per task.
   Read them through `pull(<Spec Page Work Ref>, outline)`, as the [Work list](#work-list-before-setup) says, and take the tasks from the work list, in its order.
-  `Local:` As above.
+  `Local:` Read the plan and its spec once, from the plan and the spec file. The spec is the binding authority, and the plan is its argument. Create one todo per task.
 - **Pre-flight scan** before Task 1: for every pair of tasks that share a file or interface, write one ledger row with the two tasks, what one produces against what the other consumes, and what you found. Rule on each conflict and record the ruling beside its row. A plan whose tasks share nothing gets `Pre-flight: no shared interfaces`.
 - **Continuous execution.** Don't pause to check in between tasks.
 - **Rulings, not stalls.** Decide conflicts, ambiguities, and plan defects yourself, with the spec as the authority. Record each as `Ruling: <what you decided> — <why> — <what it costs if wrong>` and keep going.
@@ -75,7 +75,7 @@ Per task:
 6. **Complete:** add the ledger line `Task N: complete (commits a..b, review clean | K parked)` and mark the todo done.
 
    The line is `Task <Work Ref>: complete (commits a..b, review clean | K parked, tests: <cmd> → <result>)`, with the implementer's final test run. Then call `record(<Work Ref>, done, <evidence>)`.
-   `Local:` The line as above. No record.
+   `Local:` Add the ledger line `Task N: complete (commits a..b, review clean | K parked)` and mark the todo done. No record.
 
 **Model selection:** use the least capable model that can do the job. Mechanical 1–2 file tasks with a complete spec get a cheap model. Multi-file integration gets a standard model. Design judgment and the final review get the most capable model. Always name the model explicitly.
 
@@ -86,7 +86,7 @@ Per task: read the brief (not the whole plan) → work the steps in order, runni
 A task is complete only when every named test exists and ran, the final run passed, every `Expected:` line was checked, and every deviation has a `Ruling:` line. Then add the ledger line `Task N: complete (commits a..b, tests: <cmd> → <result>)`.
 
 Before a task's first step, call `record(<Work Ref>, started)`; its brief is its Sub-task's description, then its Story's Acceptance Criteria. The ledger line names the task by Work Ref; after it, call `record(<Work Ref>, done, <evidence>)`.
-`Local:` As above. No record.
+`Local:` Add the ledger line `Task N: complete (commits a..b, tests: <cmd> → <result>)`. No record.
 
 ### Final review (both S1 and S2)
 
@@ -98,7 +98,7 @@ Before a task's first step, call `record(<Work Ref>, started)`; its brief is its
 2. Dispatch **one fresh reviewer on the most capable model** with [prompts/code-reviewer.md](prompts/code-reviewer.md). Give it the plan's Review Focus verbatim, the spec path, and the ledger's `Ruling:` and deferred-minor lines. Without a subagent tool, do this review yourself as a separate pass, record `Final review: self-review` in the ledger, and tell the user it's weaker.
 
    The Review Focus is the Plan section's, verbatim, and the spec is `<workspace>/spec.md`.
-   `Local:` As above.
+   `Local:` Give it the plan's Review Focus verbatim, the spec path (`docs/specs/`), and the ledger's `Ruling:` and deferred-minor lines. Without a subagent tool, do this review yourself as a separate pass, record `Final review: self-review` in the ledger, and tell the user it's weaker.
 3. **Re-grade** findings by their effect on a real user. Critical and Important findings go into **one** fix pass: in S1 a single fix subagent with the full list plus one scoped re-review; in S2 you fix each one via a test that fails first, then a green suite. Minor findings go to the ledger. There is no second fix wave.
 4. **Report.** Your final message lists every `Ruling:` line under "Rulings I made" (each with what it costs if wrong) and every deferred minor under "Deferred minors". Then delete the workspace directory.
 
@@ -114,13 +114,13 @@ Recommend `/power-architect:verify`, then `/power-architect:finish`. `/power-arc
 
 1. Read the ticket (`docs/plans/<slug>/NN-*.md` or the tracker) and state its title before starting. If the reference is ambiguous, ask.
    The ticket is the one Sub-task in the work list, read with its spec through `pull` (see the [Work list](#work-list-before-setup)). Call `record(<Work Ref>, started)` before any work on it.
-   `Local:` As above. No record.
+   `Local:` Read the ticket (`docs/plans/<slug>/NN-*.md`) and state its title before starting. If the reference is ambiguous, ask. No record.
 2. Build it with TDD at the pre-agreed seams.
 3. Run typechecking regularly, single test files regularly, and the full suite once at the end.
 4. Run the `/power-architect:review` method on the work, then commit to the current branch.
 5. Mark the ticket done, show the passing output and a diff summary, and recommend the next frontier ticket.
    To mark it done, add the ledger line `Task <Work Ref>: complete (commits a..b, tests: <cmd> → <result>)`, then call `record(<Work Ref>, done, <evidence>)`. The next frontier ticket is a Sub-task of the outline whose blockers are all done, or have their `done` queued.
-   `Local:` As above. No ledger line and no record.
+   `Local:` Mark the ticket done, show the passing output and a diff summary, and recommend the next frontier ticket. No ledger line and no record.
 
 ### L2. The whole graph (Matt `implement-spec`)
 
@@ -128,7 +128,7 @@ The goal is the whole spec implemented on one **integration branch**. The ticket
 
 1. Read the spec and tickets to understand the graph.
    The tickets are the Sub-tasks in the work list, and the graph is their `blocks` edges: the first frontier is every item whose blockers are all done. Read the spec through `pull` (see the [Work list](#work-list-before-setup)).
-   `Local:` As above.
+   `Local:` Read the spec and tickets (`docs/specs/` and `docs/plans/<slug>/`) to understand the graph.
 2. Optionally run an **exploration subagent** that saves notes outside the repo, for later implementers to read.
 3. Create the integration branch. Open a draft PR after the first merge if the tracker closes work through PRs or the user asks for one.
 4. Give each frontier ticket a **fresh implementer subagent** in its own worktree and branch, run in the background for concurrency. Each one confirms its worktree is based on the integration branch (resetting onto it if not), builds the ticket with TDD, and merges the integration branch tip into its own branch before reporting done.
@@ -136,11 +136,11 @@ The goal is the whole spec implemented on one **integration branch**. The ticket
    `Local:` No record.
 5. When an implementer finishes, a **merger subagent** merges its work into the integration branch. If the frontier changed, start implementers for the newly ready tickets.
    Once the merger has merged a ticket, add its ledger line `Task <Work Ref>: complete (commits a..b, tests: <cmd> → <result>)`, then call `record(<Work Ref>, done, <evidence>)`. A ticket joins the frontier only when every blocker is merged and recorded done, or its `done` is queued.
-   `Local:` As above. No ledger line and no record.
+   `Local:` When an implementer finishes, a **merger subagent** merges its work into the integration branch. If the frontier changed, start implementers for the newly ready tickets. No ledger line and no record.
 6. When every ticket is done, run the `/power-architect:review` method on the integration branch, and fix everything it raises in **one** fresh implementer subagent.
 7. Mark the draft PR ready (or resolve the tickets), then clean up all worktrees.
    The Sub-tasks are already recorded done, or their `done` is queued: make no further Tracker call. Stories are closed by `/power-architect:verify`, never here.
-   `Local:` As above.
+   `Local:` Mark the draft PR ready (or resolve the tickets), then clean up all worktrees.
 
 Keep communication with subagents sparse: pass **context pointers** (spec, ticket, notes, commits) rather than copying their content.
 
