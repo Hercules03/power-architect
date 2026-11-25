@@ -31,7 +31,6 @@ Implements the [Tracker contract](tracker.md) for Jira Cloud, through the Atlass
 | `updateConfluenceContent` | replace the Spec Page body (hints: `contentId`, `body`) | `updateConfluencePage` | primary |
 | `createJiraIssue` | create an Epic, Story or Sub-task (hints: `projectKey`, issue type, `summary`, `description`, `parent`) | | primary |
 | `createJiraIssueLink` | add a "blocks" or "relates to" link (hints: link type name as `linkType` or `type`, `inwardIssue`, `outwardIssue`; parameters and their direction unverified, see [Links](#links)) | `createIssueLink` | `discover` |
-| `searchConfluence` | find an earlier Spec Page by title (hint: a CQL query; parameters unverified) | | primary |
 | `getConfluenceContent` | read the Spec Page body and key table (hint: page id or URL, Markdown body; parameters unverified) | `getConfluencePage` | primary |
 | `getJiraIssue` | read an item's summary, description, status, parent and issue links (hints: `issueIdOrKey`, `view: full` or those `fields`, `responseContentFormat: markdown`; that `view: full` returns the links is unverified, so ask for the links field if it does not) | | primary |
 | `listJiraIssueComments` | an item's comments (hint: `issueIdOrKey`) | | primary |
@@ -103,8 +102,8 @@ Make these calls in this order, one at a time. Pass `cloudId` on each Jira and C
 
 1. **Reach Jira.** Call `atlassianUserInfo`. If it fails, stop and write nothing. Tell the user Jira can't be reached, so nothing was published, and that `/mcp` reconnects the Rovo MCP server. Return an empty map.
 2. **Format.** If `discover` finds `getContentFormatGuide`, read it once and follow it for tables and task lists.
-3. **Earlier publish.** If the outline names the Spec Page's Work Ref, this is a re-run: go to [Re-run](#re-run). Otherwise `searchConfluence` for a page with the spec's title in the space `confluence-space` (for example CQL `space = "<confluence-space>" AND type = page AND title = "<spec title>"`). If it finds one, show the user its title and URL, ask whether it is this spec's Spec Page, and write nothing until they answer. Yes: go to Re-run with that page. No, or no page found: carry on with step 4.
-4. **Spec Page.** `createConfluenceContent`: `contentType` `page`, `title` the spec's title, `parent` {`spaceId`: `confluence-space-id`}, `body` {`format`: `markdown`, `value`: the Spec Page body}. No key table yet.
+3. **Earlier publish.** If the outline names the Spec Page's Work Ref, this is a re-run: go to [Re-run](#re-run). Otherwise this is a first publish: make no search call, and carry on with step 4.
+4. **Spec Page.** `createConfluenceContent`: `contentType` `page`, `title` the spec's title, `parent` {`spaceId`: `confluence-space-id`}, `body` {`format`: `markdown`, `value`: the Spec Page body}. No key table yet. If the create is rejected as a duplicate title, stop here: see Duplicate title below.
 5. **Epics.** For each new Epic, in outline order, `createJiraIssue`: project `project`, issue type `type-epic`, `summary` its name, `contentFormat` `markdown`, `description`:
    - its slice of the goals and decisions
    - `Spec Page: <page URL>`
@@ -130,7 +129,9 @@ Make these calls in this order, one at a time. Pass `cloudId` on each Jira and C
    One row per item created from this spec: the Spec Page, then the Epics, then the Stories, in outline order. Sub-task rows are appended below them later. This table is how a re-run finds each item.
 8. **Return** the outline id → Work Ref map (the table's rows) and empty `held` and `declined` lists. Tell the user the Spec Page URL and the Epics and Stories created, with their keys.
 
-**A call fails after step 1.** Stop at once. Make no further call: no retry and no key table. If the Spec Page create itself failed, nothing was created: tell the user nothing was published. Otherwise tell the user the spec is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not. Return the created items as the map, so the phase records them. On a re-run, the map also holds every recorded item.
+**A call fails after step 1.** Stop at once. Make no further call: no retry and no key table. If the Spec Page create itself failed (other than as a duplicate title, below), nothing was created: tell the user nothing was published. Otherwise tell the user the spec is only partly published, with a table of what was created (outline id, kind, Work Ref) and a list of what was not. Return the created items as the map, so the phase records them. On a re-run, the map also holds every recorded item.
+
+**Duplicate title.** The Spec Page create is rejected as a duplicate title when the Tracker refuses it because a page with that title already exists in the space `confluence-space`. Only that rejection counts. Its wording is unverified, so treat a rejection whose reason says the title is taken, or that a page with it already exists in that space, as this case. Any other create failure is handled above. A duplicate-title rejection is the first write's failure, so nothing else has been written: make no further call, return the failure with the title to the phase, and write nothing. The phase asks the user (to-spec step 7). A Work Ref or URL the user gives makes the run a re-run from that page. A new title is put in the outline, and the create is retried once with it.
 
 ### Re-run
 

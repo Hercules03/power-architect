@@ -246,7 +246,7 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
 ## Known deviations from this spec
 
 - A Story with "no Sub-tasks planned" is not verifiable, so verify skips it.
-- A first publish makes one Spec Page search read, to avoid creating a duplicate page.
+- A first publish makes no Tracker search. Its only guard against a duplicate Spec Page is the create's duplicate-title rejection, which makes the phase ask the user one question before any other write.
 - The Local-mode sentence about an issue tracker configured through `/setup-matt-pocock-skills` is retained in SKILL.md, not replaced by a pointer.
 
 ## Resolved decisions
