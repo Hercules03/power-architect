@@ -107,7 +107,7 @@ The link-create tool's schema is deliberately ambiguous about link direction (as
 ## When
 The user runs `/power-architect:plan` and replies in order:
 1. at the quiz: "approved";
-2. if shown a change summary and asked to go ahead: "go ahead".
+2. if shown a change summary and asked to go ahead: "go ahead"; to the redraft question ("Redraft any item? ..."): "no".
 
 ## Then
 - The agent finds the Spec Page from the ledger and calls `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001, outline)` before drafting. It returns the Plan section and the 5 Sub-tasks with their status, parent Story and "blocks" links
@@ -116,7 +116,7 @@ The user runs `/power-architect:plan` and replies in order:
 - The MCP calls are reads only: connection checks, `getConfluenceContent` on page 4001, `getJiraIssue` reads (`discover`, `getContentFormatGuide`, `listJiraIssueLinkTypes` and `listJiraIssueComments` reads may also appear)
 - No write call of any kind: no `createJiraIssue`, `createJiraIssueLink`, `editJiraIssue`, `addOrEditJiraIssueComment` or `updateConfluenceContent`
 - PA-30 (Done) and PA-31 (In Progress) get no comment
-- The agent tells the user nothing changed and the Tracker is already up to date; `held` is empty
+- The agent tells the user nothing changed and the Tracker is already up to date, and offers the one redraft line; `held` is empty
 - The ledger still has its first line and the same 17 rows. Nothing is written under `docs/plans/`
 - No question is asked to the user about link direction, and no write happens, because no `blocks` link is created on this unchanged re-run
 - No Sprint or board call, no transition, no `executeDestructive` call

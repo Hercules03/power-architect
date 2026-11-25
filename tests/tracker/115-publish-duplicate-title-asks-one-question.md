@@ -76,7 +76,7 @@ The user runs `/power-architect:to-spec` and replies in order:
 4. at the spec gate: "approved".
 
 The Spec Page title is "Team invites", and its create is rejected as a duplicate title. The user then answers the duplicate-title question, in one of two variants that start from the same state:
-- Variant A: the user answers with the existing page's URL, "https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001".
+- Variant A: the user answers with the existing page's URL, "https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001", and then answers "no" to the redraft question.
 - Variant B: the user answers with a new title, "Team invites v2".
 
 ## Then
@@ -92,7 +92,7 @@ The Spec Page title is "Team invites", and its create is rejected as a duplicate
 
 Variant A (the user answers with the existing page's URL):
 - Variant A: The run is a re-run with page 5001 as the Spec Page: `getConfluenceContent` on page 5001 and `getJiraIssue` on PA-40 … PA-42
-- Variant A: The agent says the Tracker is already up to date, writes nothing, and asks no go-ahead
+- Variant A: The agent says the Tracker is already up to date, writes nothing, and asks only the redraft question (answered "no")
 - Variant A: No `createConfluenceContent` is retried, and no `createJiraIssue` or `updateConfluenceContent` is called (nothing changed)
 - Variant A: The ledger `.power-architect/2026-11-24-team-invites/progress.md` is written: first line `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001`, then the 4 Work Refs from the key table (the Spec Page, PA-40, PA-41, PA-42)
 

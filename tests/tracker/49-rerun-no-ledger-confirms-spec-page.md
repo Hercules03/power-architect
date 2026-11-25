@@ -84,13 +84,14 @@ The user runs `/power-architect:to-spec` and says up front: "The spec's Spec Pag
 1. confirms the proposed test seam;
 2. accepts the Large tier;
 3. to any builder-check questions: "your call on all of them";
-4. at the spec gate: "approved" (Invitations (1, 2), Membership (3, 4)).
+4. at the spec gate: "approved" (Invitations (1, 2), Membership (3, 4));
+5. to the redraft question ("Redraft any item? ..."): "no".
 
 ## Then
 - No MCP call of any kind is made before the user's "approved"
 - No search call of any kind is made (no `searchConfluence`, no CQL or JQL query); the page named by the user is the Spec Page
 - After "approved": `getConfluenceContent` on page 5001 and `getJiraIssue` on PA-40 … PA-45
-- The agent says the Tracker is already up to date, writes nothing, and asks no go-ahead
+- The agent says the Tracker is already up to date, writes nothing, and asks only the redraft question (answered "no")
 - No write call of any kind: no `createConfluenceContent`, `createJiraIssue`, `editJiraIssue`, `addOrEditJiraIssueComment` or `updateConfluenceContent` (nothing changed)
 - The ledger `.power-architect/2026-11-24-team-invites/progress.md` is written: first line `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001`, then the 7 Work Refs from the key table
 - No Sprint or board call, no transition, and no `executeDestructive` call

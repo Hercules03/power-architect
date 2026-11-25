@@ -124,7 +124,7 @@ The user runs `/power-architect:to-spec` and replies in order:
 2. accepts the Large tier;
 3. to any builder-check questions: "your call on all of them";
 4. at the spec gate: "approved" (grouping Invitations (1, 2), Membership (3));
-5. if asked to go ahead with a change summary: "go ahead".
+5. if asked to go ahead with a change summary: "go ahead"; to the redraft question ("Redraft any item? ..."): "no".
 
 ## Then
 - No MCP call of any kind is made before the user's "approved"
@@ -132,6 +132,6 @@ The user runs `/power-architect:to-spec` and replies in order:
 - The MCP calls are reads only: a connection check, `getConfluenceContent` on page 5001, and `getJiraIssue` on PA-40 … PA-44 (a `discover`, `getContentFormatGuide` or `listJiraIssueComments` read may also appear). There is no `searchConfluence` call
 - Zero write calls: no `createConfluenceContent`, `createJiraIssue`, `editJiraIssue`, `addOrEditJiraIssueComment` or `updateConfluenceContent`
 - No item is listed as updated, re-parented or held because of wording or formatting: PA-42 and PA-44 (To Do) are not rewritten, and PA-43 (Done) gets no comment
-- The agent tells the user nothing changed and the Tracker is already up to date; `held` is empty
+- The agent tells the user nothing changed and the Tracker is already up to date, and offers the one redraft line; `held` is empty
 - The ledger still has its first line and the same 6 Work Refs
 - No Sprint or board call, no transition, and no `executeDestructive` call

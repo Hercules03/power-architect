@@ -71,13 +71,13 @@ The user runs `/power-architect:plan` and replies in order:
 1. when asked to review the plan and pick an execution method: "approved, subagent-driven";
 2. if shown a change summary and asked to go ahead: "go ahead".
 
-Then, in a new session, the user runs `/power-architect:plan` a second time with nothing changed, and gives the same replies 1–2.
+Then, in a new session, the user runs `/power-architect:plan` a second time with nothing changed, and gives the same replies 1–2, and answers "no" to the redraft question.
 
 ## Then
 - First run: the writes are two Sub-task creates under PA-50 (PA-60, PA-61), one `Blocks` link (`outwardIssue` PA-60, `inwardIssue` PA-61), and one `updateConfluenceContent` on page 6001 last, whose body is the shared context as read, then a `## Plan` section holding the Goal, Architecture, Tech Stack, Global Constraints and Review Focus, then the key table with the Sub-task rows `1 | Sub-task | PA-60 | …` and `2 | Sub-task | PA-61 | …`
 - Second run: the agent finds the Spec Page from the ledger and calls `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, outline)` before drafting. Its reads include `getConfluenceContent` on page 6001 and `getJiraIssue` on PA-50, PA-60 and PA-61
 - Second run: `pull` returns the Spec Page with its `## Plan` section (the Goal "Lock an account for 15 minutes after five failed logins within 10 minutes." among it), Story PA-50, and Sub-tasks PA-60 and PA-61, each with status To Do, parent PA-50, and the link PA-60 blocks PA-61
 - Second run: the plan the agent shows for review takes the Goal, Architecture, Tech Stack, Global Constraints and Review Focus from that Plan section, and each task's title, files and steps from PA-60 and PA-61 as read (Task 1 is still titled "Failed-login counter")
-- Second run: no MCP write call of any kind (no `createJiraIssue`, `createJiraIssueLink`, `editJiraIssue`, `addOrEditJiraIssueComment` or `updateConfluenceContent`). The agent tells the user the Tracker is already up to date
+- Second run: no MCP write call of any kind (no `createJiraIssue`, `createJiraIssueLink`, `editJiraIssue`, `addOrEditJiraIssueComment` or `updateConfluenceContent`). The agent tells the user the Tracker is already up to date, and offers the one redraft line
 - The ledger lists the same 4 rows after both runs
 - No `docs/plans/` file is written in either run; no Sprint or board call, no transition, no `executeDestructive` call
