@@ -186,7 +186,7 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
   - Reviewers get the spec and plan through `pull(spec, outline)`.
   - A Bug in the work list is fixed with the debug method (a regression test first), with `record(started)` and `record(done)` on the Bug.
   - `record(started)` runs before an implementer is dispatched.
-  - `record(done, evidence)` runs after the ledger completion line is written and the item's review has passed: after the task review in S1 and L1; for S2, L2 and Bug builds, for every item built in the run after the spec's final review and its one fix pass (the Bug review, for Bugs), and not at all while a Critical or Important finding stays open. Ledger lines `Final review: passed (spec <Spec Page Work Ref>)` and `Bug review: passed` let a resume tell whether `done` may fire.
+  - `record(done, evidence)` runs after the ledger completion line is written and the item's review has passed: after the task review in S1 and L1; for S2, L2 and Bug builds, for every item built in the run after the spec's final review and its one fix pass (the Bug review, for Bugs), and not at all while a Critical or Important finding stays open. Ledger lines `Final review: passed (spec <Spec Page Work Ref>)` and `Bug review: passed (<Bug ref>)` let a resume tell whether `done` may fire. An S2 or L2 `Task` line carries the token `S2` or `L2`, and a resume classifies items by those tokens only (an S1 line, `review clean`, is never deferred). The final review's fix pass is recorded as `Fix (spec <Spec Page Work Ref>): commits a..b`, and the final review diffs the union of the spec's `Task` and `Fix` ranges.
   - The ledger gains a `## Tracker queue` section.
 - **debug** clean-up: `record(ref?, defect)`. **review** "acting on" steps always pass the current item's ref, so they only comment and never file a Bug (user story 36).
 - **verify:** `pull(spec, story)`, check each Story's Acceptance Criteria, then `record(story, done)`.
@@ -248,4 +248,7 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
 - A Story with "no Sub-tasks planned" is not verifiable, so verify skips it.
 - A first publish makes one Spec Page search read, to avoid creating a duplicate page.
 - The Local-mode sentence about an issue tracker configured through `/setup-matt-pocock-skills` is retained in SKILL.md, not replaced by a pointer.
+
+## Resolved decisions
+
 - Resolved (user decision 2026-11-25): S2, L2 and Bug builds used to record Done right after the ledger line, before any review of the item, which conflicted with user story 28. Done is now deferred until after the spec's final review and its single fix pass (the Bug review, for Bugs); an open Critical or Important finding withholds it.
