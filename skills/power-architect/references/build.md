@@ -13,7 +13,8 @@ A step with a `Local:` line below it reads two ways. With a Tracker configured, 
 - `pull` returns the ready items in `blocks` order, blockers first, each with its Work Ref, title, description, Story, its spec's Spec Page Work Ref and Scope Tier. Tell the user each item in its `blocked` list, with its blocker; never build one.
 - If `pull` stops, stop the phase: set nothing up, build nothing, write nothing. If the Tracker was unreachable, tell the user nothing was built, and to re-run `/power-architect:build` once it is reachable. If the Work Ref is unknown, ask the user to check it and the ledger's first line.
 - **One spec at a time.** After Setup, group the items by Spec Page Work Ref, and finish one spec's items, through its final review, before the next spec's. For each spec:
-  - **Its ledger** is `.power-architect/<spec-slug>/progress.md`, the one whose first line is `# Ledger — spec: <Spec Page Work Ref>` (to-spec and plan wrote it). Without one, write it: that first line, with `<spec-slug>` today's date and the spec title's slug. Every "ledger" below means this file. A ledger line names its Sub-task by Work Ref: `Task <Work Ref>: …`.
+  - **Its ledger** is `<ledger root>/.power-architect/<spec-slug>/progress.md`, the one whose first line is `# Ledger — spec: <Spec Page Work Ref>` (to-spec and plan wrote it). Without one, write it: that first line, with `<spec-slug>` today's date and the spec title's slug. The **ledger root** is the main checkout, not a linked worktree: the parent directory of `git rev-parse --git-common-dir`, resolved to an absolute path. Ledgers and their queues live in the ledger root's `.power-architect/`, so a queue written from a worktree survives it; never delete that directory during a build. Every "ledger" below means this file. A ledger line names its Sub-task by Work Ref: `Task <Work Ref>: …`.
+    `Local:` The ledger stays where it is today: `.power-architect/<plan-slug>/progress.md` in the current checkout, as below.
   - **Read the spec and plan once:** `pull(<Spec Page Work Ref>, outline)`. Its shared context is the spec, and its Plan section is the plan header (Global Constraints, Review Focus). A Large-tier Plan section is a ticket overview with no Review Focus. Write the outline to `<workspace>/spec.md` and give that path to every reviewer in place of a spec or plan path. Each Sub-task's description is its task (Small) or its ticket (Large), and its Story's Acceptance Criteria come with it.
   - **Route by its Scope Tier:** Small runs S1 or S2. Large runs L1 for one Sub-task and L2 for more.
 - **Resume.** An item whose ledger already has a `Task <Work Ref>: complete` line is never rebuilt. `pull` returned it, so the Tracker has not recorded it done: call `record(<Work Ref>, done, <evidence>)` once, with the evidence from that line, before any other work. If the ledger's `## Tracker queue` already holds an unsent `done` for it, call nothing: replay delivers it.
@@ -114,7 +115,7 @@ Recommend `/power-architect:verify`, then `/power-architect:finish`. `/power-arc
 3. Run typechecking regularly, single test files regularly, and the full suite once at the end.
 4. Run the `/power-architect:review` method on the work, then commit to the current branch.
 5. Mark the ticket done, show the passing output and a diff summary, and recommend the next frontier ticket.
-   To mark it done, add the ledger line `Task <Work Ref>: complete (commits a..b, tests: <cmd> → <result>)`, then call `record(<Work Ref>, done, <evidence>)`. The next frontier ticket is a Sub-task of the outline whose blockers are all done.
+   To mark it done, add the ledger line `Task <Work Ref>: complete (commits a..b, tests: <cmd> → <result>)`, then call `record(<Work Ref>, done, <evidence>)`. The next frontier ticket is a Sub-task of the outline whose blockers are all done, or have their `done` queued.
    `Local:` As above. No ledger line and no record.
 
 ### L2. The whole graph (Matt `implement-spec`)
@@ -130,11 +131,11 @@ The goal is the whole spec implemented on one **integration branch**. The ticket
    Call `record(<Work Ref>, started)` for each ticket just before its implementer is dispatched.
    `Local:` No record.
 5. When an implementer finishes, a **merger subagent** merges its work into the integration branch. If the frontier changed, start implementers for the newly ready tickets.
-   Once the merger has merged a ticket, add its ledger line `Task <Work Ref>: complete (commits a..b, tests: <cmd> → <result>)`, then call `record(<Work Ref>, done, <evidence>)`. A ticket joins the frontier only when every blocker is merged and recorded done.
+   Once the merger has merged a ticket, add its ledger line `Task <Work Ref>: complete (commits a..b, tests: <cmd> → <result>)`, then call `record(<Work Ref>, done, <evidence>)`. A ticket joins the frontier only when every blocker is merged and recorded done, or its `done` is queued.
    `Local:` As above. No ledger line and no record.
 6. When every ticket is done, run the `/power-architect:review` method on the integration branch, and fix everything it raises in **one** fresh implementer subagent.
 7. Mark the draft PR ready (or resolve the tickets), then clean up all worktrees.
-   The Sub-tasks are already recorded done: make no further Tracker call. Stories are closed by `/power-architect:verify`, never here.
+   The Sub-tasks are already recorded done, or their `done` is queued: make no further Tracker call. Stories are closed by `/power-architect:verify`, never here.
    `Local:` As above.
 
 Keep communication with subagents sparse: pass **context pointers** (spec, ticket, notes, commits) rather than copying their content.

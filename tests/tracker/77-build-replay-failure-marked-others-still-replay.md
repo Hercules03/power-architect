@@ -60,4 +60,5 @@ The user runs `/power-architect:build PA-61`.
 - Replay continues: q2 is for the same item PA-60 and is not sent (stays `- [ ]`, no comment, no transition on PA-60), but q3 (PA-61 done) is sent: one `Done` comment and one transition `41` on PA-61, and q3 becomes `- [x] q3`
 - Replay did not hit UNREACHABLE, so `pull(PA-61, subtask)` proceeds: it finds PA-61 Done and nothing to build, and the agent says so
 - The agent tells the user q1 failed and q2 is held behind it, with the reason, and that someone must resolve PA-60's status before they can send
+- The user-facing report of the `[!]` entry names the way out: after the cause is fixed, change the entry's marker to `- [ ]` to retry it, or to `- [x]` if it was applied by hand
 - No write on PA-60 other than the refused transition attempt. No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call, and no `transitionJiraIssue` passes `sprintId`, `assignToBacklog`, `boardId` or `fields`.

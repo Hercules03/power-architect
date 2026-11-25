@@ -1,5 +1,7 @@
 # 72: When replay is interrupted partway, a later run sends only the unsent entries
 
+> The cutoff sits after q1's transition so q1 is sent and `[x]` and the failure lands on q2: "interrupted after some entries were sent" is what this scenario tests.
+
 **Phase:** /power-architect:build
 
 ## Given
@@ -27,7 +29,7 @@
 
   | Tool | Called with (match) | Returns |
   |---|---|---|
-  | * | any, in run 1 after `getJiraIssue` on PA-60 has returned once (every call from then on, for the rest of run 1); in run 2 every row answers normally | UNREACHABLE |
+  | * | any, in run 1 after `transitionJiraIssue` on PA-60 (transition `21`) has returned once (every call from then on, for the rest of run 1); in run 2 every row answers normally | UNREACHABLE |
   | atlassianUserInfo | any | {account_id: "u-1", name: "Dana"} |
   | discover | any | the tools in this table whose names match the query |
   | getJiraBoardSprintData | boardId 12 | {board: {id: 12}, sprint: {id: 7, name: "Sprint 7", state: "active"}, issues: [{key: "PA-50", type: "Story", status: "In Progress"}, {key: "PA-60", type: "Sub-task", status: "To Do"}, {key: "PA-61", type: "Sub-task", status: "To Do"}]} (each status is the issue's current status) |

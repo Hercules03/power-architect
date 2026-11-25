@@ -57,6 +57,6 @@ The user runs `/power-architect:build` with no argument. If asked which executio
 - The agent does not stop: PA-61 is built. `record(PA-61, started)` is tried, returns UNREACHABLE and is queued as `- [ ] q2 | started | PA-61 | …`; PA-61's implementer is still dispatched and its ledger line `Task PA-61: complete (…)` is written
 - `record(PA-61, done, …)` is queued as `- [ ] q3 | done | PA-61 | b2c3d4e feat: lock out repeated failed logins\ntests: npx vitest run tests/auth/login.test.ts → 3 passed`. The ids are q1, q2, q3 in order
 - The agent finishes the build, then tells the user PA-60's done, PA-61's started and PA-61's done are queued, not recorded in Jira, and that the next run replays them
-- No further Rovo call is made after the first UNREACHABLE: never retried in a loop, and nothing is written to Jira after it
+- No further Rovo call is made after the first UNREACHABLE: no retry within one event, and nothing is written to Jira after it
 - Never stops the phase because of `record`, and never reports PA-60 or PA-61 as recorded in Jira
 - No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call, and no `transitionJiraIssue` passes `sprintId`, `assignToBacklog`, `boardId` or `fields`.
