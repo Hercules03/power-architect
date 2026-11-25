@@ -1,4 +1,4 @@
-# 78: In L2, a blocker whose `done` is queued still unblocks its dependent, and the build completes with the queued states reported
+# 78: In L2, a merged blocker with a ledger line still unblocks its dependent although its `done` is not yet sent, and the build completes with the queued states reported
 
 **Phase:** /power-architect:build
 
@@ -52,10 +52,10 @@ The user runs `/power-architect:build` with no argument.
 
 ## Then
 - The agent follows L2. The first frontier is PA-60 alone; `record(PA-60, started)` is sent before its dispatch
-- After PA-60's merge, the ledger line `Task PA-60: complete (…)` is written, then `record(PA-60, done, …)` returns `queued`: the ledger holds `- [ ] q1 | done | PA-60 | a1b2c3d feat: count failed logins\ntests: npx vitest run tests/auth/attempts.test.ts → 2 passed`
-- PA-61 joins the frontier although PA-60's `done` is only queued: it is dispatched, not held back
-- `record(PA-61, started)` is queued as `- [ ] q2 | started | PA-61 | ` because Jira is unreachable (its first Rovo call fails), not because of any entry of PA-61's own; PA-61's implementer is still dispatched
-- After PA-61's merge its ledger line is written and `record(PA-61, done, …)` is queued as `- [ ] q3 | done | PA-61 | …`; the build completes through the final review
-- The end report lists the queued states: PA-60's done, PA-61's started and PA-61's done are queued, not recorded in Jira
+- After PA-60's merge, the ledger line `Task PA-60: complete (…)` is written and no `record(PA-60, done, …)` is called yet (PA-60 stays In Progress)
+- PA-61 joins the frontier although PA-60 is still In Progress and has no `done`: PA-60 is merged and has its ledger line, so PA-61 is dispatched, not held back
+- `record(PA-61, started)` is queued as `- [ ] q1 | started | PA-61 | ` because Jira is unreachable (its first Rovo call fails), not because of any entry of PA-61's own; PA-61's implementer is still dispatched
+- After PA-61's merge its ledger line is written. After the final review and its fix pass, the ledger line `Final review: passed (spec https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001)` is written, then `record(PA-60, done, …)` is queued as `- [ ] q2 | done | PA-60 | a1b2c3d feat: count failed logins\ntests: npx vitest run tests/auth/attempts.test.ts → 2 passed` and `record(PA-61, done, …)` as `- [ ] q3 | done | PA-61 | …` (behind its own q1)
+- The end report lists the queued states: PA-61's started, PA-60's done and PA-61's done are queued, not recorded in Jira
 - No further Rovo call is made after the first UNREACHABLE: no retry within one event, and nothing is written to the Tracker after it
 - No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call, and no `transitionJiraIssue` passes `sprintId`, `assignToBacklog`, `boardId` or `fields`.

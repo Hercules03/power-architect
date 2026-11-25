@@ -1,4 +1,4 @@
-# 66: `/build` on a Sprint of Large Sub-tasks runs L2: the frontier comes from "blocks" links, started before each dispatch, ledger line then done after each merge
+# 66: `/build` on a Sprint of Large Sub-tasks runs L2: the frontier comes from "blocks" links, started before each dispatch, ledger line after each merge, done only after the final review
 
 **Phase:** /power-architect:build
 
@@ -62,7 +62,7 @@ The user runs `/power-architect:build` with no argument.
 - `pull(sprint, subtask)` returns PA-30, PA-31, PA-32, PA-33, PA-34 in that order, each with tier Large and the Spec Page `https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001`; nothing is reported blocked
 - The agent follows L2 (the whole graph) and calls `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001, outline)` before the first dispatch. Nothing under `docs/specs/` or `docs/plans/` is read
 - The first frontier is PA-30 alone. `record(PA-30, started)` (transition `21` on PA-30) comes before PA-30's implementer dispatch, and no other Sub-task is started before PA-30's merge
-- Each Sub-task's `record(<key>, started)` comes just before its own implementer dispatch, and only after every one of its blockers has been merged and recorded done: PA-31 and PA-32 after PA-30's `record(done)`, PA-33 after PA-32's, PA-34 after PA-33's
-- For each Sub-task, after the merger merges it into the integration branch: a ledger line `Task <key>: complete (…)` naming its commit, then `record(<key>, done, …)` with one `addOrEditJiraIssueComment` on it (first line `Done`, its commit and `npm test` → `45 passed` in a fenced code block) and one `transitionJiraIssue` with transition `41`. No `record(done)` for a Sub-task comes before its merge
-- After every Sub-task is done, no further Tracker write: no transition, comment or edit on any Story or Epic (PA-10 … PA-18)
+- Each Sub-task's `record(<key>, started)` comes just before its own implementer dispatch, and only after every one of its blockers has been merged and has its ledger line (the blocker is still In Progress, since no `done` is sent yet): PA-31 and PA-32 after PA-30's merge and ledger line, PA-33 after PA-32's, PA-34 after PA-33's
+- For each Sub-task, after the merger merges it into the integration branch: a ledger line `Task <key>: complete (…)` naming its commit, with no `record(done)` yet. After every Sub-task is merged, the integration-branch review runs and its one fix pass; then the ledger line `Final review: passed (spec https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001)` is written, then `record(<key>, done, …)` for each of the five, each with one `addOrEditJiraIssueComment` on it (first line `Done`, its commit and `npm test` → `45 passed` in a fenced code block) and one `transitionJiraIssue` with transition `41`. No transition `41` and no `Done` comment comes before that review
+- After those five `record(done)` calls, no further Tracker write: no transition, comment or edit on any Story or Epic (PA-10 … PA-18)
 - No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call, and no `transitionJiraIssue` passes `sprintId`, `assignToBacklog`, `boardId` or `fields`

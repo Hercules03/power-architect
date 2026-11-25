@@ -56,5 +56,5 @@ The user runs `/power-architect:build` with no argument. If asked which executio
 - The chronological trace shows `record(PA-60, done, …)` before `record(PA-61, started)`, and `record(PA-61, done, …)` before `record(PA-70, started)`. Nothing for PA-70 happens before PA-61's `record(done)`
 - PA-60 and PA-61 are built by the Small-tier method with their ledger lines in `.power-architect/2026-11-24-login-lockout/progress.md`; PA-70's line `Task PA-70: complete (…)` is in `.power-architect/bugs/progress.md` (first line `# Ledger — bugs`), and not in the spec's ledger
 - The spec's final review is given only the commits `a1b2c3d` and `b2c3d4e`; `e5f6a7b` is not among them and the Bug has no spec axis
-- PA-70's regression test is run and fails before its fix, and each of the three has `record(<key>, started)` (transition `21`) and `record(<key>, done, …)` with a `Done` comment and transition `41`
+- PA-70's regression test is run and fails before its fix, and each of the three has `record(<key>, started)` (transition `21`) and `record(<key>, done, …)` with a `Done` comment and transition `41`. PA-60's and PA-61's `done` follow their own task reviews as before; PA-70's `done` comes only after the Bug review of `e5f6a7b` has run and the line `Bug review: passed` is in the bugs ledger
 - No write of any kind on PA-50; no Sprint or board write; no `createJiraIssue`
