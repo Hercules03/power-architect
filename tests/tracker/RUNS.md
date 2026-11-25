@@ -128,3 +128,13 @@ Locality check re-run at ticket 09 (head f92e040): ✅ no matches.
 | 2026-11-25 | 66 / 67 / 78 / 83 / 84 (timing lines updated for deferred Done) | ✅ 7/7, 6/6, 8/8, 8/8, 6/6 |
 
 Grading note: these were graded from fresh Haiku dry-run traces by Opus (rounds 1–3) and Sonnet (final round) reviewers. Scenarios marked NOT re-run were last graded before the S2 token, the `Fix` lines and the ask rule landed; re-run them before relying on them.
+
+## Cleanup round (2026-11-25): spec search removed, minors triaged, rules deduplicated
+
+| Change | Evidence |
+|---|---|
+| First publish makes no Spec Page search; duplicate-title create rejection asks one question; a user-given page must be a Spec Page | Scenarios 30, 31, 34, 36, 49 re-graded; new 115 (base, A, B) and 116 pass (Sonnet graders, Haiku traces) |
+| Deferred minors: 62 triaged (23 fixed, 5 obsolete, 34 real); 9 cheap text fixes and 8 scenario nits applied | Scenarios 01b, 22, 23, 26, 37, 58b, 81d re-traced and pass |
+| Rule dedupe: 24 of 34 safe copies replaced by pointers into `tracker.md` (48 one-clause restatements and 35 substantive copies kept); `tests/tracker/consistency.sh` added | 14 scenarios re-run (41b, 40c, 57, 58b, 79, 81d, 72, 74, 106, 94d, 96b, 97, 93, 81): 102/102 Then lines pass; `sh tests/tracker/consistency.sh` prints `consistency OK` |
+
+Not re-run in this round: 101, 108 and 109 (deferral scenarios last graded before the S2 token, Fix lines and ask rule).
