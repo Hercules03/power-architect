@@ -92,6 +92,8 @@ Opt-in. In Tracker mode Jira owns the work (specs, Epics, Stories, Sub-tasks, st
 
 **Ledger root:** ledgers and queues live in the main checkout's `.power-architect/` (git-ignored), never in a linked worktree's.
 
+**A deleted ledger loses work.** The ledgers and the offline queue live in the main checkout's `.power-architect/` folder (git-ignored). If that folder is deleted, unsent updates are lost: the Tracker shows those items as unfinished, and a later `/power-architect:build` rebuilds them from the Tracker. Keep the folder, and replay queued updates (any `pull`, such as `/power-architect:build`, does it) before you clean up.
+
 **Local mode is unchanged.** Scenario tests for both modes are in [`tests/tracker/README.md`](tests/tracker/README.md).
 
 ## Where the two methods disagree

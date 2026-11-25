@@ -164,5 +164,6 @@ After `publish` returns, replace the `## Work Refs` table of the ledger `.power-
 
 - If `publish` stops partway, record what it returned the same way and tell the user the plan is only partly published. Re-running plan finishes it without duplicates.
 - On a re-run, `publish` shows a change summary and waits for the user's go-ahead. Afterwards tell the user each `held` item with its reason. If `declined` is not empty, tell the user nothing was written and list the declined items.
+- On a re-run, the go-ahead also carries the redraft question: name items there to redraft them (see [tracker.md](tracker.md#publishoutline)).
 
 `Local:` No ledger is written here.
