@@ -80,6 +80,16 @@ Each row is one dry run, graded against the scenario's **Then**. A run counts on
 | 2026-11-25 | 84 / 84b (Sub-tasks then Bug; final review excludes a Bug commit) | 08 | ✅ 6/6, 3/3 (union of inclusive `a^..b` ranges) | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
 | 2026-11-25 | 85 / 85b / 85c (Local mode unchanged) | 08 | ✅ 4/4, 3/3, 4/4 | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
 | 2026-11-25 | 71 / 75 (ticket-07 scenarios, re-run on the merged result) | 08 | ✅ 8/8, 5/5 | graded from fresh dry-run traces (Haiku); ticket 08 merged with ticket 07 and needed 3 fix rounds |
+| 2026-11-25 | 90-verify-story-all-criteria-proven-done | 09 | ✅ 10/10 | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
+| 2026-11-25 | 91-verify-story-failing-criterion-stays-open | 09 | ✅ 8/8 | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
+| 2026-11-25 | 92-verify-unfinished-subtask-story-skipped | 09 | ✅ 7/7 (the skipped Story's criteria are left out of the checklist) | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
+| 2026-11-25 | 93-verify-unreachable-stops-at-pull | 09 | ✅ 7/7 | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
+| 2026-11-25 | 94 / 94b / 94c / 94d (repeat run; already Done; comment already there; different evidence) | 09 | ✅ 6/6, 5/5, 5/5, 5/5 | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
+| 2026-11-25 | 95-verify-record-unreachable-queues-and-carries-on | 09 | ✅ 7/7 | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
+| 2026-11-25 | 96 / 96b (finish links only delivered Stories; excludes a Sub-task already on the base) | 09 | ✅ 9/9, 6/6 | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
+| 2026-11-25 | 97-finish-unreachable-queues-and-merge-goes-ahead | 09 | ✅ 8/8 | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
+| 2026-11-25 | 98-finish-keep-branch-no-tracker-call | 09 | ✅ 5/5 | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
+| 2026-11-25 | 99 / 99b (Local mode verify / finish unchanged) | 09 | ✅ 5/5, 4/4 | graded from fresh dry-run traces (Haiku); ticket 09 needed 2 fix rounds |
 
 Locality check (`jira\|rovo\|mcp__\|atlassian\|confluence\|ADF` outside `tracker-jira.md`): ✅ no matches (2026-11-24, ticket 01).
 Locality check re-run at ticket 02 (head b3f6ccf): ✅ no matches.
@@ -89,3 +99,4 @@ Locality check re-run at ticket 05 (head 9ca0ef3): ✅ no matches.
 Locality check re-run at ticket 06 (head 6e62a92): ✅ no matches.
 Locality check re-run at ticket 07 (head 0d124a7): ✅ no matches.
 Locality check re-run at ticket 08 (head af70687): ✅ no matches.
+Locality check re-run at ticket 09 (head f92e040): ✅ no matches.

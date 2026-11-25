@@ -6,11 +6,11 @@
 
 **Blocked by:** 07
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Scenario: a Story with all Acceptance Criteria proven moves to Done, with evidence in a comment
-- [ ] Scenario: a Story with one failing criterion stays open, and verify reports the gap
-- [ ] Scenario: unreachable, so verify stops
-- [ ] Scenario: finish comments the link on only the Stories delivered in this branch, with no status change
-- [ ] Scenario: unreachable during finish, so the link comment is queued and the merge or PR still goes ahead
-- [ ] Local-mode regression and the locality grep check pass
+- [x] Scenario: a Story with all Acceptance Criteria proven moves to Done, with evidence in a comment
+- [x] Scenario: a Story with one failing criterion stays open, and verify reports the gap
+- [x] Scenario: unreachable, so verify stops
+- [x] Scenario: finish comments the link on only the Stories delivered in this branch, with no status change
+- [x] Scenario: unreachable during finish, so the link comment is queued and the merge or PR still goes ahead
+- [x] Local-mode regression and the locality grep check pass
