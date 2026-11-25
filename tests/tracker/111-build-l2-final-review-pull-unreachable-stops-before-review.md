@@ -1,4 +1,4 @@
-# 111: In L2, when the spec cannot be pulled for the final review, the build stops before the review: items stay In Progress, no marker, no Done
+# 111: In L2, an unreachable per-spec spec read stops the build before anything is built; a Tracker lost after that read does not stop the final review, which runs from the workspace spec and queues the deferred `done` events
 
 **Phase:** /power-architect:build
 
@@ -41,16 +41,24 @@
 - Ledger / local files:
   - Today is 2026-11-26, a new session. `.power-architect/2026-11-24-onboarding/progress.md` exists: first line `# Ledger — spec: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001`, then the `## Work Refs` table, `Task PA-30: complete (commits f0f0f01..f0f0f01, L2, tests: npm test → 45 passed)` and `Task PA-31: complete (commits f0f0f02..f0f0f02, L2, tests: npm test → 45 passed)`. No `Final review: passed` line. The previous session ended after the last merge.
   - The agent is in a linked worktree on branch `feat/onboarding`; both commits are on the integration branch. The baseline suite `npm test` passes.
-- Execution outcomes: every Tracker call up to and including the `pull(sprint, subtask)` that returns the work list succeeds (it returns PA-30 and PA-31, both In Progress). Every Tracker call after that returns UNREACHABLE (the stub row `* | any, once the work list has been returned | UNREACHABLE`). If the review ran, it would find nothing Critical or Important.
+- Execution outcomes: two variants of this dry run, each starting from the same files.
+  - (a) Every Tracker call up to and including the `pull(sprint, subtask)` that returns the work list succeeds (PA-30 and PA-31, both In Progress). Every call after that returns UNREACHABLE, including the per-spec `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001, outline)`.
+  - (b) Every Tracker call up to and including that per-spec `pull(..., outline)` succeeds. Every call after it returns UNREACHABLE (`record` returns `queued`). The final review finds nothing Critical or Important.
 - Trace: report dispatches, ledger writes, Tracker operations, MCP calls and any review diff command in one chronological list.
 
 ## When
 The user runs `/power-architect:build` with no argument.
 
 ## Then
-- `pull(sprint, subtask)` returns PA-30 and PA-31. Both `Task` lines carry the token `L2` and no `Final review: passed` line follows them, so they are deferred items whose review is missing: neither is rebuilt (no implementer or merger dispatch, no `record(started)`), and no `record(done)` fires
-- The agent goes to L2 step 6 and calls `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001, outline)` for the spec; it stops with the Tracker unreachable. The build stops BEFORE the final review: no review diff is written, and no reviewer or fix implementer is dispatched
-- No `Final review: passed` line is written, and no `Fix` line. No `record(PA-30, done, …)` and no `record(PA-31, done, …)` is called (no comment, no transition `41`); both stay In Progress and ledger-complete, with exactly one `Task` line each
+Variant (a):
+- `pull(sprint, subtask)` returns PA-30 and PA-31. The per-spec `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001, outline)` stops with the Tracker unreachable, so the whole build stops: nothing is built (no implementer or merger dispatch, no `record(started)`), no `<workspace>/spec.md` is written, no review diff, reviewer or fix implementer
+- Nothing is recorded: no `Final review: passed` line, no `Fix` line, no `record(PA-30, done, …)` and no `record(PA-31, done, …)` (no comment, no transition `41`); both stay In Progress with exactly one `Task` line each
 - No draft PR is marked ready, and the agent does not recommend `/power-architect:verify` or `/power-architect:finish`
-- The agent tells the user the final review did not run because the Tracker was unreachable, that PA-30 and PA-31 stay In Progress, and to re-run `/power-architect:build` once the Tracker is reachable
+- The agent tells the user nothing was built and to re-run `/power-architect:build` once the Tracker is reachable
 - No Rovo call is made after the first UNREACHABLE (no retry). No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call.
+
+Variant (b):
+- Both `Task` lines carry the token `L2` with no `Final review: passed` line, so they are deferred items with a missing review: neither is rebuilt, and the spec is written to `<workspace>/spec.md` by the per-spec read
+- L2 step 6 makes no second `pull` of the spec: the final review reads `<workspace>/spec.md` and runs on the diff of the UNION of `f0f0f01^..f0f0f01` and `f0f0f02^..f0f0f02`, with the Review Focus verbatim
+- Nothing Critical or Important is open, so `Final review: passed (spec https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001)` is written below the `Task` lines, and `record(PA-30, done, …)` and `record(PA-31, done, …)` are called once each; each returns `queued` and the ledger's `## Tracker queue` holds one `done` event for each, with its evidence
+- The agent tells the user the `done` events for PA-30 and PA-31 are queued, not yet in the Tracker. No Rovo call is made after the first UNREACHABLE (no retry). No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call.
