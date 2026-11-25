@@ -61,6 +61,16 @@ Each row is one dry run, graded against the scenario's **Then**. A run counts on
 | 2026-11-25 | 67-build-s2-inline-tracker | 06 | ✅ 5/5 (re-run) | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
 | 2026-11-25 | 68 / 68b (pull unreachable stops; blocker outside Sprint) | 06 | ✅ 7/7, 5/5 | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
 | 2026-11-25 | 69-build-two-specs-two-ledgers | 06 | ✅ 7/7 | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 70-build-jira-down-mid-build-queues | 07 | ✅ 9/9 | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 71-build-next-run-replays-queue-before-pull | 07 | ✅ 8/8 (re-run) | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 72-build-replay-interrupted-resends-only-unsent | 07 | ✅ 6/6 (stub cutoff corrected so q1 is sent and the failure lands on q2) | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 73-build-pull-unreachable-queues-nothing | 07 | ✅ 5/5 | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 74-build-later-record-never-overtakes-queued | 07 | ✅ 5/5 | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 75-build-resume-skips-done-already-queued | 07 | ✅ 5/5 (re-run) | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 76-build-partial-done-queues-whole-event | 07 | ✅ 6/6 | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 77-build-replay-failure-marked-others-still-replay | 07 | ✅ 6/6 (re-run; user told how to clear a [!] entry) | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 78-build-l2-blocker-done-queued-unblocks | 07 | ✅ after Then 7 reworded (it contradicted Then 4); not re-run | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
+| 2026-11-25 | 79-build-queue-pinned-to-main-checkout | 07 | ✅ 6/6 (queue written to the main checkout, replayed from there) | graded from fresh dry-run traces (Haiku); ticket 07 needed 2 fix rounds |
 
 Locality check (`jira\|rovo\|mcp__\|atlassian\|confluence\|ADF` outside `tracker-jira.md`): ✅ no matches (2026-11-24, ticket 01).
 Locality check re-run at ticket 02 (head b3f6ccf): ✅ no matches.
@@ -68,3 +78,4 @@ Locality check re-run at ticket 03 (head 8df444b): ✅ no matches.
 Locality check re-run at ticket 04 (head bacb2a7): ✅ no matches.
 Locality check re-run at ticket 05 (head 9ca0ef3): ✅ no matches.
 Locality check re-run at ticket 06 (head 6e62a92): ✅ no matches.
+Locality check re-run at ticket 07 (head 0d124a7): ✅ no matches.

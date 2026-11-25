@@ -9,9 +9,9 @@ The result: build keeps delivering through a Jira outage, and its updates arrive
 
 **Blocked by:** 06
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Scenario: Jira goes down mid-build, so the remaining started and done events are queued and the build completes
-- [ ] Scenario: the next run replays the queue in order before pulling, and each event lands exactly once
-- [ ] Scenario: replay is interrupted partway, so a re-run sends only the unsent entries
-- [ ] Scenario: build starts while Jira is unreachable, so `pull` stops and nothing is built on a guess
+- [x] Scenario: Jira goes down mid-build, so the remaining started and done events are queued and the build completes
+- [x] Scenario: the next run replays the queue in order before pulling, and each event lands exactly once
+- [x] Scenario: replay is interrupted partway, so a re-run sends only the unsent entries
+- [x] Scenario: build starts while Jira is unreachable, so `pull` stops and nothing is built on a guess
