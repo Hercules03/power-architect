@@ -129,13 +129,14 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
 - **Selection.** No `## Tracker` section means Local Files: follow the inline `Local:` line at each call. With `adapter: <name>`, follow that adapter's reference. A section that names an adapter that doesn't exist, or that is incomplete, stops the phase and recommends running setup.
 - **Work Ref.** An opaque name for a work item. Phases store and echo it and never parse it.
 - **`publish(outline)`**, called by to-spec and plan.
+  - On a re-run it shows the user a change summary and waits for a go-ahead inside `publish`, before the first write.
   - The Work Outline is: the Spec Page body, then Epics, then Stories with Acceptance Criteria, then Sub-tasks with `blocks` and `relates` edges, plus the tier.
   - It returns the outline ids mapped to Work Refs, and a `held` list of items it did not rewrite.
   - Invariants: it is called only after the gate approval; it upserts by recorded key; it is idempotent; it never rewrites an In Progress or Done item, commenting on it instead.
   - It stops when the Tracker can't be reached.
 - **`pull(scope, level)`**, called by build, verify, plan and review.
   - `scope` is `sprint`, a spec, or a Work Ref. `level` is `story`, `subtask` or `outline`.
-  - With `story` or `subtask`, it returns the unfinished items in "blocks" order, each with its body and Acceptance Criteria. Bugs in the scope come back alongside Sub-tasks.
+  - With `story` or `subtask`, it returns the unfinished items, each with its body and Acceptance Criteria. `story` returns the Stories in outline order, with whether each Story's Sub-tasks are all finished, and never Bugs. Only `subtask` uses "blocks" order, and it returns Bugs in the scope after the Sub-tasks.
   - With `outline`, it returns the whole spec as a Work Outline: the Spec Page (including its Plan section) plus every Epic, Story and Sub-task, finished or not. This is how plan, build's reviewers and review read the spec in Tracker mode.
   - It replays queued records first. It stops when the Tracker can't be reached.
 - **`record(ref?, event, evidence)`**, called by build, debug, review, verify and finish.
@@ -144,9 +145,13 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
     - `done`: Done, with an evidence comment.
     - `note`: a comment.
     - `defect`: with a ref, a comment on that item; without one, a Bug in the Backlog.
-    - `shipped`: a link comment on every Story of the spec, with no status change.
+    - `shipped`: a link comment on every Story of the spec, with no status change. Its evidence is `<link> base <sha>`.
+    - `declined`: not an event but a `publish` result: items the user declined at the change summary, which `publish` writes nothing for.
   - It is idempotent and keeps each item's events in order.
   - When the Tracker can't be reached, it returns `queued` and the event goes into the ledger's queue. Callers carry on.
+  - **Queue format:** each entry is `- [ ] q<N> | <event> | <ref> | <evidence>` in the ledger's `## Tracker queue`; a sent entry becomes `- [x]`. An event that fails for a reason other than an unreachable Tracker becomes `- [!] … | failed: <reason>`, is reported to the user, and blocks only later entries of the same item. The way out: after the cause is fixed, change `[!]` to `[ ]` to retry or to `[x]` if applied by hand.
+  - **Bugs ledger:** a `defect` with no ref queues in `.power-architect/bugs/progress.md`, and Bugs built from a Sprint are recorded there.
+  - **Ledgers are pinned to the main checkout** (the ledger root), never a linked worktree, so queues survive worktree deletion.
 - **Rule for every Tracker Adapter:** it touches no Sprint, writes no estimates, and implements the whole contract. A tracker that lacks a feature (such as sub-tasks) has that gap absorbed inside its adapter, never in a phase.
 
 **The Jira Tracker Adapter** is a new reference, and the only module that mentions Rovo, MCP tool names or ADF. It holds:
@@ -164,7 +169,7 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
   - the active Sprint read
   - Confluence page create and update
 - **The key table on the Spec Page**, used for the upsert.
-- **Markdown-to-ADF formatting.**
+- **Markdown** (`contentFormat: markdown`); never build ADF.
 - **The ledger's `## Tracker queue` section**: each entry has an id and is marked sent once replayed.
 
 **Setup command.** `/power-architect:setup-tracker <name>` runs that adapter's Install section. It is listed with the other commands in the skill's command table and the README.
@@ -193,7 +198,9 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
 
 **Builder's calls** (settled by the spec author; see the builder check):
 - **Ledger in Tracker mode:** the ledger is keyed by the spec's slug (`<spec-slug>` instead of `<plan-slug>`). Its first line names the Spec Page's Work Ref. build, verify and finish for that spec share it, including its `## Tracker queue`. A Sprint holding Sub-tasks from several specs uses one ledger per spec.
-- **Large-tier mapping:** each tracer-bullet ticket is one Sub-task. Its description holds the ticket's "what to build" and its acceptance criteria. Plan-level content (Goal, Architecture, Global Constraints, Review Focus) goes in a **Plan** section of the Spec Page, which build's reviewers read in place of the local plan header.
+- **Large-tier mapping:** each tracer-bullet ticket is one Sub-task. Its description holds the ticket's "what to build" and its acceptance criteria. The Large-tier **Plan** section of the Spec Page is a ticket table (`ticket | title | Blocked by`) with no Review Focus. The Small tier's Plan section carries Goal, Architecture, Tech Stack, Global Constraints and Review Focus. Build's reviewers read the Plan section in place of the local plan header.
+- **Spec Page layout:** the shared context first (including the Scope Tier), then `## Plan`, then the `## Work Refs` key table last. The ledger's `## Work Refs` is the fallback when the page has no key table.
+- **Drafts** live in git-ignored scratch under the ledger root (`.power-architect/<spec-slug>/`), never in the repo's tracked files.
 - **`shipped` coverage:** the Stories that have at least one Sub-task done in this branch. A spec is always named by its Spec Page's Work Ref.
 - **Structural changes on re-run:**
   - Each outline item's identity is the Work Ref recorded in the key table, not its number, so renumbering is harmless.
@@ -235,3 +242,10 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
 - ADR-0001 (Jira owns the work, the repo owns knowledge) and ADR-0002 (Rovo MCP only, no Sprint control) bind this spec.
 - Exact Rovo MCP tool names and parameters must be confirmed against Atlassian's current supported-tools page when the adapter is written. Tools differ between MCP v1 and v2.
 - The skill does not dogfood Jira Mode: this repo itself stays in Local Files mode.
+
+## Known deviations from this spec
+
+- S2, L2 and Bug builds record Done after the ledger line but before a per-item review (only the final review follows). User story 28 and the `record(done, evidence)` line under **build** conflict on this; the build follows the latter.
+- A Story with "no Sub-tasks planned" is not verifiable, so verify skips it.
+- A first publish makes one Spec Page search read, to avoid creating a duplicate page.
+- The Local-mode sentence about an issue tracker configured through `/setup-matt-pocock-skills` is retained in SKILL.md, not replaced by a pointer.
