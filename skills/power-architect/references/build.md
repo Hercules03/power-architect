@@ -18,7 +18,7 @@ A step with a `Local:` line below it reads two ways. With a Tracker configured, 
   - **Route by its Scope Tier:** Small runs S1 or S2. Large runs L1 for one Sub-task and L2 for more.
 - **Resume.** An item whose ledger already has a `Task <Work Ref>: complete` line is never rebuilt. `pull` returned it, so the Tracker has not recorded it done: call `record(<Work Ref>, done, <evidence>)` once, with the evidence from that line, before any other work.
 - **Evidence** for `record(done)`: every commit from `a` to `b` of the line's `commits a..b`, both included (`git log --oneline a^..b`), or the PR URL; then the test command and its result.
-- **If `record` stops**, stop the build there. Tell the user which items' starts and completions are not recorded in the Tracker. The ledger lines stand, and re-running `/power-architect:build` records them.
+- **If `record` stops**, stop the build there. Tell the user which items' starts and completions are not recorded in the Tracker. The ledger lines stand, and re-running `/power-architect:build` records them. In L2, wait for the running implementers and merge them, or tell the user which worktrees remain; their completed tickets get ledger lines but their `done` stays unrecorded until a later run.
 
 `Local:` No work list to pull. The argument (none, a ticket number, or `all`) and the plan or tickets choose the work, and the ledger is `.power-architect/<plan-slug>/progress.md`, as below.
 
@@ -85,7 +85,8 @@ Before a task's first step, call `record(<Work Ref>, started)`; its brief is its
 
 ### Final review (both S1 and S2)
 
-1. Write the whole-branch diff (`git merge-base main HEAD`..HEAD) to a file.
+0. If the work list held only resume items (nothing was built this run), skip the final review and say so.
+1. Write the diff of this spec's commits (the commits in its ledger's `Task` lines, not the whole-branch merge-base diff) to a file, and tell the reviewer which commits belong to the spec.
 2. Dispatch **one fresh reviewer on the most capable model** with [prompts/code-reviewer.md](prompts/code-reviewer.md). Give it the plan's Review Focus verbatim, the spec path, and the ledger's `Ruling:` and deferred-minor lines. Without a subagent tool, do this review yourself as a separate pass, record `Final review: self-review` in the ledger, and tell the user it's weaker.
 
    The Review Focus is the Plan section's, verbatim, and the spec is `<workspace>/spec.md`.

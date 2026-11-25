@@ -106,6 +106,7 @@ Called by build, debug, review, verify and finish.
   - A `defect` from review always passes the current item's `ref`.
 - **Errors:**
   - Tracker unreachable: the event goes into the ledger's `## Tracker queue` and the result is `queued`. **The phase carries on.** The next `pull` that reaches the Tracker replays the queue in order.
+  - An adapter that cannot queue stops the phase instead and reports which states are unrecorded.
 
 ## Every Tracker Adapter must
 

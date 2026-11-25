@@ -300,7 +300,15 @@ Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence
 1. **Read** the item with `getJiraIssue`: its status.
 2. **`started`.** If the status is in `status-in-progress` or `status-done`, do nothing (no transition, no comment) and return `ok`. Otherwise [move](#moving-an-item) it to the first status of `status-in-progress`.
 3. **`done`**, in this order. A Done item is never pulled again, so a crash between the two steps must leave the comment written and the move still to do:
-   1. **Comment.** The evidence comment is the first line `Done`, then one fenced code block holding one line per commit, `<short SHA> <subject>` (or one line `PR: <URL>`), then `tests: <command> → <result>`. Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Done` and a code block naming the same commits (or PR) and the same test command and result, compared as normalised text (publish [Re-run](#re-run) step 4). Then add none. Otherwise `addOrEditJiraIssueComment` with it, Markdown, and no `commentId`.
+   1. **Comment.** The evidence comment is exactly this, with the commit lines and the `tests:` line both inside the one fenced block:
+      ````
+      Done
+      ```
+      <short SHA> <subject>        (one line per commit, or one line `PR: <URL>`)
+      tests: <command> → <result>
+      ```
+      ````
+      Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Done` and a body containing every evidence commit SHA (or the PR URL) and the `tests:` line (command and result), compared as normalised text (publish [Re-run](#re-run) step 4) wherever those lines sit, inside or outside the fence. Then add none. Otherwise `addOrEditJiraIssueComment` with it, Markdown, and no `commentId`.
    2. **Move** it to the first status of `status-done`, unless its status is already in `status-done`.
 4. **Return** `ok`.
 
