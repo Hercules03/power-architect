@@ -1,5 +1,7 @@
 # 113: A re-run that also builds a new item for another spec does not absorb that spec's commits into the first spec's review or Done evidence
 
+This scenario is the single-attribution case that follows the user's answer (114 covers the two-commit case).
+
 **Phase:** /power-architect:build
 
 ## Given
@@ -31,9 +33,10 @@
 - Trace: report ledger writes, the later-commit computation, final-review diff commands and Tracker operations in one chronological list.
 
 ## When
-The user runs `/power-architect:build` with no argument. If asked which execution method to use, they reply "inline".
+The user runs `/power-architect:build` with no argument. If asked which execution method to use, they reply "inline". When asked which spec owns the uncovered commit, the user answers that `d5e6f7a` belongs to spec A (the first spec).
 
 ## Then
+- Because two specs lack a marker and one uncovered commit exists, the build asks which spec `d5e6f7a` belongs to before any write; after the answer no further question is asked
 - Spec A is processed first (PA-60 appears first in the work list). Before anything is built in this run, the agent computes spec A's later commits as the commits on `<merge-base with the base branch>..HEAD` covered by NO `Task` or `Fix` range in ANY ledger under the ledger root and not Bug commits: the set is exactly `d5e6f7a`, and the trace shows it computed before the first `record(PA-81, started)`
 - `Fix (spec https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001): commits d5e6f7a..d5e6f7a` is written to spec A's ledger first. Spec A's review diff is the union of `a1b2c3d`, `b2c3d4e`, `c4d5e6f` and `d5e6f7a`, and neither `9a8b7c6` (spec B's) nor `1f2e3d4` (built later) is in it
 - PA-60's and PA-61's `Done` evidence lists only spec A's commits: each item's own commit (`a1b2c3d` for PA-60, `b2c3d4e` for PA-61), then `c4d5e6f` and `d5e6f7a` (the `Fix` lines' `c4d5e6f..c4d5e6f` and `d5e6f7a..d5e6f7a`), then its `tests:` line; it lists neither `9a8b7c6` nor `1f2e3d4`
