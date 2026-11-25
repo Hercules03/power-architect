@@ -28,7 +28,7 @@
 - Ledger / local files: none relevant
 
 ## When
-The user runs `/power-architect:setup-tracker jira`. Each list has one entry, so the agent may use it and say so. When shown the proposed section and status mapping, the user replies "yes".
+The user runs `/power-architect:setup-tracker jira`. When shown the proposed section and status mapping, the user replies "yes".
 
 ## Then
 - `listJiraProjectIssueTypesMetadata` is called for project `MOB`, with the site's cloudId

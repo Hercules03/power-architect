@@ -22,11 +22,14 @@
 - Ledger / local files: none relevant
 
 ## When
-The user runs `/power-architect:setup-tracker jira`. Each list has one entry, so the agent may use it and say so. The user has not yet answered the status-mapping question.
+The user runs `/power-architect:setup-tracker jira`. The user has not yet answered the status-mapping question.
+
+Variant (the user replies "yes" to the proposed mapping): the run continues from there.
 
 ## Then
 - The agent tries the workflow tool (`getJiraWorkflows`); its failure does not stop setup
 - The agent falls back to the status list (`listJiraStatuses`) for the project
-- The agent shows a proposed To Do / In Progress / Done mapping in which each of the five statuses (Backlog, Selected for Development, Doing, Code Review, Shipped) appears under exactly one of To Do, In Progress or Done
+- The agent shows a proposed To Do / In Progress / Done mapping in which each of the five statuses (Backlog, Selected for Development, Doing, Code Review, Shipped) appears under exactly one bucket, as: Backlog → To Do; Selected for Development → To Do; Doing → In Progress; Code Review → In Progress; Shipped → Done
 - The agent asks the user to confirm or correct the mapping, and waits
 - No file is written before that answer: AGENTS.md has no `## Tracker` section and no CLAUDE.md is created
+- Variant "yes": AGENTS.md gains one `## Tracker` section (appended, with `adapter: jira`), in which `status-todo` lists Backlog and Selected for Development, `status-in-progress` lists Doing and Code Review, and `status-done` lists Shipped, each bucket comma-separated; no status appears in two buckets; no CLAUDE.md is created

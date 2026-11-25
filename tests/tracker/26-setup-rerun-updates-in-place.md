@@ -34,7 +34,7 @@
 - Ledger / local files: none relevant
 
 ## When
-The user runs `/power-architect:setup-tracker jira` again and picks project `PA` (other lists have one entry, which the agent may use and say so). When shown the proposed section and status mapping, the user replies "yes".
+The user runs `/power-architect:setup-tracker jira` again and picks project `PA`. When shown the proposed section and status mapping, the user replies "yes".
 
 ## Then
 - The agent finds the existing `## Tracker` section in CLAUDE.md and says it will be replaced

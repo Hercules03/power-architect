@@ -4,8 +4,8 @@ The spec keeps only the user-story sentences, and the earlier session's spec-dra
 reused slug path, so the Tracker text is the only record of the old drafts. Round 1's re-run step 4 compared
 "an Epic's name, slice and ADR links; a Story's title, user-story sentence, each Acceptance Criteria check"
 piece by piece against what it read. This session drafts them in different words that do not normalise equal
-("returns 201 and sends one invite email" vs "responds 201 and sends exactly one invitation"), so round 1
-updates PA-42, PA-44 and both Epics and comments on the Done PA-43. The fix compares only the approved
+("returns 201 and sends one invite email" vs "responds 201 and sends exactly one invitation"), so this can fail
+against the round-1 text, which compared drafted prose: round 1 would update PA-42, PA-44 and both Epics and comment on the Done PA-43. The fix compares only the approved
 user-story sentences, grouping and (when the user changed it this session) shared context.
 -->
 # 40c: A re-run in a new session makes no writes when only the agent's drafted titles, criteria and slices are worded differently
