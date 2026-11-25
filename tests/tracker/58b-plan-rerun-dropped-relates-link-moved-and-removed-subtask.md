@@ -46,8 +46,8 @@
   | PA-50 | Story | Lock out repeated failed logins | To Do | PA-5 | none |
   | PA-51 | Story | Show a lockout notice | To Do | PA-5 | none |
   | PA-60 | Sub-task | Failed-login counter | To Do | PA-50 | relates PA-51 (type `Relates`) |
-  | PA-61 | Sub-task | Lockout notice text | To Do | PA-50 | none |
-  | PA-62 | Sub-task | Clear the lock on reset | To Do | PA-50 | none |
+  | PA-61 | Sub-task | Lockout notice text | To Do | PA-50 | blocked by PA-60 (type `Blocks`) |
+  | PA-62 | Sub-task | Clear the lock on reset | To Do | PA-50 | blocked by PA-61 (type `Blocks`) |
 
   PA-5 is the user's existing Epic "Security"; it was not created from this spec. PA-50 and PA-51 are Stories under PA-5 for this spec.
 

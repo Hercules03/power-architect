@@ -57,7 +57,7 @@ The Spec Page title is "Team invites", and its create is rejected as a duplicate
 - No MCP call of any kind is made before the user's "approved"
 - No search call is made anywhere in the run: no `searchConfluence`, and no CQL or JQL query of any kind
 - The first Spec Page create (`createConfluenceContent`, title "Team invites") is the first write attempted, and it is rejected as a duplicate title; nothing else is written before the question
-- The first answer, a Jira issue URL, is not a Spec Page: the agent does not treat PA-40 as the Spec Page (no `getJiraIssue` makes it the Spec Page, and no re-run starts from it), and asks once more, word for word: "A page with this title already exists. Give me the Work Ref or URL of this spec's Spec Page: a page in the space PASPEC that has its key table (`## Work Refs`). Otherwise give a different title."
+- The first answer, a Jira issue URL, is not a Spec Page: the agent does not treat PA-40 as the Spec Page (no `getJiraIssue` makes it the Spec Page, and no re-run starts from it), and asks once more, offering the existing Spec Page's Work Ref or URL (a page in the space with its key table) or a different title
 - The agent waits for the answer; no write call is made before it
 - The second answer is a page in the space PASPEC with no `## Work Refs` key table: `getConfluenceContent` on page 7001 shows no key table, so it is not a Spec Page. The agent stops and says nothing was written
 - After the second invalid answer the agent asks no third question, makes no re-run and no change summary, and asks for no go-ahead
