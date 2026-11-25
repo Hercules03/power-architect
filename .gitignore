@@ -1,2 +1,4 @@
 .worktrees/
 .power-architect/
+.claude-plugin/
+docs/

@@ -10,11 +10,11 @@
 
 **Blocked by:** 05
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Scenario: three Sub-tasks with "blocks" links are built in the right order, each with started, then review, then the ledger line, then done
-- [ ] Scenario: `/build <key>` builds only that item
-- [ ] Scenario: resuming after a crash between the ledger line and `done` fires `done` once and does not rebuild
-- [ ] Scenario: no Sprint operation appears in any build trace
-- [ ] The done comment carries the commits or PR and the test evidence
-- [ ] Local-mode regression and the locality grep check pass
+- [x] Scenario: three Sub-tasks with "blocks" links are built in the right order, each with started, then review, then the ledger line, then done
+- [x] Scenario: `/build <key>` builds only that item
+- [x] Scenario: resuming after a crash between the ledger line and `done` fires `done` once and does not rebuild
+- [x] Scenario: no Sprint operation appears in any build trace
+- [x] The done comment carries the commits or PR and the test evidence
+- [x] Local-mode regression and the locality grep check pass

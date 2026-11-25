@@ -51,9 +51,20 @@ Each row is one dry run, graded against the scenario's **Then**. A run counts on
 | 2026-11-24 | 59-plan-local-mode-unchanged | 05 | ✅ 8/8 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
 | 2026-11-24 | 59b-plan-small-local-mode-unchanged | 05 | ✅ 7/7 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
 | 2026-11-24 | 30 / 40 / 46 (regression) | 05 | ✅ 14/14, 8/8, 9/9 after ticket 05 | graded from fresh dry-run traces; ticket 05 needed 2 fix rounds |
+| 2026-11-25 | 60-build-sprint-blocks-order | 06 | ✅ 11/11 (re-run at final head: every task reviewer gets the Global Constraints) | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 61 / 61b (build one Sub-task / one Story by key) | 06 | ✅ 6/6, 5/5 | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 62-build-resume-fires-done-once | 06 | ✅ 6/6 (re-run) | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 63 / 63b (Done comment not repeated; test line inside / outside the fence) | 06 | ✅ 6/6, 6/6 | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 64 / 64b (Local mode S1 / L1 unchanged) | 06 | ✅ 10/10 (re-run: whole-branch final review kept), 6/6 | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 65-build-l1-tracker-one-subtask | 06 | ✅ 7/7 | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 66-build-l2-tracker-sprint-graph | 06 | ✅ 7/7 (re-run) | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 67-build-s2-inline-tracker | 06 | ✅ 5/5 (re-run) | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 68 / 68b (pull unreachable stops; blocker outside Sprint) | 06 | ✅ 7/7, 5/5 | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
+| 2026-11-25 | 69-build-two-specs-two-ledgers | 06 | ✅ 7/7 | graded from fresh dry-run traces (re-runs by Haiku); ticket 06 needed 2 fix rounds |
 
 Locality check (`jira\|rovo\|mcp__\|atlassian\|confluence\|ADF` outside `tracker-jira.md`): ✅ no matches (2026-11-24, ticket 01).
 Locality check re-run at ticket 02 (head b3f6ccf): ✅ no matches.
 Locality check re-run at ticket 03 (head 8df444b): ✅ no matches.
 Locality check re-run at ticket 04 (head bacb2a7): ✅ no matches.
 Locality check re-run at ticket 05 (head 9ca0ef3): ✅ no matches.
+Locality check re-run at ticket 06 (head 6e62a92): ✅ no matches.
