@@ -36,16 +36,18 @@ Re-read the spec (and plan or tickets), build a checklist of every requirement, 
 
 ## Stories (with a Tracker)
 
-With a Tracker, verify also closes the spec's Stories (see the [Tracker contract](tracker.md#pullscope-level)). The spec is the one in the ledger's first line (`# Ledger — spec: <Spec Page Work Ref>`), or the Work Ref the user gives.
+With a Tracker, verify also closes the spec's Stories (see the [Tracker contract](tracker.md#pullscope-level)). The spec is the one in the ledger's first line (`# Ledger — spec: <Spec Page Work Ref>`; if several ledgers name a spec, ask the user which), or the Work Ref the user gives.
 
-1. **Pull first**, before any command is run: `pull(<Spec Page Work Ref>, story)` returns the spec's Stories that are not Done, in outline order, each with its Acceptance Criteria, its status, and whether all its Sub-tasks are Done (and which are not). Then `pull(<Spec Page Work Ref>, outline)`: the spec for the checklist above is read from it, not from a file.
+1. **Pull first**, before any command is run: `pull(<Spec Page Work Ref>, story)` returns the spec's Stories that are not Done, in outline order, each with its Acceptance Criteria, its status, and whether all its Sub-tasks are Done (and which are not). Then `pull(<Spec Page Work Ref>, outline)`: the spec for the checklist above is read from it, not from a file. The checklist leaves out the Acceptance Criteria of any Story reported as having unfinished Sub-tasks (or no Sub-tasks planned): they are not run and not reported as passing.
    If a `pull` stops, stop the phase: run nothing, write nothing, and tell the user nothing was verified or written, and to re-run `/power-architect:verify` once the Tracker is reachable.
 2. **Run the usual checks** (full suite, typecheck, lint, build, and the checklist above).
 3. **Each Story from `pull`, one at a time.** Bugs are never part of it.
-   - **Unfinished Sub-tasks.** The Story is not verifiable: report `N Sub-tasks unfinished (<Work Refs>)` (or `no Sub-tasks planned`), mark none of its criteria, and write nothing for it.
+   - **Unfinished Sub-tasks.** The Story is not verifiable: report `N Sub-tasks unfinished (<Work Refs>)` (or `no Sub-tasks planned`), mark none of its criteria, and write nothing for it. Tell the user which Sub-tasks to build (`/power-architect:build <Work Refs>`) and to run verify again.
    - **Otherwise** the gate above applies to each Acceptance Criterion: identify the command or observable that proves it, run it fresh, read the output, and only then mark it passed.
    - **Every criterion passed:** call `record(<Story Work Ref>, done, <evidence>)`. `evidence` is one line per criterion: `<criterion text> — <command> → <result>`.
    - **Any criterion failed or can't be proven:** make no Tracker call for the Story. Report the gap: the criterion, its command and its output. Never call the Story done or complete.
-4. **If `record` returns `queued`**, carry on. Tell the user which Stories' `done` is queued, not yet in the Tracker.
+   - **Already verified.** A repeat is judged on the criterion texts only, never on the commands or results, which a new session picks again: a `Verified` comment that already holds every criterion's text (the part before ` — `, as read in the Story) is not written again; only the move remains.
+4. **Finish is recommended** only when no Story has a gap and none is unverifiable; otherwise say what to fix first.
+5. **If `record` returns `queued`**, carry on. Tell the user which Stories' `done` is queued, not yet in the Tracker.
 
 `Local:` No Stories, no `pull` and no `record`. Do only what the section above the line says.

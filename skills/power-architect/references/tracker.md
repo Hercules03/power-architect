@@ -74,7 +74,7 @@ Called by plan, build, review and verify.
 - **Arguments:**
   - `scope`: `sprint` (the active Sprint), a spec, or a Work Ref.
   - `level`: one of three:
-    - `story`: the unfinished Stories of a spec, in outline order, each with its Work Ref, title, body, Acceptance Criteria and status, and whether all its Sub-tasks are finished, naming each that is not. A Story with no Sub-task counts as having an unfinished one. A Bug is never returned.
+    - `story`: the unfinished Stories of a spec, in outline order, each with its Work Ref, title, body, Acceptance Criteria and status, and whether all its Sub-tasks are finished, naming each that is not. A Story with no Sub-tasks planned counts as having an unfinished one (reported as `no Sub-tasks planned`). A Bug is never returned.
     - `subtask`: the unfinished Sub-tasks in scope, plus any Bugs in scope, in `blocks` order with blockers first. Each comes with its body and acceptance criteria. With `sprint`, the scope is the Sub-tasks and Bugs in the active Sprint; with a Story's Work Ref, that Story's Sub-tasks; with a Sub-task's or a Bug's Work Ref, that item.
       - A **Bug** has no spec, Story, Scope Tier or `blocks` edge. It is always ready, and comes after every Sub-task in the list.
       - Each item carries its Work Ref, title, description, status, Story, the Spec Page Work Ref of its spec, that spec's Scope Tier, and its blockers with their status. Ties in `blocks` order follow the spec's outline order.
@@ -93,10 +93,10 @@ Called by build, debug, review, verify and finish.
 | Event | Effect |
 |---|---|
 | `started` | The item moves to In Progress. |
-| `done` | The item moves to Done, with a comment holding `evidence`. For a Sub-task or Bug, that is commits or PR, plus the test command and its result. For a Story (from verify), it is one line per Acceptance Criterion, each with the command that proved it and its result. A Story already Done gets no move and no comment. |
+| `done` | The item moves to Done, with a comment holding `evidence`. For a Sub-task or Bug, that is commits or PR, plus the test command and its result. For a Story (from verify), it is one line per Acceptance Criterion, each with the command that proved it and its result. A Story already Done gets no move and no comment. A repeat is judged on the Story's criterion texts, not on the commands or results. |
 | `note` | A comment on the item. |
 | `defect` | With a `ref`: one comment on that item. Without one: a new Bug in the Backlog, never in a Sprint, and no priority, estimate or assignee. A defect already recorded (the same comment, or an open Bug for the same symptom and root cause) adds nothing new to the Tracker's items. |
-| `shipped` | `ref` is a spec. `evidence` is the PR or merge link. Comments the link on every Story of that spec with at least one Sub-task done on this branch (the Sub-tasks of the spec ledger's `Task <ref>: complete` lines whose commits are on this branch). Changes no status. The adapter records the delivered Sub-tasks in the ledger before its first write, so a replay re-derives nothing. |
+| `shipped` | `ref` is a spec. `evidence` is the PR or merge link, with the `base` SHA. Comments the link on every Story of that spec with at least one Sub-task done on this branch (the Sub-tasks of the spec ledger's `Task <ref>: complete` lines whose commits are in the range `<base>..<branch>`, with `base` the merge-base captured before the merge or push; a commit already on the base branch does not count). Changes no status. The adapter records the delivered Sub-tasks in the ledger before its first write, so a replay re-derives nothing. |
 
 - **Returns:** `ok`, or `queued`.
 - **Invariants:**

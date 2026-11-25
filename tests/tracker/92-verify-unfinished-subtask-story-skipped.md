@@ -54,9 +54,9 @@ The user runs the phase.
 
 ## Then
 - `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, story)` returns exactly one Story, PA-51 (PA-50 is Done and not returned), flagged as having an unfinished Sub-task: PA-63
-- The agent reports PA-51 as not verifiable with the words `1 Sub-tasks unfinished (PA-63)`, and says it was skipped
+- The agent reports that the Story has unfinished Sub-task(s) PA-63 and is not verified, and says it was skipped
 - PA-51's criterion `The admin audit log lists each lockout.` is never marked passed or verified, even though its command would pass
 - `record` is never called for PA-51 or any item. There is no `addOrEditJiraIssueComment` and no `transitionJiraIssue` call at all: PA-51 is not marked Done and nothing is written to the Tracker
-- verify still runs the full suite, typecheck and lint, and the Local checklist against the spec read through `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, outline)`
+- verify still runs the full suite, typecheck and lint, and the Local checklist against the spec read through `pull(https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001, outline)`; the checklist leaves out PA-51's criterion, so its command is not run
 - The agent does not tell the user PA-51 is Done or complete, and tells them to finish PA-63 (for example with `/power-architect:build PA-63`) and run verify again
 - No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call, and no `transitionJiraIssue` passes `sprintId`, `assignToBacklog`, `boardId` or `fields`. No `addOrEditJiraIssueComment` passes `commentId`. No resolution, assignee or estimate is set
