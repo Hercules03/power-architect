@@ -31,7 +31,6 @@
   | getAccessibleAtlassianResources | any | [{id: "11111111-2222-3333-4444-555555555555", url: "https://acme.atlassian.net", name: "acme"}] |
   | discover | any | the tools in this table whose names match the query |
   | getContentFormatGuide | any | "Markdown is accepted. Tables and task lists (`- [ ]`) are supported." |
-  | searchConfluence | any | [] |
   | createConfluenceContent | any | {id: "4001", url: "https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001"} |
   | createJiraIssue | any | {key: "PA-<n>"} |
   | updateConfluenceContent | any | {id: "4001", version: 2} |
@@ -58,6 +57,7 @@ The user runs `/power-architect:to-spec` and replies in order:
 - The first grouping shown is Identity & SSO (1, 2, 3), Organization Setup (4, 5), Subscription & Billing (6, 7, 8)
 - After the edit, the agent shows the grouping again: Identity & SSO (1, 2, 3, 5), Organization Setup (4), Subscription & Billing (6, 7, 8), and asks for approval again
 - No MCP call of any kind is made before the final "approved"
+- No search call is made on this first publish
 - `publish(outline)` is called once, with three Epics: Identity & SSO holding stories 1, 2, 3, 5; Organization Setup holding story 4; Subscription & Billing holding 6, 7, 8
 - The Story creates run in user-story order 1–8 (PA-13 … PA-20), and the Story for user story 5 (PA-17) has parent PA-10 (Identity & SSO), while the Story for user story 4 (PA-16) has parent PA-11
 - The key table and the ledger record story 5 as PA-17
