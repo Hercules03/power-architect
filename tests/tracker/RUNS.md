@@ -100,3 +100,9 @@ Locality check re-run at ticket 06 (head 6e62a92): ✅ no matches.
 Locality check re-run at ticket 07 (head 0d124a7): ✅ no matches.
 Locality check re-run at ticket 08 (head af70687): ✅ no matches.
 Locality check re-run at ticket 09 (head f92e040): ✅ no matches.
+
+## Final whole-branch review (2026-11-25)
+- Two Opus reviewers (Standards axis, Spec axis) over `186d6c5..HEAD`; one fix pass (b6d5b61, 3f2781b, ee8130a) plus one Local-mode fix (7bf2a30: `Local:` lines in build.md spelled out in full after two dry runs read "as above" as the Tracker line).
+- Regression sample after the fix pass: scenarios 02, 35, 48, 59, 59b, 64, 64b, 85, 85b, 85c, 99, 99b (Local mode) and 50, 52, 60, 96 (Tracker mode); the Local scenarios 02, 64 and 85c were re-run after the build.md fix and pass with the original Local ledger formats.
+- Not re-run after the fix pass: the other ~85 Tracker scenarios (their skill text was not touched by the fix pass apart from handoff wording, the evidence-string format in 96/97/96b, and brief file names).
+- Known open design question (user decision): S2, L2 and Bug builds record Done after the ledger line but before a per-item review; see the spec's "Known deviations".
