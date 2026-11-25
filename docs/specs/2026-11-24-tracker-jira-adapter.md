@@ -14,7 +14,7 @@ A repo can opt into a **Tracker**. When the Tracker is Jira (**Jira Mode**):
 
 - `/power-architect:to-spec` writes the spec's shared context to a Confluence **Spec Page**. It groups the spec's user stories into **Epics** by domain, and the user approves the spec and the grouping together. It then creates the Epics and their **Stories**, each Story with **Acceptance Criteria**.
 - `/power-architect:plan` adds **Sub-tasks** under those Stories, joined by "blocks" links.
-- `/power-architect:build` works through the active **Sprint** that the user (the **Product Owner**) created. It moves each Sub-task to In Progress when work starts and to Done once its review passes, with a comment carrying the evidence.
+- `/power-architect:build` works through the active **Sprint** that the user (the **Product Owner**) created. It moves each Sub-task to In Progress when work starts and to Done only after its review passes, with a comment carrying the evidence: the task review for a Small-tier subagent-driven task or a single Large ticket, the spec's final review for an inline task, a whole-graph build or a Bug.
 - `verify` closes Stories. `finish` links the delivery. `debug` and `review` file **Bugs**.
 
 The user follows the project on the Jira board and reads work-item descriptions and comments for detail. **Knowledge Docs** stay in the repo: the glossary, ADRs, DESIGN.md and AGENTS.md. Repos without a Tracker behave exactly as they do today.
@@ -37,7 +37,7 @@ The user follows the project on the Jira board and reads work-item descriptions 
 - A re-run of to-spec or plan duplicates work items, or overwrites work that has already started.
 - A phase file grows "if Jira…" branches, or names Rovo tools.
 - Build stalls because Jira is briefly unreachable.
-- Jira status says Done for work whose review or verification never passed.
+- Jira status says Done for work whose review or verification never passed (the review that covers it: the task review for S1 and L1, the spec's final review for S2, L2 and Bug builds).
 
 ## Approaches Considered
 
@@ -93,7 +93,7 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
 25. As a Product Owner, I want `/build` with no argument to work through the active Sprint's unfinished Sub-tasks in "blocks" order, so that the agent builds what I committed to.
 26. As a user, I want `/build <key>` to build a single Story or Sub-task, so that I can target work.
 27. As a user, I want a Sub-task to move to In Progress when its implementer starts, so that the board shows live work.
-28. As a user, I want a Sub-task to move to Done only after its task review passes, with a comment giving the commits or PR and the test evidence, so that Done means verified.
+28. As a user, I want a Sub-task to move to Done only after its review passes (the task review for S1 and L1, the spec's final review for S2, L2 and Bug builds), with a comment giving the commits or PR and the test evidence, so that Done means verified.
 29. As a user, I want the local ledger to keep working for resuming builds, so that compaction or crashes don't redo work.
 30. As a user, I want build to keep going when Jira can't be reached, queuing status changes and comments in the ledger and replaying them on the next run that can reach it, so that a Jira blip never stalls delivery.
 31. As a user, I want replayed updates never to duplicate a comment or a status change.
@@ -186,7 +186,7 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
   - Reviewers get the spec and plan through `pull(spec, outline)`.
   - A Bug in the work list is fixed with the debug method (a regression test first), with `record(started)` and `record(done)` on the Bug.
   - `record(started)` runs before an implementer is dispatched.
-  - `record(done, evidence)` runs after the ledger completion line is written, in S1, S2, L1 and L2.
+  - `record(done, evidence)` runs after the ledger completion line is written and the item's review has passed: after the task review in S1 and L1; for S2, L2 and Bug builds, for every item built in the run after the spec's final review and its one fix pass (the Bug review, for Bugs), and not at all while a Critical or Important finding stays open. Ledger lines `Final review: passed (spec <Spec Page Work Ref>)` and `Bug review: passed` let a resume tell whether `done` may fire.
   - The ledger gains a `## Tracker queue` section.
 - **debug** clean-up: `record(ref?, defect)`. **review** "acting on" steps always pass the current item's ref, so they only comment and never file a Bug (user story 36).
 - **verify:** `pull(spec, story)`, check each Story's Acceptance Criteria, then `record(story, done)`.
@@ -245,7 +245,7 @@ At the integration level, the official **Atlassian Rovo MCP server** was picked 
 
 ## Known deviations from this spec
 
-- S2, L2 and Bug builds record Done after the ledger line but before a per-item review (only the final review follows). User story 28 and the `record(done, evidence)` line under **build** conflict on this; the build follows the latter.
 - A Story with "no Sub-tasks planned" is not verifiable, so verify skips it.
 - A first publish makes one Spec Page search read, to avoid creating a duplicate page.
 - The Local-mode sentence about an issue tracker configured through `/setup-matt-pocock-skills` is retained in SKILL.md, not replaced by a pointer.
+- Resolved (user decision 2026-11-25): S2, L2 and Bug builds used to record Done right after the ledger line, before any review of the item, which conflicted with user story 28. Done is now deferred until after the spec's final review and its single fix pass (the Bug review, for Bugs); an open Critical or Important finding withholds it.

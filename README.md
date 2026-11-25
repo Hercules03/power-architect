@@ -82,7 +82,7 @@ Opt-in. In Tracker mode Jira owns the work (specs, Epics, Stories, Sub-tasks, st
 | --- | --- | --- |
 | `to-spec` | the Spec Page, on a re-run | Spec Page, Epics, Stories |
 | `plan` | the spec (Spec Page, Stories) | Sub-tasks, links, the Spec Page's Plan section |
-| `build` | the active Sprint (or one Work Ref): Sub-tasks and Bugs | status moves and evidence comments |
+| `build` | the active Sprint (or one Work Ref): Sub-tasks and Bugs | In Progress when work starts; Done with an evidence comment only after the review passes (the task review for S1 and L1, the spec's final review for S2, L2 and Bug builds) |
 | `debug` | open Bugs | a comment on the item, or a Backlog Bug |
 | `review` | the spec | comments on the current item |
 | `verify` | the spec's Stories | Story to Done with a Verified comment |
