@@ -73,15 +73,15 @@ The user runs `/power-architect:to-spec` and replies in order:
 2. accepts the Large tier;
 3. to any builder-check questions: "your call on all of them";
 4. at the spec gate: "approved" (grouping Invitations (1), Membership (2));
-5. at the change summary and the redraft question ("Redraft any item? ..."): "Redraft: Invitations and the Spec Page shared context. Go ahead."
+5. at the change summary and the redraft question ("Redraft any item? ..."): "Redraft: Invitations and the Spec Page shared context."
 
-Variant A (the user names a started Epic): the same replies, except at step 5: "Redraft: Membership. Go ahead."
+Variant A (the user names a started Epic): the same replies, except at step 5: "Redraft: Membership."
 
 Variant B (the user declines): the same replies, except at step 5: "no".
 
 ## Then
 - No MCP call of any kind is made before the user's "approved"
-- The change summary says the Tracker is already up to date (nothing created, updated, re-parented, held or removed), and the agent then asks the redraft question, word for word: "Redraft any item? Name items (Epic slice, Story criteria, Spec Page shared context) or say no." It asks it before any write
+- The change summary says the Tracker is already up to date (nothing created, updated, re-parented, held or removed), and the agent then asks the redraft question, word for word: "Redraft any item? Name items (Epic slice, Story criteria, Spec Page shared context), or say no." It asks it before any write
 - Main (step 5 names Invitations and the shared context): exactly two writes, in order: one `editJiraIssue` on PA-40 with `fields` `summary` and `description`, where the description keeps its `Spec Page:` line and its slice is redrafted from the approved spec, and then one `updateConfluenceContent` on page 5001, the last call, whose body is the approved shared context followed by the key table as read. The shared context is published although no change was detected this session
 - Main: no write on PA-41, PA-42 or PA-43 (nothing changed there, and Membership was not named)
 - Variant A: PA-41 is started (In Progress), so it is not rewritten: no `editJiraIssue` on PA-41. Its only write is one `addOrEditJiraIssueComment` on PA-41 with no comment id, first line `Spec change not applied (item started)`, whose code block holds only `Redraft requested: kept as read.` and whose last line is `Spec Page: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001`. No `updateConfluenceContent` (no shared context was named)

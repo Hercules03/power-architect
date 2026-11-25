@@ -84,7 +84,7 @@ The user runs `/power-architect:to-spec` and replies in order:
 2. accepts the Large tier;
 3. to any builder-check questions: "your call on all of them";
 4. at the spec gate: "approved" (grouping Invitations (1), Membership (2, 3), Billing (4));
-5. at the change summary and the redraft question: "go ahead, no redraft".
+5. at the change summary and its go-ahead question: "go ahead".
 
 ## Then
 - No MCP call of any kind is made before the user's "approved"
