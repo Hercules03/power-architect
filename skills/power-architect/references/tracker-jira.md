@@ -279,6 +279,15 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
    - the Spec Page: its Work Ref, title, shared context and Plan section
    - each item with its outline id, kind, Work Ref, summary, description, status and parent. A Story's Acceptance Criteria are the `- [ ]` lines under its `## Acceptance Criteria`. A Sub-task also has its blocked-by and relates sets, as [Plan publish](#plan-publish) step 2 defines them. An item with outline id `—` comes back marked removed.
 
+### `story`
+
+`scope` is a spec: its Spec Page's Work Ref. Reads only, apart from [Replay](#replay).
+
+1. Run `outline` steps 1 to 4: reach Jira, [replay](#replay), read the Spec Page, the recorded items and each Epic, Story and Sub-task. A stop there stops this `pull`, with the same message.
+2. **Keep** each Story (a `type-story` row not marked removed) whose status is not in `status-done`, in key table order. Never return a Bug or an Epic.
+3. **Sub-tasks.** For each Story, its Sub-tasks are the recorded Sub-task rows (not marked removed from plan) whose parent is that Story. Note each one's status, and list those whose status is not in `status-done` as unfinished. A Story with no such Sub-task is flagged `no Sub-tasks planned`: it is not verifiable.
+4. **Return** each Story with its Work Ref (key), title (summary), description, Acceptance Criteria (the `- [ ]` lines under its `## Acceptance Criteria`, text only), status, whether all its Sub-tasks are Done, and its unfinished Sub-tasks (key and status).
+
 ### `subtask`
 
 `scope` is `sprint`, or a Work Ref: a Sub-task's, a Bug's or a Story's key. Reads only, apart from [Replay](#replay).
@@ -295,9 +304,9 @@ Implements [`pull(scope, level)`](tracker.md#pullscope-level).
 
 ## record
 
-Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence) for `started`, `done` and [`defect`](#defect). One call at a time, passing `cloudId` on each. Never set a resolution, assignee, estimate, or any Sprint, board or backlog field. Never touch a Sprint.
+Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence) for `started`, `done` (a Sub-task, a Bug or a Story), [`shipped`](#shipped) and [`defect`](#defect). One call at a time, passing `cloudId` on each. Never set a resolution, assignee, estimate, or any Sprint, board or backlog field. Never touch a Sprint.
 
-1. **Read** the item with `getJiraIssue`: its status.
+1. **Read** the item with `getJiraIssue`: its status and issue type. `shipped` has no single item: go to [`shipped`](#shipped).
 2. **`started`.** If the status is in `status-in-progress` or `status-done`, do nothing (no transition, no comment) and return `ok`. Otherwise [move](#moving-an-item) it to the first status of `status-in-progress`.
 3. **`done`**, in this order. A Done item is never pulled again, so a crash between the two steps must leave the comment written and the move still to do:
    1. **Comment.** The evidence comment is exactly this, with the commit lines and the `tests:` line both inside the one fenced block:
@@ -311,6 +320,27 @@ Implements [`record(ref?, event, evidence)`](tracker.md#recordref-event-evidence
       Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Done` and a body containing every evidence commit SHA (or the PR URL) and the `tests:` line (command and result), compared as normalised text (publish [Re-run](#re-run) step 4) wherever those lines sit, inside or outside the fence. Then add none. Otherwise `addOrEditJiraIssueComment` with it, Markdown, and no `commentId`.
    2. **Move** it to the first status of `status-done`, unless its status is already in `status-done`.
 4. **Return** `ok`.
+
+**`done` on a Story** (`type-story`; verify's evidence is one line per Acceptance Criterion, `<criterion text> — <command> → <result>`). If its status is in `status-done`, do nothing (no comment, no move) and return `ok`. Otherwise, in this order:
+   1. **Comment.** The comment is exactly this, with one `✅` line per evidence line inside the one fenced block. The first line is `Verified`, never `Done`:
+      ````
+      Verified
+      ```
+      ✅ <criterion text> — <command> → <result>
+      ```
+      ````
+      Read the item's comments with `listJiraIssueComments`. The comment is already there when one has the first line `Verified` and a body containing every criterion line, compared as normalised text (publish [Re-run](#re-run) step 4) wherever those lines sit, inside or outside the fence. Then add none. Otherwise `addOrEditJiraIssueComment` with it, Markdown, and no `commentId`.
+   2. **Move** it to the first status of `status-done`.
+
+   Never touch its Sub-tasks, its Epic or a Sprint, and never set a resolution or an assignee.
+
+### `shipped`
+
+`ref` is the Spec Page's Work Ref and `evidence` is the PR URL or merge commit link. It comments the link on each Story this branch delivered, and changes no status.
+1. **Delivered Sub-tasks**, from the ledger and git only (no Jira call). Take the spec's ledger (`.power-architect/<spec-slug>/progress.md` under the ledger root, whose first line names the Spec Page). Its `Task <Sub-task ref>: complete (commits a..b, …)` lines whose last commit `b` is reachable from the branch's HEAD (`git merge-base --is-ancestor b HEAD`) are the delivered Sub-tasks. Append the ledger line `Shipped: <link> — Sub-tasks <ref>, <ref>` (unless one with the same link is there). With no delivered Sub-task, return `ok` and write nothing.
+2. **Stories.** Read each delivered Sub-task with `getJiraIssue`: its parent is a delivered Story. Ignore a parent that is not a `type-story`. Comment nothing on a Bug, an Epic, a Sub-task or a Story with no delivered Sub-task.
+3. **Comment** each delivered Story, never repeating one. The comment is exactly the first line `Shipped`, then the link on its own line, as plain Markdown. Read the Story's comments with `listJiraIssueComments`: it is already there when one has the first line `Shipped` and the link, compared as normalised text. Then add none. Otherwise `addOrEditJiraIssueComment`, no `commentId`.
+4. Never call a transition. Return `ok`.
 
 ### `defect`
 
@@ -338,14 +368,14 @@ Queue, never stop (the [queue rules](tracker.md#recordref-event-evidence) apply)
 **A `defect` with no `ref`** has no item to queue behind and may have no spec ledger: queue it in the bugs ledger `<ledger root>/.power-architect/bugs/progress.md` (create it with first line `# Ledger — bugs` if missing) as `- [ ] q<N> | defect | - | <evidence verbatim>`, escaped as below, then return `queued`. Its [replay](#replay) repeats the open-Bug search of [`defect`](#defect) step 1 first, then comments on the same defect or creates the Bug, so it never creates a second Bug. Steps 2 and 3 below apply. An entry with ref `-` never blocks and is never blocked by another entry: each no-ref defect is independent, so an unsent or `[!]` no-ref defect does not hold back a later one, and replay repeats the open-Bug search for each.
 1. **Behind an entry.** If the item has an unsent entry (`[ ]` or `[!]`) in any ledger's `## Tracker queue`, queue this event without calling Jira.
 2. **Unreachable.** If a Rovo call fails because Jira can't be reached, at any step, queue the whole event, even if an earlier step wrote something (replay does not repeat it: a status already in the target bucket is not moved again, and a `Done` comment already there is not added again). A refusal that is not "unreachable" (such as no transition into the wanted status) is not queued: [Moving an item](#moving-an-item) stops (during replay, the entry becomes `[!]`).
-3. **Queue** it: append `- [ ] q<N> | <event> | <ref> | <evidence on one line>` to the ledger's `## Tracker queue` (create the section if missing), then return `queued`. Escape the evidence as the [queue rules](tracker.md#recordref-event-evidence) say (`\` as `\\`, a literal ` | ` as ` \| `, newlines as `\n`). The ledger is the main checkout's, whichever worktree the agent is in. If a ledger is lost, its unsent events are lost: the item then shows as unfinished in the Tracker and a resume rebuilds it. So a build never deletes the main checkout's `.power-architect/`. For `done`, `<evidence>` is the commit lines and the `tests:` line, not the comment.
+3. **Queue** it (for `shipped`, step 1 of [`shipped`](#shipped) is done first, because it needs no Jira call): append `- [ ] q<N> | <event> | <ref> | <evidence on one line>` to the ledger's `## Tracker queue` (create the section if missing), then return `queued`. Escape the evidence as the [queue rules](tracker.md#recordref-event-evidence) say (`\` as `\\`, a literal ` | ` as ` \| `, newlines as `\n`). The ledger is the main checkout's, whichever worktree the agent is in. If a ledger is lost, its unsent events are lost: the item then shows as unfinished in the Tracker and a resume rebuilds it. So a build never deletes the main checkout's `.power-architect/`. For `done`, `<evidence>` is the commit lines and the `tests:` line (a Story's: its criterion lines), not the comment. For `shipped`, `<ref>` is the Spec Page's Work Ref and `<evidence>` is the link.
 4. The phase carries on. Say, at the end of the phase, which items' events are queued.
 
 ### Replay
 
 First step of every `pull`, after step 1 (Reach Jira) and before anything is read.
 1. Collect the `- [ ]` entries of every ledger under the main checkout's `.power-architect/` (never a linked worktree's): ledgers in directory-name order, each in `q` order.
-2. Apply each as `record` does for its event, with the stored evidence (`done` writes the Done comment from the evidence), skipping an entry whose item has an earlier `- [!]` entry (an entry with ref `-` is never skipped for this reason). Mark it `- [x]` on success.
+2. Apply each as `record` does for its event, with the stored evidence (`done` writes the Done comment from the evidence, a Story's the Verified comment; `shipped` reads its delivered Sub-tasks from the ledger's `Shipped:` line for that link and derives nothing), skipping an entry whose item has an earlier `- [!]` entry (an entry with ref `-` is never skipped for this reason). Mark it `- [x]` on success.
 3. If a call fails because Jira can't be reached, stop replaying and stop the `pull` as its Reach Jira step does: read nothing; the rest stay `- [ ]`.
 4. If it fails for any other reason, mark it `- [!] … | failed: <reason>`, tell the user, and go on to the next entry. Say in that message how to clear it: after the cause is fixed, change the entry's marker to `- [ ]` to retry it, or to `- [x]` if it was applied by hand.
 5. Then carry on with the `pull`'s read.

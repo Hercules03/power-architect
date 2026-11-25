@@ -22,10 +22,16 @@ Adapted from Superpowers `finishing-a-development-branch`. Announce: "I'm finish
    For a detached HEAD: 1. Push as a new branch and create a PR · 2. Keep as-is.
 5. **Execute the choice.**
    - **Merge:** from the main repo root, `git checkout <base>`, `git pull`, `git merge <branch>`, then run the tests **on the merged result**. If they fail, stop and leave the branch and worktree in place. If they're green, clean up the worktree (step 6), then `git branch -d <branch>`.
+     With a Tracker, once the tests are green and before the cleanup, call `record(<Spec Page Work Ref>, shipped, <merge commit>)`: the merge commit's link if the forge gives one, else its SHA.
    - **PR:** `git push -u origin <branch>`, then open the PR with the forge's tooling, following the repo's PR template, and report the URL. **Keep the worktree** for PR feedback.
+     With a Tracker, then call `record(<Spec Page Work Ref>, shipped, <PR URL>)` (see the [Tracker contract](tracker.md#recordref-event-evidence)).
    - **Keep:** report "Keeping branch <name>. Worktree preserved at <path>."
+     With a Tracker, make no Tracker call, and tell the user nothing was shipped.
    - **Discard** happens only if the user explicitly asks. List the branch, commits, and worktree that will be deleted, and require them to type `discard`. Then clean up and `git branch -D`.
 6. **Clean up** (merge or confirmed discard only). For a normal repo there's nothing to do. A worktree under `.worktrees/` or `worktrees/` is ours: `git worktree remove "$WORKTREE_PATH" && git worktree prune`. If removal is refused because of uncommitted files, **never use `--force`**: show the files and ask whether to commit, move, or delete them. Any other worktree belongs to the host, so leave it.
+
+**With a Tracker**, `shipped` comments the delivery link on the Stories this branch delivered, and changes no status. The spec is the one in the first line of each ledger whose `Task` lines cover this branch's commits (one call per spec; none when no ledger covers them, and then say the branch is untracked). A Bug's ledger is not a spec. If `record` returns `queued`, carry on with the merge or PR, and tell the user the link comment is queued, not yet in the Tracker. Finish makes no `pull`.
+`Local:` No Tracker call; do only what the steps above say.
 
 Never force-push unless the user explicitly asks. A rejected push means the remote moved, so investigate.
 
