@@ -30,6 +30,7 @@
   | atlassianUserInfo | any | {account_id: "u-1", name: "Dana"} |
   | discover | any | the tools in this table whose names match the query |
   | getConfluenceContent | page 6001 | the Spec Page "Login lockout" of scenario 60: Scope Tier Small, a `## Plan` section (Global Constraints "Five failures within 10 minutes lock the account."; Review Focus "Failures for different accounts never share a counter."), and the key table `spec`, `1 \| Story \| PA-50`, `1 \| Sub-task \| PA-60`, `2 \| Sub-task \| PA-61`. This is what `pull(spec, outline)` reads |
+  | getJiraIssue | PA-50 | {key: "PA-50", type: Story, summary: "Lock out repeated failed logins", status: To Do, parent: PA-5} |
   | getJiraIssue | PA-60 | {key: "PA-60", type: Sub-task, summary: "Failed-login counter", status: Done, parent: PA-50} |
   | getJiraIssue | PA-61 | {key: "PA-61", type: Sub-task, summary: "Login handler enforces the lockout", status: In Progress, parent: PA-50} |
   | getJiraIssue | PA-70 | the Bug this dry run created, or the Bug of the Given |
