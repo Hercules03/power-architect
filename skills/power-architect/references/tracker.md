@@ -105,8 +105,11 @@ Called by build, debug, review, verify and finish.
   - For `done`, write the phase's own completion record (such as the ledger line) **before** calling `record`.
   - A `defect` from review always passes the current item's `ref`.
 - **Errors:**
-  - Tracker unreachable: the event goes into the ledger's `## Tracker queue` and the result is `queued`. **The phase carries on.** The next `pull` that reaches the Tracker replays the queue in order.
-  - An adapter that cannot queue stops the phase instead and reports which states are unrecorded.
+  - Tracker unreachable: the event is **queued** and the result is `queued`. **The phase carries on.** The first failing call decides, and a failure partway through one event queues the whole event (replay repeats it safely). An adapter must queue; it never stops a phase for an unreachable `record`.
+- **The queue** is the `## Tracker queue` section of the ledger of the item's spec (for `shipped`, the spec's ledger), one line per event: `- [ ] q<N> | <event> | <ref or spec> | <evidence, verbatim, on one line, newlines as \n>`. `<N>` rises by one per ledger. A sent event becomes `- [x]`; an event that fails for a reason other than an unreachable Tracker becomes `- [!] … | failed: <reason>`.
+  - While an item has an unsent entry (`[ ]` or `[!]`), every later `record` for it is queued behind it, without calling the Tracker, so events never overtake.
+  - Every `pull` that reaches the Tracker first replays the unsent entries of all ledgers, oldest first, each as the online `record` would apply it, then reads. It stops replaying at the first unreachable call (and then stops, as `pull` does). A `[!]` entry is reported to the user and blocks only later entries of the same item.
+  - Local Files mode has no Tracker and no queue.
 
 ## Every Tracker Adapter must
 
