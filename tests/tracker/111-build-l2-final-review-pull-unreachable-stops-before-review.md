@@ -59,6 +59,6 @@ Variant (a):
 
 Variant (b):
 - Both `Task` lines carry the token `L2` with no `Final review: passed` line, so they are deferred items with a missing review: neither is rebuilt, and the spec is written to `<workspace>/spec.md` by the per-spec read
-- L2 step 6 makes no second `pull` of the spec: the final review reads `<workspace>/spec.md` and runs on the diff of the UNION of `f0f0f01^..f0f0f01` and `f0f0f02^..f0f0f02`, with the Review Focus verbatim
+- L2 step 6 makes no second `pull` of the spec: the final review reads `<workspace>/spec.md` and runs on the diff of the UNION of `f0f0f01^..f0f0f01` and `f0f0f02^..f0f0f02`, with the spec and the ticket-graph overview
 - Nothing Critical or Important is open, so `Final review: passed (spec https://acme.atlassian.net/wiki/spaces/PASPEC/pages/4001)` is written below the `Task` lines, and `record(PA-30, done, …)` and `record(PA-31, done, …)` are called once each; each returns `queued` and the ledger's `## Tracker queue` holds one `done` event for each, with its evidence
-- The agent tells the user the `done` events for PA-30 and PA-31 are queued, not yet in the Tracker. No Rovo call is made after the first UNREACHABLE (no retry). No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call.
+- The agent tells the user the `done` events for PA-30 and PA-31 are queued, not yet in the Tracker. No Rovo call is made after the first UNREACHABLE (no retry within one event: each event tries once). No Sprint or board write: no `manageJiraSprint` or `createJiraBoard` call.
