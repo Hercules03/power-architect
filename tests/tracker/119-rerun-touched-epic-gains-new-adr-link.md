@@ -51,9 +51,9 @@
   | PA-53 | Story | Pay by card | To Do | PA-42 |
 
   Descriptions as published (the Epics' descriptions are the ones the adapter wrote; each holds its slice, its `Spec Page:` line and its ADR lines):
-  - PA-40: slice "Invite teammates by email, and let invitees accept from the link." Then `Spec Page: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001` and `ADRs: ADR 0001 — docs/adr/0001-sessions.md — https://github.com/acme/app/blob/main/docs/adr/0001-sessions.md`
-  - PA-41: slice "Manage who belongs to an organization." Then the same `Spec Page:` line and the same `ADRs:` line for 0001 as PA-40
-  - PA-42: slice "Take payment for a plan." Then the same `Spec Page:` line and the same `ADRs:` line for 0001 as PA-40
+  - PA-40: slice "Invite teammates by email, and let invitees accept from the link." Then `Spec Page: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/5001` and `ADR: ADR 0001 — docs/adr/0001-sessions.md — https://github.com/acme/app/blob/main/docs/adr/0001-sessions.md`
+  - PA-41: slice "Manage who belongs to an organization." Then the same `Spec Page:` line and the same `ADR:` line for 0001 as PA-40
+  - PA-42: slice "Take payment for a plan." Then the same `Spec Page:` line and the same `ADR:` line for 0001 as PA-40
 
   Key table on page 5001:
 
@@ -88,8 +88,8 @@ The user runs `/power-architect:to-spec` and replies in order:
 
 ## Then
 - No MCP call of any kind is made before the user's "approved"
-- The change summary, shown before any write, lists: PA-51 (Story 2) re-parented from PA-40 to PA-41; PA-40 and PA-41 updated with a redrafted slice, because their membership changed; PA-42 not listed (its membership did not change). Nothing created, held or removed
-- Each updated Epic's ADR lines are refreshed from the spec's current ADR list: PA-40 and PA-41 each gain one `ADRs:` line for `docs/adr/0007-invite-expiry.md` (title "Invite expiry", its URL), and keep their existing ADR 0001 line
+- The change summary, shown before any write, lists: PA-51 (Story 2) re-parented from PA-40 to PA-41; PA-40 and PA-41 updated with a redrafted slice, because their membership changed; PA-42 is not updated, redrafted or commented (an "unchanged" row in the summary is allowed; its membership did not change). Nothing created, held or removed
+- Each updated Epic's ADR lines are refreshed from the spec's current ADR list: PA-40 and PA-41 each gain one line `ADR: Invite expiry — docs/adr/0007-invite-expiry.md — <its URL>`, every ADR line carrying the `ADR:` prefix, and keep their existing `ADR: ADR 0001 — …` line
 - The writes, in order, one call at a time, parents first: `editJiraIssue` on PA-40 (summary and description, the description keeping its `Spec Page:` line and ADR 0001 line, and gaining the ADR 0007 line); `editJiraIssue` on PA-41 (the same, with its slice redrafted for its new membership); then `editJiraIssue` on PA-51 setting `fields` `parent` to PA-41 (its summary and description are not changed)
 - No `editJiraIssue` on PA-42: it is untouched, so it gains no ADR line. No edit of PA-50, PA-52 or PA-53
 - No `addOrEditJiraIssueComment` (nothing started or removed) and no `createJiraIssue`

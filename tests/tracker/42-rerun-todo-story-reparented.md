@@ -87,7 +87,7 @@ The user runs `/power-architect:to-spec` and replies in order:
 
 ## Then
 - No MCP call of any kind is made before the user's "approved"
-- The change summary, shown before any write, lists PA-43 as re-parented from PA-40 to PA-41, PA-40 and PA-41 as updated with a redrafted slice (their membership changed), and nothing created, held or removed
+- The change summary, shown before any write, lists PA-43 as re-parented from PA-40 to PA-41, and nothing created, held or removed. For PA-40 and PA-41 (their membership changed) either outcome is correct: if a slice-only `editJiraIssue` occurs the summary lists it as updated with a redrafted slice; if the redraft equals the text read there is no write and it is not listed; summary and writes must agree
 - The writes in order: at most one `editJiraIssue` on each of PA-40 and PA-41 that changes only its slice line(s) (summary, `Spec Page:` line and any other line kept as read) → one `editJiraIssue` on PA-43 that sets its parent to PA-41; PA-43's summary and description are not changed
 - No `addOrEditJiraIssueComment`, no `createJiraIssue`, and no edit of PA-42, PA-44 or PA-45
 - No `updateConfluenceContent` (the key table's rows are unchanged)

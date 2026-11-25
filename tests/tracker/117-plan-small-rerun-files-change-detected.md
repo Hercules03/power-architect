@@ -79,10 +79,10 @@ The user runs `/power-architect:plan` and replies in order:
 - No MCP write call of any kind is made before the change summary's "go ahead"
 - The change summary, shown before any write, lists PA-60 as updated (its Files changed: the summary and description are rewritten in place) and PA-61 as held (it is In Progress and its Files changed). Nothing created, re-parented or removed; no link; the Plan section and the Story PA-50 are unchanged
 - The agent asks one question after the summary, the go-ahead question ("Go ahead? Reply "go ahead", "go ahead, redraft <items>", or "no"."), and the user's "go ahead" answers it; no other question is asked
-- The writes, in order: one `editJiraIssue` on PA-60 with `fields` `summary` and `description`, where the description's Files lines name `src/auth/lockout.ts` and `tests/auth/lockout.test.ts`, its Interfaces and steps stay as read, and it ends with `Spec Page: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`
+- The writes, in order: one `editJiraIssue` on PA-60 with `fields` `summary` and `description`, where the description's Files lines name `src/auth/lockout.ts` and `tests/auth/lockout.test.ts`, its approved step list stays as approved (the file paths inside the step text may follow the new Files), and it ends with `Spec Page: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`
 - The only comment: one `addOrEditJiraIssueComment` on PA-61 with no comment id. Its first line is `Plan change not applied (item started)`. Its fenced code block holds only the changed Files lines, as `- Modify: src/auth/login.ts:40-62` and `+ Modify: src/auth/login.ts:40-70`, and no step or Interfaces line. Its last line is `Spec Page: https://acme.atlassian.net/wiki/spaces/PASPEC/pages/6001`
 - PA-61 is never edited: no `editJiraIssue` on PA-61, no transition. PA-60's status is not changed
 - No `createJiraIssue`, no `createJiraIssueLink`, and no `updateConfluenceContent` (the Plan section, the shared context and the key table did not change)
 - `publish` returns `held` with PA-61 and its reason (started, Files changed), and the agent tells the user PA-61 was held and why, and that PA-60 was updated in place
-- Second run is not part of this scenario. No Sprint or board call, no transition, no `executeDestructive` call
+- No Sprint or board call, no transition, no `executeDestructive` call
 </content>

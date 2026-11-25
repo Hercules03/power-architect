@@ -82,7 +82,7 @@ The user runs `/power-architect:plan` and replies in order:
 2. if the plan is shown again for review: "approved, subagent-driven";
 3. if shown a change summary and asked to go ahead: "go ahead".
 
-Then, in a new session (session 2), the user runs `/power-architect:plan` a second time with the same request, and gives the same replies 1–3.
+Then, in a new session (session 2), the user runs `/power-architect:plan` a second time with the same request, and gives the same replies 1–2. Session 2 has nothing to write, so the question after the summary is "Redraft any item?", and the user replies `no`.
 
 Variant (session 3, a new session after session 2): the user runs `/power-architect:plan` and replies in order:
 1. when asked to review the plan and pick an execution method: "Add a final step 6 to Task 2: run `npx tsc --noEmit`, expected no errors. Otherwise approved, subagent-driven.";
